@@ -1,0 +1,10 @@
+/*    /index.html   200
+
+# Alternative rules (ถ้าข้างบนไม่ได้ผล)
+/profile.html    /index.html   200
+/about.html      /index.html   200
+/help.html       /index.html   200
+/member.html     /index.html   200
+/new.html        /index.html   200
+/review.html     /index.html   200
+/students.html   /index.html   200
