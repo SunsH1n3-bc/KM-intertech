@@ -5856,5 +5856,105 @@ console.log('Enhanced Multi-User System loaded successfully!');
     
     console.log('Fixed notification system loaded - แจ้งเตือนครั้งเดียวต่อการอัพเดท');
 </script>
+
+<script>
+    // เพิ่มในไฟล์ JavaScript หลัก (เช่น ใน index.html)
+
+// ตรวจสอบ URL เมื่อโหลดหน้าเว็บ
+document.addEventListener('DOMContentLoaded', function() {
+    // ซ่อนทุกหน้าก่อน
+    hideAllPages();
+    
+    // ตรวจสอบ URL ปัจจุบัน
+    const currentPath = window.location.pathname;
+    console.log('Current path:', currentPath);
+    
+    // แสดงหน้าตาม URL
+    showPageByPath(currentPath);
+});
+
+function hideAllPages() {
+    // ซ่อนทุกหน้า
+    const pages = [
+        'home-container',
+        'profile-container', 
+        'about-container',
+        'help-container',
+        'member-container',
+        'new-container',
+        'review-container',
+        'students-container'
+    ];
+    
+    pages.forEach(pageId => {
+        const element = document.getElementById(pageId);
+        if (element) {
+            element.style.display = 'none';
+        }
+    });
+}
+
+function showPageByPath(path) {
+    // แสดงหน้าตาม path
+    switch(path) {
+        case '/':
+        case '/index.html':
+            showPage('home-container');
+            break;
+        case '/profile.html':
+            showPage('profile-container');
+            break;
+        case '/about.html':
+            showPage('about-container');
+            break;
+        case '/help.html':
+            showPage('help-container');
+            break;
+        case '/member.html':
+            showPage('member-container');
+            break;
+        case '/new.html':
+            showPage('new-container');
+            break;
+        case '/review.html':
+            showPage('review-container');
+            break;
+        case '/students.html':
+            showPage('students-container');
+            break;
+        default:
+            // ถ้าไม่เจอ path ให้แสดงหน้าแรก
+            showPage('home-container');
+            // เปลี่ยน URL กลับไปหน้าแรก
+            history.replaceState({}, '', '/');
+    }
+}
+
+function showPage(pageId) {
+    const element = document.getElementById(pageId);
+    if (element) {
+        element.style.display = 'block';
+    }
+}
+
+// ฟังก์ชันสำหรับการนำทาง (ใช้ในเมนู)
+function navigateTo(path) {
+    // เปลี่ยน URL
+    history.pushState({}, '', path);
+    
+    // ซ่อนทุกหน้า
+    hideAllPages();
+    
+    // แสดงหน้าใหม่
+    showPageByPath(path);
+}
+
+// จัดการ back/forward button
+window.addEventListener('popstate', function(event) {
+    hideAllPages();
+    showPageByPath(window.location.pathname);
+});
+</script>
 </body>
+
 </html>
