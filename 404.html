@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>กำลังโหลด...</title>
+    <script>
+        // Redirect ไปยังหน้าแรกพร้อมกับ path ปัจจุบัน
+        const currentPath = window.location.pathname;
+        const newUrl = '/' + '?redirect=' + encodeURIComponent(currentPath);
+        window.location.replace(newUrl);
+    </script>
+</head>
+<body>
+    <p>กำลังโหลดหน้าเว็บ...</p>
+</body>
+</html>
