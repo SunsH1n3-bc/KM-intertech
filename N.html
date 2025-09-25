@@ -1032,42 +1032,42 @@ button:focus, a:focus {
         <div class="nav-container">
             <ul class="nav-menu">
                 <li class="nav-item" data-tooltip="หน้าแรก">
-                    <a href="./index.html" class="nav-link" aria-label="หน้าแรก">
+                    <a href="index.html" class="nav-link" aria-label="หน้าแรก">
                         <ion-icon name="home" class="nav-icon"></ion-icon>
                         <span class="nav-ripple"></span>
                     </a>
                 </li>
                 
                 <li class="nav-item" data-tooltip="สแกน QR Code">
-                    <a href="./ScanQRCode.html" class="nav-link" aria-label="สแกน">
+                    <a href="ScanQRCode.html" class="nav-link" aria-label="สแกน">
                         <ion-icon name="qr-code" class="nav-icon"></ion-icon>
                         <span class="nav-ripple"></span>
                     </a>
                 </li>
                 
                 <li class="nav-item" data-tooltip="เช็คอิน">
-                    <a href="./studens.html" class="nav-link" aria-label="เช็คอิน">
+                    <a href="studens.html" class="nav-link" aria-label="เช็คอิน">
                         <ion-icon name="checkmark-circle" class="nav-icon"></ion-icon>
                         <span class="nav-ripple"></span>
                     </a>
                 </li>
                 
                 <li class="nav-item" data-tooltip="ตารางเรียน">
-                    <a href="./ClassRoom.html" class="nav-link" aria-label="ตารางเรียน">
+                    <a href="ClassRoom.html" class="nav-link" aria-label="ตารางเรียน">
                         <ion-icon name="calendar" class="nav-icon"></ion-icon>
                         <span class="nav-ripple"></span>
                     </a>
                 </li>
                 
                 <li class="nav-item" data-tooltip="รายงาน">
-                    <a href="./Report.html" class="nav-link" aria-label="รายงาน">
+                    <a href="Report.html" class="nav-link" aria-label="รายงาน">
                         <ion-icon name="bar-chart" class="nav-icon"></ion-icon>
                         <span class="nav-ripple"></span>
                     </a>
                 </li>
                 
                 <li class="nav-item" data-tooltip="โปรไฟล์">
-                    <a href="./Profile.html" class="nav-link" aria-label="โปรไฟล์">
+                    <a href="Profile.html" class="nav-link" aria-label="โปรไฟล์">
                         <ion-icon name="person" class="nav-icon"></ion-icon>
                         <span class="nav-ripple"></span>
                     </a>
@@ -1088,7 +1088,7 @@ button:focus, a:focus {
         <!-- Breadcrumb -->
         <div class="breadcrumb">
             <div class="breadcrumb-item">
-                <a href="./index.html">
+                <a href="index.html">
                     <ion-icon name="home-outline"></ion-icon>
                     <span>หน้าแรก</span>
                 </a>
@@ -1409,9 +1409,9 @@ button:focus, a:focus {
                 <div class="footer-section">
                     <h4>ลิงก์ด่วน</h4>
                     <div class="footer-links">
-                        <a href="./about.html">เกี่ยวกับเรา</a>
-                        <a href="./terms.html">เงื่อนไขการใช้งาน</a>
-                        <a href="./help.html">ช่วยเหลือ</a>
+                        <a href="about.html">เกี่ยวกับเรา</a>
+                        <a href="#">เงื่อนไขการใช้งาน</a>
+                        <a href="help.html">ช่วยเหลือ</a>
                     </div>
                 </div>
             </div>
@@ -1463,6 +1463,19 @@ button:focus, a:focus {
         // Print functionality
         document.querySelector('.print-btn').addEventListener('click', () => {
             window.print();
+        });
+
+        // Accept/Decline button functionality
+        document.querySelector('.accept-btn').addEventListener('click', () => {
+            alert('ขอบคุณที่ยอมรับเงื่อนไขการใช้งาน');
+            // Here you can add code to handle acceptance
+        });
+
+        document.querySelector('.decline-btn').addEventListener('click', () => {
+            if (confirm('คุณแน่ใจหรือไม่ที่จะไม่ยอมรับเงื่อนไขการใช้งาน?')) {
+                alert('คุณได้ปฏิเสธเงื่อนไขการใช้งาน');
+                // Here you can add code to handle decline
+            }
         });
     </script>
 </body>
