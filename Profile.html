@@ -7,7 +7,7 @@
         <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
         <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
         <style>
-            /* Import Google Fonts */
+/* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
 
 /* CSS Variables */
@@ -195,11 +195,6 @@ body {
     font-size: 1.5rem;
     font-weight: 600;
     color: var(--primary-blue);
-}
-
-.nav-links {
-    display: flex;
-    gap: 1.5rem;
 }
 
 .nav-link {
@@ -423,14 +418,18 @@ body {
     background: var(--white);
 }
 
+/* แก้ไขปัญหาไอคอนซ้อนกัน - เฉพาะ input ที่มี password-toggle */
+.input-container.has-toggle .form-input {
+    padding-right: 3rem;
+}
+
 .form-input:focus {
     outline: none;
     border-color: var(--primary-blue);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.form-input:focus + .input-icon,
-.input-container.focused .input-icon {
+.form-input:focus + .input-icon {
     color: var(--primary-blue);
 }
 
@@ -444,6 +443,7 @@ body {
     font-size: 1.25rem;
     padding: 0.25rem;
     transition: var(--transition);
+    z-index: 2;
 }
 
 .password-toggle:hover {
@@ -1143,10 +1143,6 @@ select.form-input:focus {
         padding: 0 1rem;
     }
     
-    .nav-links {
-        gap: 1rem;
-    }
-    
     .nav-link span {
         display: none;
     }
@@ -1233,7 +1229,8 @@ select.form-input:focus {
 }
         </style>
     </head>
-    <body>
+
+<body>
         <!-- Background Pattern -->
         <div class="background-pattern">
             <div class="pattern-grid"></div>
@@ -1255,7 +1252,7 @@ select.form-input:focus {
                     </div>
                     <span class="nav-title">Scan Check-in</span>
                 </div>
-                    <a href="./help.html" class="nav-link">
+                    <a href="./help.html" onclick="showHelp()" class="nav-link">
                         <ion-icon name="help-circle-outline"></ion-icon>
                         <span>ช่วยเหลือ</span>
                     </a>
@@ -1500,7 +1497,7 @@ select.form-input:focus {
                                 <input type="password" id="regPassword" name="password" class="form-input" 
                                     placeholder="กรอกรหัสผ่าน (อย่างน้อย 6 ตัวอักษร)" required>
                                 <button type="button" class="password-toggle" id="regPasswordToggle">
-                                    <ion-icon name="eye-outline" id="regToggleIcon"></ion-icon>
+                                    <ion-icon name="eye-outline"></ion-icon>
                                 </button>
                             </div>
                             <div class="form-hint" id="passwordHint"></div>
@@ -1514,7 +1511,7 @@ select.form-input:focus {
                                 <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" 
                                     placeholder="ยืนยันรหัสผ่านอีกครั้ง" required>
                                 <button type="button" class="password-toggle" id="confirmPasswordToggle">
-                                    <ion-icon name="eye-outline" id="confirmToggleIcon"></ion-icon>
+                                    <ion-icon name="eye-outline"></ion-icon>
                                 </button>
                             </div>
                             <div class="form-hint" id="confirmPasswordHint"></div>
@@ -1526,8 +1523,8 @@ select.form-input:focus {
                                 <input type="checkbox" id="acceptTerms" name="acceptTerms" required>
                                 <span class="checkmark"></span>
                                 <span class="checkbox-text">
-                                    ฉันยอมรับ <a href="./N.html" style="color: #667eea;">เงื่อนไขการใช้งาน</a> 
-                                    และ <a href="./about.html" style="color: #667eea;">นโยบายความเป็นส่วนตัว</a>
+                                    ฉันยอมรับ <a href="#" onclick="showTerms()" style="color: #667eea;">เงื่อนไขการใช้งาน</a> 
+                                    และ <a href="#" onclick="showPrivacy()" style="color: #667eea;">นโยบายความเป็นส่วนตัว</a>
                                 </span>
                             </label>
                         </div>
@@ -1623,7 +1620,7 @@ select.form-input:focus {
                                 <input type="password" id="newPassword" name="newPassword" class="form-input" 
                                     placeholder="กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)" required>
                                 <button type="button" class="password-toggle" id="newPasswordToggle">
-                                    <ion-icon name="eye-outline" id="newToggleIcon"></ion-icon>
+                                    <ion-icon name="eye-outline"></ion-icon>
                                 </button>
                             </div>
                             <div class="form-hint" id="newPasswordHint"></div>
@@ -1637,7 +1634,7 @@ select.form-input:focus {
                                 <input type="password" id="confirmNewPassword" name="confirmNewPassword" class="form-input" 
                                     placeholder="ยืนยันรหัสผ่านใหม่อีกครั้ง" required>
                                 <button type="button" class="password-toggle" id="confirmNewPasswordToggle">
-                                    <ion-icon name="eye-outline" id="confirmNewToggleIcon"></ion-icon>
+                                    <ion-icon name="eye-outline"></ion-icon>
                                 </button>
                             </div>
                             <div class="form-hint" id="confirmNewPasswordHint"></div>
@@ -1716,11 +1713,11 @@ select.form-input:focus {
                     <p>&copy; 2024 Scan Check-in System. สงวนลิขสิทธิ์.</p>
                 </div>
                 <div class="footer-right">
-                    <a href="#" class="footer-link">
+                    <a href="#" class="footer-link" onclick="showPrivacy()">
                         <ion-icon name="document-text-outline"></ion-icon>
                         นโยบายความเป็นส่วนตัว
                     </a>
-                    <a href="#" class="footer-link">
+                    <a href="#" class="footer-link" onclick="showTerms()">
                         <ion-icon name="information-circle-outline"></ion-icon>
                         เงื่อนไขการใช้งาน
                     </a>
@@ -1793,69 +1790,87 @@ select.form-input:focus {
         }
     };
 
-    // Load existing users from localStorage if available
-    const storedUsers = localStorage.getItem('userDatabase');
-    if (storedUsers) {
-        userDatabase = { ...userDatabase, ...JSON.parse(storedUsers) };
-    }
+    // Load existing users
+    const storedUsers = JSON.parse(localStorage.getItem('userDatabase') || '{}');
+    userDatabase = { ...userDatabase, ...storedUsers };
 
     // Global variable to store user data for password reset
     let resetUserData = null;
 
-    // Form toggle function
-    function toggleForm(formType) {
-        const loginContainer = document.getElementById('loginContainer');
-        const registerContainer = document.getElementById('registerContainer');
-        const forgotContainer = document.getElementById('forgotContainer');
-        const resetContainer = document.getElementById('resetContainer');
-        
-        // Hide all containers
-        loginContainer.style.display = 'none';
-        registerContainer.style.display = 'none';
-        forgotContainer.style.display = 'none';
-        resetContainer.style.display = 'none';
-        
-        // Show selected container
-        switch(formType) {
-            case 'register':
-                registerContainer.style.display = 'block';
-                break;
-            case 'forgot':
-                forgotContainer.style.display = 'block';
-                break;
-            case 'reset':
-                resetContainer.style.display = 'block';
-                break;
-            default:
-                loginContainer.style.display = 'block';
+    // Auto-fill login form if remembered
+    document.addEventListener('DOMContentLoaded', function() {
+        loadRememberedLogin();
+        checkAutoLogin();
+    });
+
+    function loadRememberedLogin() {
+        const rememberedLogin = JSON.parse(localStorage.getItem('rememberedLogin') || '{}');
+        if (rememberedLogin.username) {
+            document.getElementById('username').value = rememberedLogin.username;
+            document.getElementById('remember').checked = true;
         }
     }
 
-    // Password toggle functionality
-    function setupPasswordToggle(passwordId, toggleId, iconId) {
+    function checkAutoLogin() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+        
+        if (isLoggedIn === 'true' && userData.rememberMe) {
+            window.location.href = 'index.html';
+        }
+    }
+
+    // Form toggle function
+    function toggleForm(formType) {
+        const containers = {
+            login: document.getElementById('loginContainer'),
+            register: document.getElementById('registerContainer'),
+            forgot: document.getElementById('forgotContainer'),
+            reset: document.getElementById('resetContainer')
+        };
+        
+        // Hide all containers
+        Object.values(containers).forEach(container => {
+            container.style.display = 'none';
+        });
+        
+        // Show selected container
+        if (containers[formType]) {
+            containers[formType].style.display = 'block';
+        }
+        
+        resetForms();
+    }
+
+    // Password toggle functionality - Fixed to prevent duplicate icons
+    function setupPasswordToggle(toggleId, inputId) {
         const toggleButton = document.getElementById(toggleId);
-        if (toggleButton) {
-            toggleButton.addEventListener('click', function() {
-                const passwordInput = document.getElementById(passwordId);
-                const toggleIcon = document.getElementById(iconId);
+        const input = document.getElementById(inputId);
+        
+        if (toggleButton && input) {
+            toggleButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
                 
-                if (passwordInput.type === 'password') {
-                    passwordInput.type = 'text';
-                    toggleIcon.name = 'eye-off-outline';
+                const icon = this.querySelector('ion-icon');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.name = 'eye-off-outline';
                 } else {
-                    passwordInput.type = 'password';
-                    toggleIcon.name = 'eye-outline';
+                    input.type = 'password';
+                    icon.name = 'eye-outline';
                 }
             });
         }
     }
 
     // Setup all password toggles
-    setupPasswordToggle('password', 'passwordToggle', 'toggleIcon');
-    setupPasswordToggle('regPassword', 'regPasswordToggle', 'regToggleIcon');
-    setupPasswordToggle('confirmPassword', 'confirmPasswordToggle', 'confirmToggleIcon');
-    setupPasswordToggle('newPassword', 'newPasswordToggle', 'newToggleIcon');
-    setupPasswordToggle('confirmNewPassword', 'confirmNewPasswordToggle', 'confirmNewToggleIcon');
+    setupPasswordToggle('passwordToggle', 'password');
+    setupPasswordToggle('regPasswordToggle', 'regPassword');
+    setupPasswordToggle('confirmPasswordToggle', 'confirmPassword');
+    setupPasswordToggle('newPasswordToggle', 'newPassword');
+    setupPasswordToggle('confirmNewPasswordToggle', 'confirmNewPassword');
 
     // Username validation
     const regUsernameField = document.getElementById('regUsername');
@@ -1989,6 +2004,18 @@ select.form-input:focus {
         confirmNewPasswordField.addEventListener('input', checkConfirmNewPassword);
     }
 
+    // Remember login functionality
+    function saveRememberedLogin(username, remember) {
+        if (remember) {
+            localStorage.setItem('rememberedLogin', JSON.stringify({
+                username: username,
+                savedAt: new Date().getTime()
+            }));
+        } else {
+            localStorage.removeItem('rememberedLogin');
+        }
+    }
+
     // Login form submission
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
@@ -2012,10 +2039,14 @@ select.form-input:focus {
                         userData.loginTime = new Date().toISOString();
                         userData.rememberMe = rememberMe;
                         
+                        // Save user data
                         localStorage.setItem('userData', JSON.stringify(userData));
                         localStorage.setItem('isLoggedIn', 'true');
                         localStorage.setItem('userRole', user.role);
                         localStorage.setItem('username', username);
+                        
+                        // Save remembered login
+                        saveRememberedLogin(username, rememberMe);
                         
                         showSuccessModal(
                             'เข้าสู่ระบบสำเร็จ!',
@@ -2088,12 +2119,13 @@ select.form-input:focus {
                 // Add to database
                 userDatabase[formData.username] = newUser;
                 
-                // Save to localStorage
-                const usersToSave = { ...userDatabase };
-                // Remove default users for storage (keep only new registrations)
-                delete usersToSave.student001;
-                delete usersToSave.teacher001;
-                delete usersToSave.admin;
+                // Save to localStorage (only new users, not default ones)
+                const usersToSave = {};
+                Object.keys(userDatabase).forEach(key => {
+                    if (!['student001', 'teacher001', 'admin'].includes(key)) {
+                        usersToSave[key] = userDatabase[key];
+                    }
+                });
                 localStorage.setItem('userDatabase', JSON.stringify(usersToSave));
                 
                 showSuccessModal(
@@ -2169,11 +2201,12 @@ select.form-input:focus {
                 userDatabase[resetUserData.username].password = newPassword;
                 
                 // Save to localStorage
-                const usersToSave = { ...userDatabase };
-                // Remove default users for storage (keep only new registrations)
-                delete usersToSave.student001;
-                delete usersToSave.teacher001;
-                delete usersToSave.admin;
+                const usersToSave = {};
+                Object.keys(userDatabase).forEach(key => {
+                    if (!['student001', 'teacher001', 'admin'].includes(key)) {
+                        usersToSave[key] = userDatabase[key];
+                    }
+                });
                 localStorage.setItem('userDatabase', JSON.stringify(usersToSave));
                 
                 // Clear reset data
@@ -2190,7 +2223,6 @@ select.form-input:focus {
 
     // Validation function
     function validateRegistrationForm(data) {
-        // Check required fields
         const requiredFields = ['username', 'password', 'firstName', 'lastName', 'email', 'phone', 'studentId', 'class', 'role', 'birthDate'];
         for (let field of requiredFields) {
             if (!data[field]) {
@@ -2199,45 +2231,38 @@ select.form-input:focus {
             }
         }
         
-        // Check username availability
         if (userDatabase[data.username]) {
             showErrorModal('ชื่อผู้ใช้นี้ถูกใช้แล้ว กรุณาเลือกชื่อใหม่');
             return false;
         }
         
-        // Check username length
         if (data.username.length < 4) {
             showErrorModal('ชื่อผู้ใช้ต้องมีอย่างน้อย 4 ตัวอักษร');
             return false;
         }
         
-        // Check password length
         if (data.password.length < 6) {
             showErrorModal('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
             return false;
         }
         
-        // Check password confirmation
         if (data.password !== data.confirmPassword) {
             showErrorModal('รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน');
             return false;
         }
         
-        // Check email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(data.email)) {
             showErrorModal('รูปแบบอีเมลไม่ถูกต้อง');
             return false;
         }
         
-        // Check phone format
         const phoneRegex = /^[0-9]{10}$/;
         if (!phoneRegex.test(data.phone.replace(/[-\s]/g, ''))) {
             showErrorModal('รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง (10 หลัก)');
             return false;
         }
         
-        // Check birth date (must be in the past)
         const birthDate = new Date(data.birthDate);
         const today = new Date();
         if (birthDate >= today) {
@@ -2245,7 +2270,6 @@ select.form-input:focus {
             return false;
         }
         
-        // Check terms acceptance
         if (!data.acceptTerms) {
             showErrorModal('กรุณายอมรับเงื่อนไขการใช้งาน');
             return false;
@@ -2264,7 +2288,6 @@ select.form-input:focus {
         document.getElementById('loadingOverlay').classList.remove('active');
     }
 
-    // Show success modal
     function showSuccessModal(title, message, type) {
         document.getElementById('successTitle').textContent = title;
         document.getElementById('successMessage').textContent = message;
@@ -2299,11 +2322,11 @@ select.form-input:focus {
                 break;
             default: // login
                 primaryBtn.innerHTML = '<ion-icon name="home-outline"></ion-icon> หน้าหลัก';
-                primaryBtn.onclick = () => window.location.href = './index.html';
+                primaryBtn.onclick = () => window.location.href = 'index.html';
                 
                 secondaryBtn.innerHTML = '<ion-icon name="person-outline"></ion-icon> แก้ไขโปรไฟล์';
                 secondaryBtn.style.display = 'block';
-                secondaryBtn.onclick = () => window.location.href = './Nav.html';
+                secondaryBtn.onclick = () => window.location.href = 'Nav.html';
         }
         
         document.getElementById('successModal').classList.add('active');
@@ -2312,6 +2335,19 @@ select.form-input:focus {
     function showErrorModal(message) {
         document.getElementById('errorMessage').textContent = message;
         document.getElementById('errorModal').classList.add('active');
+    }
+
+    // Helper functions for GitHub Pages compatibility
+    function showHelp() {
+        alert('การช่วยเหลือ:\n\n- ใช้ชื่อผู้ใช้: student001, รหัสผ่าน: password123 สำหรับนักเรียน\n- ใช้ชื่อผู้ใช้: teacher001, รหัสผ่าน: teacher123 สำหรับครู\n- ติดต่อเราหากมีปัญหา');
+    }
+
+    function showTerms() {
+        alert('เงื่อนไขการใช้งาน:\n\n1. ใช้ระบบตามวัตถุประสงค์ที่กำหนด\n2. ไม่นำข้อมูลไปใช้ในทางที่ผิด\n3. รักษาความปลอดภัยของบัญชี\n4. ปฏิบัติตามกฎระเบียบของสถาบัน');
+    }
+
+    function showPrivacy() {
+        alert('นโยบายความเป็นส่วนตัว:\n\n1. เก็บข้อมูลอย่างปลอดภัย\n2. ไม่เปิดเผยข้อมูลแก่บุคคลที่สาม\n3. ใช้ข้อมูลเพื่อการศึกษาเท่านั้น\n4. สามารถขอดูข้อมูลส่วนตัวได้');
     }
 
     // Modal action buttons
@@ -2356,16 +2392,6 @@ select.form-input:focus {
         }
     });
 
-    // Auto-redirect if logged in
-    document.addEventListener('DOMContentLoaded', function() {
-        const isLoggedIn = localStorage.getItem('isLoggedIn');
-        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-        
-        if (isLoggedIn === 'true' && userData.rememberMe) {
-            window.location.href = '/HTML/index.html';
-        }
-    });
-
     // Auto-generate student ID based on role
     const roleField = document.getElementById('role');
     if (roleField) {
@@ -2404,14 +2430,14 @@ select.form-input:focus {
         
         // Clear reset user data
         resetUserData = null;
+        
+        // Reload remembered login if switching back to login
+        setTimeout(() => {
+            if (document.getElementById('loginContainer').style.display !== 'none') {
+                loadRememberedLogin();
+            }
+        }, 100);
     }
-
-    // Reset forms when switching between login/register/forgot/reset
-    const originalToggleForm = toggleForm;
-    toggleForm = function(formType) {
-        resetForms();
-        originalToggleForm(formType);
-    };
         </script>
     </body>
     </html>
