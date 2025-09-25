@@ -795,90 +795,6 @@ body {
     color: #bfdbfe;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .hero-content,
-    .vision-content,
-    .contact-content {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-    
-    .hero-text h2 {
-        font-size: 2rem;
-    }
-    
-    .hero-stats {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .nav-menu {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .header-content {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .timeline::before {
-        left: 2rem;
-    }
-    
-    .timeline-item {
-        grid-template-columns: 1fr;
-        margin-left: 3rem;
-    }
-    
-    .timeline-item:nth-child(even) {
-        direction: ltr;
-    }
-    
-    .timeline-item:nth-child(even) .timeline-content {
-        text-align: left;
-    }
-    
-    .timeline-date {
-        position: absolute;
-        left: -4rem;
-        top: 50%;
-        transform: translateY(-50%);
-        padding: 0.5rem;
-        font-size: 1rem;
-    }
-    
-    .mission-grid,
-    .team-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Smooth Scroll */
-html {
-    scroll-behavior: smooth;
-}
-
-/* Loading Animation */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.mission-card,
-.team-member,
-.timeline-item,
-.contact-item {
-    animation: fadeInUp 0.6s ease-out;
-}
-
 /* Scroll to Top Button */
 .scroll-to-top {
     position: fixed;
@@ -907,6 +823,196 @@ html {
 .scroll-to-top.show {
     display: flex;
 }
+
+/* Mobile Menu */
+.mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    gap: 4px;
+}
+
+.mobile-menu-btn span {
+    width: 25px;
+    height: 3px;
+    background: #3b82f6;
+    transition: all 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-content,
+    .vision-content,
+    .contact-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .hero-text h2 {
+        font-size: 2rem;
+    }
+    
+    .hero-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .nav-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        flex-direction: column;
+        padding: 1rem;
+        gap: 0.5rem;
+        border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+    }
+    
+    .nav-menu.active {
+        display: flex;
+    }
+    
+    .mobile-menu-btn {
+        display: flex;
+    }
+    
+    .header-content {
+        position: relative;
+    }
+    
+    .timeline::before {
+        left: 2rem;
+    }
+    
+    .timeline-item {
+        grid-template-columns: 1fr;
+        margin-left: 3rem;
+    }
+    
+    .timeline-item:nth-child(even) {
+        direction: ltr;
+    }
+    
+    .timeline-item:nth-child(even) .timeline-content {
+        text-align: left;
+    }
+    
+    .timeline-date {
+        position: absolute;
+        left: -4rem;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 0.5rem;
+        font-size: 1rem;
+        width: 3rem;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .mission-grid,
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-header h2 {
+        font-size: 2rem;
+    }
+    
+    .vision-text h2,
+    .contact-info h2 {
+        font-size: 2rem;
+    }
+}
+
+/* Smooth Scroll */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Loading Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mission-card,
+.team-member,
+.timeline-item,
+.contact-item {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Form Validation Styles */
+.form-group.error input,
+.form-group.error select,
+.form-group.error textarea {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-group.success input,
+.form-group.success select,
+.form-group.success textarea {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+.error-message {
+    font-size: 0.75rem;
+    color: #ef4444;
+    margin-top: 0.5rem;
+    display: none;
+}
+
+.form-group.error .error-message {
+    display: block;
+}
+
+/* Success Message */
+.success-message {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid #22c55e;
+    color: #166534;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.success-message.show {
+    display: flex;
+}
+
+/* Print Styles */
+@media print {
+    .about-header,
+    .scroll-to-top,
+    .contact-form {
+        display: none;
+    }
+    
+    .hero-section {
+        padding-top: 2rem;
+    }
+    
+    * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
     </style>
 </head>
 <body>
@@ -918,7 +1024,12 @@ html {
                     <ion-icon name="school" class="logo-icon"></ion-icon>
                     <h1>เกี่ยวกับเรา</h1>
                 </div>
-                <nav class="nav-menu">
+                <div class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <nav class="nav-menu" id="navMenu">
                     <a href="#mission" class="nav-link">พันธกิจ</a>
                     <a href="#vision" class="nav-link">วิสัยทัศน์</a>
                     <a href="#team" class="nav-link">ทีมงาน</a>
@@ -1200,18 +1311,25 @@ html {
                 </div>
                 <div class="contact-form">
                     <h3>ส่งข้อความหาเรา</h3>
-                    <form class="form">
+                    <div class="success-message" id="successMessage">
+                        <ion-icon name="checkmark-circle"></ion-icon>
+                        <span>ข้อความของคุณถูกส่งเรียบร้อยแล้ว!</span>
+                    </div>
+                    <form class="form" id="contactForm">
                         <div class="form-group">
                             <label for="name">ชื่อ-นามสกุล</label>
                             <input type="text" id="name" name="name" required>
+                            <div class="error-message">กรุณากรอกชื่อ-นามสกุล</div>
                         </div>
                         <div class="form-group">
                             <label for="email">อีเมล</label>
                             <input type="email" id="email" name="email" required>
+                            <div class="error-message">กรุณากรอกอีเมลที่ถูกต้อง</div>
                         </div>
                         <div class="form-group">
                             <label for="phone">เบอร์โทร</label>
                             <input type="tel" id="phone" name="phone">
+                            <div class="error-message">กรุณากรอกเบอร์โทรที่ถูกต้อง</div>
                         </div>
                         <div class="form-group">
                             <label for="subject">หัวข้อ</label>
@@ -1222,10 +1340,12 @@ html {
                                 <option value="bug">แจ้งปัญหาการใช้งาน</option>
                                 <option value="feature">ขอฟีเจอร์เพิ่มเติม</option>
                             </select>
+                            <div class="error-message">กรุณาเลือกหัวข้อ</div>
                         </div>
                         <div class="form-group">
                             <label for="message">ข้อความ</label>
                             <textarea id="message" name="message" rows="5" required></textarea>
+                            <div class="error-message">กรุณากรอกข้อความ</div>
                         </div>
                         <button type="submit" class="submit-btn">
                             <ion-icon name="send"></ion-icon>
@@ -1265,28 +1385,28 @@ html {
                 <div class="footer-section">
                     <h4>ลิงก์ด่วน</h4>
                     <ul class="footer-links">
-                        <li><a href="#">หน้าแรก</a></li>
-                        <li><a href="#">ฟีเจอร์</a></li>
-                        <li><a href="#">ราคา</a></li>
-                        <li><a href="#">ช่วยเหลือ</a></li>
+                        <li><a href="index.html">หน้าแรก</a></li>
+                        <li><a href="#mission">พันธกิจ</a></li>
+                        <li><a href="#vision">วิสัยทัศน์</a></li>
+                        <li><a href="#contact">ติดต่อเรา</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>การสนับสนุน</h4>
                     <ul class="footer-links">
-                        <li><a href="#">คู่มือการใช้งาน</a></li>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">ติดต่อเรา</a></li>
-                        <li><a href="#">แจ้งปัญหา</a></li>
+                        <li><a href="#team">ทีมงาน</a></li>
+                        <li><a href="#history">ประวัติ</a></li>
+                        <li><a href="#contact">ติดต่อเรา</a></li>
+                        <li><a href="#contact">แจ้งปัญหา</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>นโยบาย</h4>
                     <ul class="footer-links"> 
-                        <li><a href="./N.html">เงื่อนไขการใช้งาน</a></li>
-                        <li><a href="#">นโยบายความเป็นส่วนตัว</a></li>
-                        <li><a href="#">นโยบายคุกกี้</a></li>
-                        <li><a href="#">ข้อกำหนดการบริการ</a></li>
+                        <li><a href="terms.html">เงื่อนไขการใช้งาน</a></li>
+                        <li><a href="privacy.html">นโยบายความเป็นส่วนตัว</a></li>
+                        <li><a href="cookies.html">นโยบายคุกกี้</a></li>
+                        <li><a href="service.html">ข้อกำหนดการบริการ</a></li>
                     </ul>
                 </div>
             </div>
@@ -1295,5 +1415,241 @@ html {
             </div>
         </div>
     </footer>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" id="scrollToTop" onclick="scrollToTop()">
+        <ion-icon name="chevron-up"></ion-icon>
+    </button>
+
+    <script>
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const navMenu = document.getElementById('navMenu');
+            navMenu.classList.toggle('active');
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId.startsWith('#')) {
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+                // Close mobile menu after clicking
+                document.getElementById('navMenu').classList.remove('active');
+            });
+        });
+
+        // Scroll to top functionality
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Show/hide scroll to top button
+        window.addEventListener('scroll', function() {
+            const scrollToTopBtn = document.getElementById('scrollToTop');
+            if (window.pageYOffset > 300) {
+                scrollToTopBtn.classList.add('show');
+            } else {
+                scrollToTopBtn.classList.remove('show');
+            }
+
+            // Header shadow on scroll
+            const header = document.querySelector('.about-header');
+            if (window.pageYOffset > 50) {
+                header.style.boxShadow = '0 2px 20px rgba(0,0,0,0.1)';
+            } else {
+                header.style.boxShadow = 'none';
+            }
+        });
+
+        // Form validation and submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            let isValid = true;
+            const formGroups = document.querySelectorAll('.form-group');
+            
+            // Reset previous validation states
+            formGroups.forEach(group => {
+                group.classList.remove('error', 'success');
+            });
+
+            // Validate name
+            const name = document.getElementById('name');
+            if (!name.value.trim()) {
+                name.closest('.form-group').classList.add('error');
+                isValid = false;
+            } else {
+                name.closest('.form-group').classList.add('success');
+            }
+
+            // Validate email
+            const email = document.getElementById('email');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email.value.trim() || !emailRegex.test(email.value)) {
+                email.closest('.form-group').classList.add('error');
+                isValid = false;
+            } else {
+                email.closest('.form-group').classList.add('success');
+            }
+
+            // Validate phone (optional but if provided, should be valid)
+            const phone = document.getElementById('phone');
+            if (phone.value.trim()) {
+                const phoneRegex = /^[0-9-+\s()]+$/;
+                if (!phoneRegex.test(phone.value)) {
+                    phone.closest('.form-group').classList.add('error');
+                    isValid = false;
+                } else {
+                    phone.closest('.form-group').classList.add('success');
+                }
+            }
+
+            // Validate subject
+            const subject = document.getElementById('subject');
+            if (!subject.value) {
+                subject.closest('.form-group').classList.add('error');
+                isValid = false;
+            } else {
+                subject.closest('.form-group').classList.add('success');
+            }
+
+            // Validate message
+            const message = document.getElementById('message');
+            if (!message.value.trim()) {
+                message.closest('.form-group').classList.add('error');
+                isValid = false;
+            } else {
+                message.closest('.form-group').classList.add('success');
+            }
+
+            // If form is valid, show success message
+            if (isValid) {
+                // Show success message
+                document.getElementById('successMessage').classList.add('show');
+                
+                // Reset form
+                this.reset();
+                formGroups.forEach(group => {
+                    group.classList.remove('error', 'success');
+                });
+
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    document.getElementById('successMessage').classList.remove('show');
+                }, 5000);
+
+                // Scroll to success message
+                document.getElementById('successMessage').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        });
+
+        // Add loading animation for mission cards
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for animation
+        document.querySelectorAll('.mission-card, .team-member, .timeline-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+
+        // Add counter animation for hero stats
+        function animateCounter(element, target, duration = 2000) {
+            const start = 0;
+            const increment = target / (duration / 16);
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    element.textContent = target + (target === 99 ? '%' : '+');
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current) + (target === 99 ? '%' : '+');
+                }
+            }, 16);
+        }
+
+        // Animate counters when they come into view
+        const statsObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const numbers = entry.target.querySelectorAll('.stat-number');
+                    numbers.forEach((num, index) => {
+                        const targets = [100, 1, 99];
+                        setTimeout(() => {
+                            animateCounter(num, targets[index]);
+                        }, index * 200);
+                    });
+                    statsObserver.unobserve(entry.target);
+                }
+            });
+        });
+
+        const heroStats = document.querySelector('.hero-stats');
+        if (heroStats) {
+            statsObserver.observe(heroStats);
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const navMenu = document.getElementById('navMenu');
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            
+            if (!navMenu.contains(e.target) && !menuBtn.contains(e.target)) {
+                navMenu.classList.remove('active');
+            }
+        });
+
+        // Add active state to navigation links based on scroll position
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                const sectionHeight = section.clientHeight;
+                if (window.pageYOffset >= sectionTop && window.pageYOffset < sectionTop + sectionHeight) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
