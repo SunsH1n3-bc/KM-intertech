@@ -3,2060 +3,1101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบ QR Code เช็คชื่อ - นักเรียน</title>
-    
-    <!-- QR Code Libraries from CDNJS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-    
-    <!-- Ionicons -->
+    <title>ระบบสร้างรหัสเข้าเช็คชื่อ</title>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    
     <style>
-        /* Reset & Base Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            --secondary-gradient: linear-gradient(135deg, #60a5fa 0%, #1d4ed8 100%);
+            --success-gradient: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            --dark-gradient: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(59, 130, 246, 0.2);
+            --shadow-light: 0 8px 32px rgba(59, 130, 246, 0.15);
+            --shadow-heavy: 0 20px 60px rgba(59, 130, 246, 0.2);
+            --blur: blur(10px);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        :root {
-            --primary-blue: #0066ff;
-            --primary-blue-light: #4d94ff;
-            --primary-blue-lighter: #80b3ff;
-            --primary-blue-dark: #0052cc;
-            
-            --white: #ffffff;
-            --off-white: #f8f9fa;
-            --light-gray: #e9ecef;
-            --gray: #6c757d;
-            --dark-gray: #343a40;
-            
-            --gradient-start: #0066ff;
-            --gradient-end: #00a8ff;
-            
-            --shadow-sm: 0 2px 8px rgba(0, 102, 255, 0.1);
-            --shadow-md: 0 4px 16px rgba(0, 102, 255, 0.15);
-            --shadow-lg: 0 8px 32px rgba(0, 102, 255, 0.2);
-            --glass-shadow: 0 8px 32px rgba(0, 102, 255, 0.1);
-            
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 20px;
-            --radius-xl: 30px;
-            
-            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
         body {
-            font-family: 'Segoe UI', 'Kanit', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            background-attachment: fixed;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
             min-height: 100vh;
-            color: var(--dark-gray);
-            line-height: 1.6;
             position: relative;
             overflow-x: hidden;
+            color: #1f2937;
         }
 
-        body::before {
-            content: '';
+        /* Background Animation */
+        .bg-container {
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            width: 100%;
+            height: 100%;
             z-index: -2;
+            background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 50%, #bfdbfe 100%);
         }
 
-        body::after {
-            content: '';
+        .bg-grid {
             position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 40px 40px;
-            animation: backgroundMove 60s linear infinite;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: -1;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, rgba(147, 197, 253, 0.08) 1px, transparent 1px);
+            background-size: 60px 60px, 40px 40px;
+            animation: gridMove 20s linear infinite;
         }
 
-        @keyframes backgroundMove {
+        @keyframes gridMove {
             0% { transform: translate(0, 0); }
-            100% { transform: translate(40px, 40px); }
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes tabFadeIn {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes expandWidth {
-            from { width: 0; }
-            to { width: 60px; }
-        }
-
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            100% { transform: translate(60px, 60px); }
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        header {
-            text-align: center;
             padding: 40px 20px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--glass-shadow);
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            animation: slideDown 0.6s ease-out;
+            position: relative;
+            z-index: 10;
         }
 
-        header h1 {
-            font-size: 2.5rem;
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 60px 0;
+        }
+
+        .header-content {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow-light);
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: var(--primary-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
+            line-height: 1.2;
         }
 
-        header h1 ion-icon {
-            font-size: 3rem;
-            color: var(--primary-blue);
-        }
-
-        header p {
-            color: var(--gray);
-            font-size: 1.1rem;
-        }
-
-        .tab-navigation {
-            display: flex;
-            gap: 15px;
+        .header-subtitle {
+            font-size: 1.3rem;
+            font-weight: 400;
+            color: #4b5563;
             margin-bottom: 30px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 10px;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            animation: slideUp 0.6s ease-out 0.2s both;
         }
 
-        .tab-btn {
-            flex: 1;
-            padding: 15px 25px;
-            border: none;
-            background: transparent;
-            color: var(--gray);
-            font-size: 1rem;
-            font-weight: 500;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: var(--transition-normal);
+        .header-stats {
             display: flex;
-            align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        /* Glass Card Design */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
 
-        .tab-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            opacity: 0;
-            transition: var(--transition-normal);
-            z-index: -1;
+        .glass-card:hover {
+            box-shadow: var(--shadow-heavy);
+            border-color: rgba(59, 130, 246, 0.3);
         }
 
-        .tab-btn:hover {
-            transform: translateY(-2px);
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            text-align: center;
         }
 
-        .tab-btn:hover::before {
-            opacity: 0.1;
+        .section-header ion-icon {
+            font-size: 2rem;
+            color: #3b82f6;
         }
 
-        .tab-btn.active {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            color: var(--white);
-            box-shadow: var(--shadow-md);
-            transform: scale(1.02);
-        }
-
-        .tab-btn ion-icon {
-            font-size: 1.3rem;
-        }
-
-        main {
-            animation: fadeIn 0.6s ease-out 0.4s both;
-        }
-
-        .tab-content {
-            display: none;
-            animation: tabFadeIn 0.4s ease-out;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .form-section, .scan-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 40px;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--glass-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            margin-bottom: 30px;
-        }
-
-        .form-section h2, .scan-section h2 {
+        .section-title {
             font-size: 1.8rem;
-            color: var(--dark-gray);
-            margin-bottom: 30px;
-            position: relative;
-            padding-bottom: 15px;
+            font-weight: 700;
+            color: #1f2937;
         }
 
-        .form-section h2::after, .scan-section h2::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            border-radius: 2px;
-            animation: expandWidth 0.8s ease-out;
+        /* Form Styling */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
         }
 
         .form-group {
-            margin-bottom: 25px;
+            position: relative;
         }
 
-        .form-group label {
+        .form-label {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            color: var(--dark-gray);
-            margin-bottom: 10px;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #374151;
             font-size: 0.95rem;
         }
 
-        .form-group label ion-icon {
+        .form-label ion-icon {
             font-size: 1.2rem;
-            color: var(--primary-blue);
+            color: #3b82f6;
         }
 
-        .form-group input,
-        .form-group select {
+        .form-input, .form-select {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid var(--light-gray);
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            transition: var(--transition-fast);
-            background: var(--white);
-            color: var(--dark-gray);
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .form-group input::placeholder {
-            color: #adb5bd;
-        }
-
-        button {
-            padding: 14px 30px;
-            border: none;
-            border-radius: var(--radius-md);
-            font-size: 1rem;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            border-radius: 16px;
+            font-size: 16px;
             font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition-normal);
+            color: #1f2937;
+            transition: all 0.3s ease;
+        }
+
+        .form-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Premium Buttons */
+        .btn {
+            position: relative;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            position: relative;
+            gap: 12px;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             overflow: hidden;
+            text-decoration: none;
+            min-width: 160px;
         }
 
-        button[type="submit"],
-        #startScanBtn {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            color: var(--white);
-            box-shadow: var(--shadow-md);
+        .btn-primary {
+            background: var(--success-gradient);
+            color: #ffffff;
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--dark-gradient);
+            color: #ffffff;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-block {
             width: 100%;
         }
 
-        button[type="submit"]:hover,
-        #startScanBtn:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-lg);
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
         }
 
-        button[type="submit"]:active,
-        #startScanBtn:active {
-            transform: translateY(-1px);
-        }
-
-        button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        button:active::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        #qrCodeSection {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+        /* Code Display */
+        .code-showcase {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 197, 253, 0.1));
+            border-radius: 24px;
             padding: 40px;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--glass-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            animation: fadeInScale 0.5s ease-out;
-        }
-
-        #qrCodeSection h2 {
-            font-size: 1.8rem;
-            color: var(--dark-gray);
-            margin-bottom: 30px;
             text-align: center;
-        }
-
-        .student-info {
-            background: linear-gradient(135deg, rgba(0, 102, 255, 0.05), rgba(0, 168, 255, 0.05));
-            padding: 20px;
-            border-radius: var(--radius-md);
-            margin-bottom: 30px;
-            border-left: 4px solid var(--primary-blue);
-        }
-
-        .student-info p {
-            margin: 8px 0;
-            color: var(--dark-gray);
-        }
-
-        .student-info strong {
-            color: var(--primary-blue);
-            font-weight: 600;
-        }
-
-        #qrCodeContainer {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 30px;
-            background: var(--white);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 30px;
-            min-height: 320px;
-            flex-direction: column;
-        }
-
-        #qrCodeContainer canvas,
-        #qrCodeContainer img {
-            border-radius: var(--radius-sm);
-            max-width: 100%;
-            height: auto;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .manual-qr-data {
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .manual-qr-data textarea {
-            width: 100%;
-            height: 150px;
-            padding: 10px;
-            border: 2px solid var(--light-gray);
-            border-radius: var(--radius-sm);
-            font-family: monospace;
-            font-size: 12px;
-            resize: none;
-            margin: 15px 0;
-        }
-
-        .qr-fallback {
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .qr-ascii {
-            font-family: monospace;
-            font-size: 8px;
-            line-height: 0.8;
-            background: white;
-            padding: 20px;
-            border-radius: var(--radius-sm);
-            margin: 20px 0;
-            white-space: pre;
-            overflow: auto;
-            border: 2px solid var(--primary-blue);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .action-buttons button {
-            flex: 1;
-            min-width: 150px;
-            background: var(--white);
-            color: var(--primary-blue);
-            border: 2px solid var(--primary-blue);
-        }
-
-        .action-buttons button:hover {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            color: var(--white);
-            border-color: transparent;
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .instructions {
-            background: rgba(0, 102, 255, 0.05);
-            padding: 25px;
-            border-radius: var(--radius-md);
-            border-left: 4px solid var(--primary-blue-light);
-        }
-
-        .instructions h3 {
-            color: var(--primary-blue);
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-
-        .instructions ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .instructions li {
-            padding: 8px 0;
-            padding-left: 30px;
+            margin: 40px 0;
+            border: 2px solid rgba(59, 130, 246, 0.2);
             position: relative;
-            color: var(--dark-gray);
-        }
-
-        .instructions li::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            color: var(--primary-blue);
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-
-        .scanner-controls {
-            display: flex;
-            gap: 15px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-
-        #stopScanBtn {
-            background: linear-gradient(135deg, #dc3545, #c82333);
-            color: var(--white);
-            box-shadow: 0 4px 16px rgba(220, 53, 69, 0.3);
-        }
-
-        #stopScanBtn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 32px rgba(220, 53, 69, 0.4);
-        }
-
-        #fileUploadBtn {
-            background: linear-gradient(135deg, #17a2b8, #138496);
-            color: var(--white);
-            box-shadow: 0 4px 16px rgba(23, 162, 184, 0.3);
-        }
-
-        #fileUploadBtn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 32px rgba(23, 162, 184, 0.4);
-        }
-
-        #qrScanner {
-            margin: 30px 0;
-            border-radius: var(--radius-md);
             overflow: hidden;
-            box-shadow: var(--shadow-md);
         }
 
-        #reader {
-            border-radius: var(--radius-md);
-            width: 100% !important;
+        .code-showcase-content {
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            padding: 30px;
         }
 
-        #reader video {
-            width: 100% !important;
-            max-width: 100% !important;
-            border-radius: var(--radius-md);
-        }
-
-        #qr-reader {
-            width: 100%;
-        }
-
-        #scanResult {
-            animation: slideInRight 0.5s ease-out;
-        }
-
-        #scanResult h3 {
-            color: var(--primary-blue);
-            margin-bottom: 20px;
-            font-size: 1.4rem;
-        }
-
-        .result-info {
-            background: linear-gradient(135deg, rgba(0, 102, 255, 0.05), rgba(0, 168, 255, 0.05));
-            padding: 20px;
-            border-radius: var(--radius-md);
-            margin-bottom: 20px;
-            border-left: 4px solid #28a745;
-        }
-
-        .result-info p {
-            margin: 10px 0;
-            color: var(--dark-gray);
-        }
-
-        .result-info strong {
-            color: var(--primary-blue);
+        .code-title {
+            font-size: 1.2rem;
             font-weight: 600;
-        }
-
-        #resultStatus {
-            color: #28a745;
-            font-weight: bold;
-        }
-
-        #recentAttendance {
-            margin-top: 30px;
-            padding: 25px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: var(--radius-md);
-        }
-
-        #recentAttendance h3 {
-            color: var(--primary-blue);
             margin-bottom: 20px;
-            font-size: 1.3rem;
+            color: #4b5563;
         }
 
-        #attendanceList {
+        .code-number {
+            font-size: 4rem;
+            font-weight: 900;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 8px;
+            margin: 20px 0;
+        }
+
+        /* Info Grid */
+        .info-grid {
             display: grid;
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
         }
 
-        .attendance-item {
-            padding: 15px;
-            background: var(--white);
-            border-radius: var(--radius-sm);
-            border-left: 3px solid var(--primary-blue);
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition-fast);
+        .info-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
         }
 
-        .attendance-item:hover {
-            transform: translateX(5px);
-            box-shadow: var(--shadow-md);
+        .info-card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: var(--shadow-light);
         }
 
-        .loading-indicator {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            color: var(--primary-blue);
-        }
-
-        .loading-indicator.show {
-            display: block;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 3px solid rgba(0, 102, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: var(--primary-blue);
-            animation: spin 1s linear infinite;
-            margin-bottom: 10px;
-        }
-
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: var(--radius-md);
-            margin: 15px 0;
-            border-left: 4px solid #dc3545;
-        }
-
-        .success-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: var(--radius-md);
-            margin: 15px 0;
-            border-left: 4px solid #28a745;
-        }
-
-        .warning-message {
-            background: #fff3cd;
-            color: #856404;
-            padding: 15px;
-            border-radius: var(--radius-md);
-            margin: 15px 0;
-            border-left: 4px solid #ffc107;
-        }
-
-        .info-message {
-            background: #d1ecf1;
-            color: #0c5460;
-            padding: 15px;
-            border-radius: var(--radius-md);
-            margin: 15px 0;
-            border-left: 4px solid #17a2b8;
-        }
-
-        .library-status {
-            background: rgba(0, 102, 255, 0.1);
-            padding: 15px;
-            border-radius: var(--radius-md);
-            margin-bottom: 20px;
+        .info-card-header {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            margin-bottom: 15px;
         }
 
-        .library-status ion-icon {
+        .info-card-header ion-icon {
+            font-size: 1.5rem;
+            color: #3b82f6;
+        }
+
+        .info-card-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .info-card-value {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        /* Button Groups */
+        .btn-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        /* Notifications */
+        .toast {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px 25px;
+            color: #1f2937;
+            font-weight: 500;
+            box-shadow: var(--shadow-light);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            min-width: 320px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast ion-icon {
             font-size: 1.5rem;
         }
 
-        .status-ok {
-            color: #28a745;
+        .toast-success {
+            border-left: 4px solid #10b981;
         }
 
-        .status-error {
-            color: #dc3545;
+        .toast-error {
+            border-left: 4px solid #ef4444;
         }
 
-        .status-warning {
-            color: #ffc107;
+        .toast-success ion-icon {
+            color: #10b981;
         }
 
-        #fileInput {
-            display: none;
+        .toast-error ion-icon {
+            color: #ef4444;
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* File Not Found Section */
+        .file-warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
+            border: 2px solid rgba(245, 158, 11, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .file-warning ion-icon {
+            font-size: 2rem;
+            color: #f59e0b;
+            margin-bottom: 10px;
+        }
+
+        .file-warning p {
+            color: #d97706;
+            margin-bottom: 15px;
+        }
+
+        /* URL Display */
+        .url-display {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #1f2937;
+            word-break: break-all;
+            margin: 10px 0;
+            max-height: 100px;
+            overflow-y: auto;
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            header h1 {
-                font-size: 1.8rem;
+            .container {
+                padding: 20px 15px;
             }
             
-            header h1 ion-icon {
-                font-size: 2rem;
+            .header h1 {
+                font-size: 2.5rem;
             }
             
-            .form-section, .scan-section {
+            .header-stats {
+                gap: 20px;
+            }
+            
+            .glass-card {
                 padding: 25px;
             }
             
-            .tab-navigation {
-                flex-direction: column;
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
             }
             
-            .action-buttons, .scanner-controls {
-                flex-direction: column;
+            .code-number {
+                font-size: 2.5rem;
+                letter-spacing: 4px;
             }
             
-            .action-buttons button, .scanner-controls button {
+            .btn-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
                 width: 100%;
+                max-width: 300px;
+            }
+            
+            .toast {
+                right: 15px;
+                left: 15px;
+                transform: translateY(-100px);
+                min-width: auto;
+            }
+            
+            .toast.show {
+                transform: translateY(0);
             }
         }
 
-        @media (max-width: 480px) {
-            .container {
-                padding: 10px;
-            }
-            
-            header {
-                padding: 25px 15px;
-            }
-            
-            header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .form-section, .scan-section {
-                padding: 20px;
-            }
+        /* Hidden utility */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Copy button styling */
+        .copy-btn {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+            transform: translateY(-1px);
         }
     </style>
 </head>
 <body>
+    <div class="bg-container"></div>
+    <div class="bg-grid"></div>
+
     <div class="container">
-        <!-- Loading Indicator -->
-        <div class="loading-indicator" id="loadingIndicator">
-            <div class="spinner"></div>
-            <p>กำลังโหลดระบบ...</p>
-        </div>
-
-        <!-- Header -->
-        <header>
-            <h1>
-                <ion-icon name="qr-code-outline"></ion-icon>
-                ระบบ QR Code เช็คชื่อ
-            </h1>
-            <p>สร้าง QR Code หรือสแกนเพื่อเช็คชื่อเข้าเรียน</p>
-        </header>
-
-        <!-- Library Status -->
-        <div class="library-status" id="libraryStatus">
-            <ion-icon name="sync-outline"></ion-icon>
-            <span>กำลังตรวจสอบระบบ...</span>
-        </div>
-
-        <!-- Tab Navigation -->
-        <nav class="tab-navigation">
-            <button class="tab-btn active" data-tab="create">
-                <ion-icon name="create-outline"></ion-icon>
-                สร้าง QR Code
-            </button>
-            <button class="tab-btn" data-tab="scan">
-                <ion-icon name="scan-outline"></ion-icon>
-                สแกน QR Code
-            </button>
-        </nav>
-
-        <!-- Main Content -->
-        <main>
-            <!-- Create QR Code Tab -->
-            <div id="createTab" class="tab-content active">
-                <section class="form-section">
-                    <h2>สร้าง QR Code ส่วนตัว</h2>
-                    
-                    <div id="statusMessage"></div>
-                    
-                    <form id="qrGeneratorForm">
-                        <!-- Student Name -->
-                        <div class="form-group">
-                            <label for="studentName">
-                                <ion-icon name="person-outline"></ion-icon>
-                                ชื่อ - นามสกุล
-                            </label>
-                            <input 
-                                type="text" 
-                                id="studentName" 
-                                name="studentName" 
-                                required 
-                                placeholder="กรอกชื่อ-นามสกุลของคุณ"
-                            >
-                        </div>
-
-                        <!-- Student ID (Optional) -->
-                        <div class="form-group">
-                            <label for="studentId">
-                                <ion-icon name="id-card-outline"></ion-icon>
-                                รหัสนักเรียน (ถ้ามี)
-                            </label>
-                            <input 
-                                type="text" 
-                                id="studentId" 
-                                name="studentId" 
-                                placeholder="รหัสนักเรียน (ไม่บังคับ)"
-                            >
-                        </div>
-
-                        <!-- Grade Level -->
-                        <div class="form-group">
-                            <label for="gradeLevel">
-                                <ion-icon name="school-outline"></ion-icon>
-                                ระดับชั้น
-                            </label>
-                            <select id="gradeLevel" name="gradeLevel" required>
-                                <option value="">-- เลือกระดับชั้น --</option>
-                                <optgroup label="ปวช. ปีที่ 1">
-                                    <option value="ปวช.1/1">ปวช.1/1</option>
-                                    <option value="ปวช.1/2">ปวช.1/2</option>
-                                    <option value="ปวช.1/3">ปวช.1/3</option>
-                                    <option value="ปวช.1/4">ปวช.1/4</option>
-                                    <option value="ปวช.1/5">ปวช.1/5</option>
-                                    <option value="ปวช.1/6">ปวช.1/6</option>
-                                </optgroup>
-                                <optgroup label="ปวช. ปีที่ 2">
-                                    <option value="ปวช.2/1">ปวช.2/1</option>
-                                    <option value="ปวช.2/3">ปวช.2/3</option>
-                                    <option value="ปวช.2/4">ปวช.2/4</option>
-                                </optgroup>
-                                <optgroup label="ปวช. ปีที่ 3">
-                                    <option value="ปวช.3/1">ปวช.3/1</option>
-                                    <option value="ปวช.3/3">ปวช.3/3</option>
-                                    <option value="ปวช.3/5">ปวช.3/5</option>
-                                </optgroup>
-                            </select>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <button type="submit" id="generateBtn">
-                            <ion-icon name="qr-code-outline"></ion-icon>
-                            สร้าง QR Code
-                        </button>
-                    </form>
-                </section>
-
-                <!-- QR Code Display -->
-                <section id="qrCodeSection" style="display: none;">
-                    <h2>QR Code ของคุณ</h2>
-                    
-                    <!-- Student Info -->
-                    <div class="student-info">
-                        <p><strong>ชื่อ:</strong> <span id="displayName"></span></p>
-                        <p><strong>รหัสนักเรียน:</strong> <span id="displayId"></span></p>
-                        <p><strong>ชั้น:</strong> <span id="displayGrade"></span></p>
-                        <p><strong>สร้างเมื่อ:</strong> <span id="displayDate"></span></p>
+        <!-- Header Section -->
+        <div class="header">
+            <div class="header-content">
+                <h1>ระบบสร้างรหัสเช็คชื่อ</h1>
+                <p class="header-subtitle">แพลตฟอร์มจัดการเข้าเรียนสำหรับสถาบันการศึกษา</p>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalCodes">0</div>
+                        <div class="stat-label">รหัสทั้งหมด</div>
                     </div>
-
-                    <!-- QR Code -->
-                    <div id="qrCodeContainer">
-                        <p>กำลังสร้าง QR Code...</p>
+                    <div class="stat-item">
+                        <div class="stat-number" id="activeCodes">0</div>
+                        <div class="stat-label">รหัสที่ใช้งาน</div>
                     </div>
-
-                    <!-- Actions -->
-                    <div class="action-buttons">
-                        <button onclick="downloadQRCode()">
-                            <ion-icon name="download-outline"></ion-icon>
-                            ดาวน์โหลด
-                        </button>
-                        <button onclick="saveToDevice()">
-                            <ion-icon name="save-outline"></ion-icon>
-                            บันทึกในเครื่อง
-                        </button>
-                        <button onclick="testQRData()">
-                            <ion-icon name="checkmark-circle-outline"></ion-icon>
-                            ทดสอบ QR Code
-                        </button>
-                        <button onclick="generateNewQR()">
-                            <ion-icon name="refresh-outline"></ion-icon>
-                            สร้างใหม่
-                        </button>
+                    <div class="stat-item">
+                        <div class="stat-number">99.9%</div>
+                        <div class="stat-label">ความเสถียร</div>
                     </div>
-
-                    <!-- Instructions -->
-                    <div class="instructions">
-                        <h3>คำแนะนำ:</h3>
-                        <ul>
-                            <li>บันทึก QR Code นี้ไว้ในโทรศัพท์</li>
-                            <li>ใช้ QR Code เดียวกันได้ทุกวิชา</li>
-                            <li>เมื่อเข้าเรียน ให้สแกน QR Code เพื่อเช็คชื่อ</li>
-                            <li>หากไม่สามารถสร้าง QR Code ได้ ให้คัดลอกข้อมูลด้านล่างไปใช้</li>
-                            <li>กดปุ่ม "ทดสอบ QR Code" เพื่อตรวจสอบความถูกต้อง</li>
-                        </ul>
-                    </div>
-                </section>
+                </div>
             </div>
+        </div>
 
-            <!-- Scan QR Code Tab -->
-            <div id="scanTab" class="tab-content">
-                <section class="scan-section">
-                    <h2>สแกน QR Code เพื่อเช็คชื่อ</h2>
-
-                    <div id="scanStatusMessage"></div>
-
-                    <!-- Subject Selection -->
+        <!-- Code Generator Section -->
+        <div id="codeGenerator" class="glass-card">
+            <div class="section-header">
+                <ion-icon name="add-circle-outline"></ion-icon>
+                <h2 class="section-title">สร้างรหัสเข้าเรียนใหม่</h2>
+            </div>
+            
+            <form id="generateForm">
+                <div class="form-grid">
                     <div class="form-group">
-                        <label for="scanSubject">
-                            <ion-icon name="book-outline"></ion-icon>
-                            เลือกรายวิชาที่จะเช็คชื่อ
+                        <label class="form-label">
+                            <ion-icon name="person-outline"></ion-icon>
+                            ชื่อ - นามสกุล
                         </label>
-                        <select id="scanSubject" required>
-                            <option value="">-- เลือกรายวิชา --</option>
+                        <input type="text" id="studentName" class="form-input" required 
+                               placeholder="กรอกชื่อ-นามสกุลนักเรียน">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="school-outline"></ion-icon>
+                            ระดับชั้น
+                        </label>
+                        <select id="gradeLevel" class="form-select" required>
+                            <option value="">เลือกระดับชั้น</option>
+                            <option value="ปวช.1/1">ปวช.1/1</option>
+                            <option value="ปวช.1/2">ปวช.1/2</option>
+                            <option value="ปวช.1/3">ปวช.1/3</option>
+                            <option value="ปวช.1/4">ปวช.1/4</option>
+                            <option value="ปวช.1/5">ปวช.1/5</option>
+                            <option value="ปวช.1/6">ปวช.1/6</option>
+                            <option value="ปวช.2/1">ปวช.2/1</option>
+                            <option value="ปวช.2/3">ปวช.2/3</option>
+                            <option value="ปวช.2/4">ปวช.2/4</option>
+                            <option value="ปวช.3/1">ปวช.3/1</option>
+                            <option value="ปวช.3/3">ปวช.3/3</option>
+                            <option value="ปวช.3/5">ปวช.3/5</option>
                         </select>
                     </div>
-
-                    <!-- Scanner Controls -->
-                    <div class="scanner-controls">
-                        <button id="startScanBtn" onclick="startScanning()">
-                            <ion-icon name="camera-outline"></ion-icon>
-                            เริ่มสแกนด้วยกล้อง
-                        </button>
-                        <button id="fileUploadBtn" onclick="uploadQRImage()">
-                            <ion-icon name="image-outline"></ion-icon>
-                            อัปโหลดรูป QR Code
-                        </button>
-                        <button id="stopScanBtn" onclick="stopScanning()" style="display: none;">
-                            <ion-icon name="stop-outline"></ion-icon>
-                            หยุดสแกน
-                        </button>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="code-outline"></ion-icon>
+                            รหัสวิชา
+                        </label>
+                        <input type="text" id="subjectCode" class="form-input" required 
+                               placeholder="เช่น 2101-1001">
                     </div>
-
-                    <!-- Hidden file input -->
-                    <input type="file" id="fileInput" accept="image/*" onchange="handleFileUpload(event)" />
-
-                    <!-- Scanner View -->
-                    <div id="qrScanner" style="display: none;">
-                        <div id="reader"></div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="book-outline"></ion-icon>
+                            ชื่อรายวิชา
+                        </label>
+                        <input type="text" id="subjectName" class="form-input" required 
+                               placeholder="เช่น คณิตศาสตร์พื้นฐาน">
                     </div>
-
-                    <!-- Scan Result -->
-                    <div id="scanResult" style="display: none;">
-                        <h3>ผลการสแกน</h3>
-                        <div class="result-info">
-                            <p><strong>สถานะ:</strong> <span id="resultStatus"></span></p>
-                            <p><strong>ชื่อ:</strong> <span id="resultName"></span></p>
-                            <p><strong>รหัสนักเรียน:</strong> <span id="resultStudentId"></span></p>
-                            <p><strong>ชั้น:</strong> <span id="resultGrade"></span></p>
-                            <p><strong>รายวิชา:</strong> <span id="resultSubject"></span></p>
-                            <p><strong>เวลา:</strong> <span id="resultTime"></span></p>
-                        </div>
-                        <button onclick="scanAgain()">
-                            <ion-icon name="refresh-outline"></ion-icon>
-                            สแกนใหม่
-                        </button>
-                    </div>
-
-                    <!-- Recent Attendance -->
-                    <div id="recentAttendance" style="display: none;">
-                        <h3>ประวัติการเช็คชื่อล่าสุด</h3>
-                        <div id="attendanceList"></div>
-                    </div>
-
-                    <!-- Scanning Instructions -->
-                    <div class="instructions">
-                        <h3>วิธีการสแกน QR Code:</h3>
-                        <ul>
-                            <li><strong>สแกนด้วยกล้อง:</strong> กดปุ่ม "เริ่มสแกนด้วยกล้อง" และนำกล้องส่องไปที่ QR Code</li>
-                            <li><strong>อัปโหลดรูป:</strong> กดปุ่ม "อัปโหลดรูป QR Code" แล้วเลือกรูปภาพ QR Code จากเครื่อง</li>
-                            <li>รองรับไฟล์ภาพ: JPG, PNG, GIF, BMP, WebP</li>
-                            <li>QR Code ต้องชัดเจน ไม่เบลอหรือมีสิ่งบดบัง</li>
-                            <li>หาก QR Code ไม่สามารถอ่านได้ ให้ตรวจสอบ Console (F12) เพื่อดูรายละเอียด</li>
-                        </ul>
-                    </div>
-                </section>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">
+                    <span id="generateBtnText">
+                        <ion-icon name="rocket-outline"></ion-icon>
+                        สร้างรหัสเข้าเรียน
+                    </span>
+                </button>
+            </form>
+        </div>
+        
+        <!-- Result Section -->
+        <div id="resultSection" class="glass-card hidden">
+            <div class="section-header">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <h2 class="section-title">รหัสเข้าเรียนของคุณ</h2>
             </div>
-        </main>
+            
+            <div class="code-showcase">
+                <div class="code-showcase-content">
+                    <div class="code-title">รหัสของคุณคือ</div>
+                    <div class="code-number" id="codeDisplay"></div>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <ion-icon name="person"></ion-icon>
+                        <div class="info-card-label">ชื่อนักเรียน</div>
+                    </div>
+                    <div class="info-card-value" id="nameDisplay"></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <ion-icon name="school"></ion-icon>
+                        <div class="info-card-label">ระดับชั้น</div>
+                    </div>
+                    <div class="info-card-value" id="gradeDisplay"></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <ion-icon name="book"></ion-icon>
+                        <div class="info-card-label">รายวิชา</div>
+                    </div>
+                    <div class="info-card-value" id="subjectDisplay"></div>
+                </div>
+            </div>
+
+            <!-- File warning section -->
+            <div id="fileWarning" class="file-warning hidden">
+                <ion-icon name="warning-outline"></ion-icon>
+                <p><strong>ไม่พบไฟล์ studens.html</strong></p>
+                <p>คุณสามารถคัดลอก URL ด้านล่างและใช้เมื่อมีไฟล์แล้ว</p>
+                <div class="url-display" id="generatedURL"></div>
+                <button class="copy-btn" onclick="copyURL()">
+                    <ion-icon name="copy-outline"></ion-icon>
+                    คัดลอก URL
+                </button>
+            </div>
+            
+            <div class="btn-group">
+                <button onclick="openAttendancePage()" class="btn btn-primary">
+                    <ion-icon name="open-outline"></ion-icon>
+                    เข้าเช็คชื่อทันที
+                </button>
+            </div>
+            
+            <div class="btn-group">
+                <button onclick="resetForm()" class="btn btn-secondary">
+                    <ion-icon name="refresh-outline"></ion-icon>
+                    สร้างรหัสใหม่
+                </button>
+            </div>
+        </div>
+        
+        <!-- Code Checker Section -->
+        <div id="codeChecker" class="glass-card">
+            <div class="section-header">
+                <ion-icon name="search-outline"></ion-icon>
+                <h2 class="section-title">ใช้รหัสเข้าเช็คชื่อ</h2>
+            </div>
+            
+            <form id="checkCodeForm">
+                <div class="form-group">
+                    <label class="form-label">
+                        <ion-icon name="key-outline"></ion-icon>
+                        กรอกรหัสเข้าเรียน
+                    </label>
+                    <input type="text" id="inputCode" class="form-input" required 
+                           placeholder="กรอกรหัส 6 หลัก" maxlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <ion-icon name="log-in-outline"></ion-icon>
+                    เข้าเช็คชื่อ
+                </button>
+            </form>
+        </div>
     </div>
 
     <script>
-        // Global variables
-        let currentQRData = null;
-        let html5QrCode = null;
-        let scanHistory = [];
-        let librariesLoaded = {
-            qrcode: false,
-            html5qrcode: false
-        };
-
-        // Initialize application
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Loaded');
-            setTimeout(() => {
-                hideLoadingIndicator();
-                initializeApp();
-            }, 1500);
-        });
-
-        // Initialize the application
-        function initializeApp() {
-            checkLibrariesStatus();
-            setupTabNavigation();
-            loadSubjects();
-            loadSavedQRCode();
-            loadScanHistory();
-            setupFormSubmission();
-        }
-
-        // Check libraries status with timeout
-        function checkLibrariesStatus() {
-            const statusDiv = document.getElementById('libraryStatus');
-            
-            // Wait for libraries to load
-            setTimeout(() => {
-                const qrCodeLoaded = typeof QRious !== 'undefined';
-                const html5QrCodeLoaded = typeof Html5Qrcode !== 'undefined';
-                
-                librariesLoaded.qrcode = qrCodeLoaded;
-                librariesLoaded.html5qrcode = html5QrCodeLoaded;
-                
-                console.log('QRious library loaded:', qrCodeLoaded);
-                console.log('Html5Qrcode library loaded:', html5QrCodeLoaded);
-                
-                updateLibraryStatus(statusDiv, qrCodeLoaded, html5QrCodeLoaded);
-            }, 3000);
-        }
-
-        function updateLibraryStatus(statusDiv, qrCodeLoaded, html5QrCodeLoaded) {
-            if (qrCodeLoaded && html5QrCodeLoaded) {
-                statusDiv.innerHTML = `
-                    <ion-icon name="checkmark-circle-outline" class="status-ok"></ion-icon>
-                    <span>ระบบพร้อมใช้งานเต็มรูปแบบ!</span>
-                `;
-                statusDiv.className = 'library-status status-ok';
-                showMessage('ระบบโหลดเสร็จสิ้น - พร้อมใช้งาน!', 'success');
-            } else if (qrCodeLoaded && !html5QrCodeLoaded) {
-                statusDiv.innerHTML = `
-                    <ion-icon name="warning-outline" class="status-warning"></ion-icon>
-                    <span>สามารถสร้าง QR Code ได้ แต่ไม่สามารถสแกนได้</span>
-                `;
-                statusDiv.className = 'library-status status-warning';
-                showMessage('ระบบทำงานบางส่วน - สามารถสร้าง QR Code ได้', 'warning');
-            } else if (!qrCodeLoaded && html5QrCodeLoaded) {
-                statusDiv.innerHTML = `
-                    <ion-icon name="warning-outline" class="status-warning"></ion-icon>
-                    <span>สามารถสแกน QR Code ได้ แต่สร้างแบบ Manual</span>
-                `;
-                statusDiv.className = 'library-status status-warning';
-                showMessage('ระบบทำงานบางส่วน - สามารถสแกนได้', 'warning');
-            } else {
-                statusDiv.innerHTML = `
-                    <ion-icon name="alert-circle-outline" class="status-error"></ion-icon>
-                    <span>ระบบทำงานแบบ Manual - ไม่สามารถสร้างหรือสแกน QR Code อัตโนมัติได้</span>
-                `;
-                statusDiv.className = 'library-status status-error';
-                showMessage('ระบบทำงานแบบ Manual - คุณสามารถคัดลอกข้อมูลเพื่อใช้งานได้', 'warning');
-            }
-        }
-
-        // Show/hide loading indicator
-        function showLoadingIndicator() {
-            const indicator = document.getElementById('loadingIndicator');
-            if (indicator) indicator.classList.add('show');
-        }
-
-        function hideLoadingIndicator() {
-            const indicator = document.getElementById('loadingIndicator');
-            if (indicator) indicator.classList.remove('show');
-        }
-
-        // Show message functions
-        function showMessage(message, type = 'info', targetDiv = 'statusMessage') {
-            const statusDiv = document.getElementById(targetDiv);
-            if (!statusDiv) return;
-            
-            let className = 'info-message';
-            if (type === 'success') className = 'success-message';
-            else if (type === 'error') className = 'error-message';
-            else if (type === 'warning') className = 'warning-message';
-            
-            statusDiv.innerHTML = `<div class="${className}">${message}</div>`;
-            
-            // Auto hide success messages after 5 seconds
-            if (type === 'success' || type === 'info') {
-                setTimeout(() => {
-                    statusDiv.innerHTML = '';
-                }, 5000);
-            }
-        }
-
-        function showError(message, targetDiv = 'statusMessage') {
-            showMessage(message, 'error', targetDiv);
-        }
-
-        function showScanMessage(message, type = 'info') {
-            showMessage(message, type, 'scanStatusMessage');
-        }
-
-        function showScanError(message) {
-            showMessage(message, 'error', 'scanStatusMessage');
-        }
-
-        // Setup form submission
-        function setupFormSubmission() {
-            const form = document.getElementById('qrGeneratorForm');
-            if (!form) return;
-            
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                generateQRFromForm();
-            });
-        }
-
-        // Generate QR Code from form
-        function generateQRFromForm() {
-            const studentName = document.getElementById('studentName').value.trim();
-            const studentId = document.getElementById('studentId').value.trim() || 'ไม่ระบุ';
-            const gradeLevel = document.getElementById('gradeLevel').value;
-            
-            // Validate input
-            if (!studentName) {
-                showError('กรุณากรอกชื่อ-นามสกุล');
-                return;
-            }
-            
-            if (!gradeLevel) {
-                showError('กรุณาเลือกระดับชั้น');
-                return;
-            }
-            
-            // Disable button during generation
-            const generateBtn = document.getElementById('generateBtn');
-            const originalText = generateBtn.innerHTML;
-            generateBtn.innerHTML = '<ion-icon name="sync-outline"></ion-icon> กำลังสร้าง...';
-            generateBtn.disabled = true;
-            
-            // Create QR data with simpler structure for better scanning
-            currentQRData = {
-                name: studentName,
-                id: studentId,
-                grade: gradeLevel,
-                timestamp: new Date().toISOString(),
-                type: 'student_qr',
-                version: '1.1'
-            };
-            
+        // เก็บข้อมูลรหัสที่สร้าง
+        let generatedCodes = {};
+        let currentGeneratedURL = '';
+        
+        // ตรวจสอบว่าไฟล์ studens.html มีอยู่หรือไม่
+        async function checkFileExists(url) {
             try {
-                // Generate QR Code
-                generateQRCode(currentQRData)
-                    .then(() => {
-                        // Save to local storage
-                        localStorage.setItem('studentQRCode', JSON.stringify(currentQRData));
-                        
-                        // Show QR Code section
-                        showQRCodeSection();
-                        
-                        showMessage('สร้าง QR Code เรียบร้อย!', 'success');
-                        
-                        // Scroll to QR section
-                        setTimeout(() => {
-                            document.getElementById('qrCodeSection').scrollIntoView({ 
-                                behavior: 'smooth' 
-                            });
-                        }, 500);
-                    })
-                    .catch(error => {
-                        console.error('Error generating QR Code:', error);
-                        showError('เกิดข้อผิดพลาดในการสร้าง QR Code: ' + error.message);
-                    })
-                    .finally(() => {
-                        // Re-enable button
-                        generateBtn.innerHTML = originalText;
-                        generateBtn.disabled = false;
-                    });
-                    
+                const response = await fetch(url, { method: 'HEAD' });
+                return response.ok;
             } catch (error) {
-                console.error('Error in QR generation process:', error);
-                showError('เกิดข้อผิดพลาด: ' + error.message);
-                generateBtn.innerHTML = originalText;
-                generateBtn.disabled = false;
+                return false;
             }
-        }
-
-        // Generate QR Code with better error correction
-        function generateQRCode(data) {
-            return new Promise((resolve, reject) => {
-                const container = document.getElementById('qrCodeContainer');
-                // Create simpler, more reliable QR data format
-                const qrData = JSON.stringify(data, null, 0); // No indentation for smaller size
-                
-                console.log('Generating QR Code with data:', qrData);
-                console.log('QR Data length:', qrData.length);
-                container.innerHTML = '<div style="padding: 20px;"><ion-icon name="sync-outline" style="font-size: 2rem; animation: spin 1s linear infinite;"></ion-icon><br>กำลังสร้าง QR Code...</div>';
-                
-                // Method 1: Try QRious if available
-                if (librariesLoaded.qrcode && typeof QRious !== 'undefined') {
-                    setTimeout(() => {
-                        try {
-                            container.innerHTML = '';
-                            
-                            // Create canvas element
-                            const canvas = document.createElement('canvas');
-                            container.appendChild(canvas);
-                            
-                            // Generate QR code using QRious with optimized settings
-                            const qr = new QRious({
-                                element: canvas,
-                                value: qrData,
-                                size: 400,  // Larger size for better scanning
-                                foreground: '#000000',
-                                background: '#ffffff',
-                                level: 'M'  // Medium error correction (better balance than H)
-                            });
-                            
-                            // Store the QR data globally for validation
-                            window.generatedQRData = qrData;
-                            
-                            console.log('QR Code generated with QRious successfully');
-                            console.log('Stored QR data for validation:', window.generatedQRData);
-                            resolve();
-                        } catch (error) {
-                            console.error('QRious generation failed:', error);
-                            showFallbackOptions(container, qrData);
-                            resolve();
-                        }
-                    }, 1000);
-                } else {
-                    // Method 2: Show fallback options
-                    setTimeout(() => {
-                        showFallbackOptions(container, qrData);
-                        resolve();
-                    }, 1000);
-                }
-            });
-        }
-
-        // Show fallback QR options
-        function showFallbackOptions(container, qrData) {
-            container.innerHTML = `
-                <div class="qr-fallback">
-                    <div class="warning-message" style="margin-bottom: 20px;">
-                        <ion-icon name="information-circle-outline"></ion-icon>
-                        <strong>ไม่สามารถสร้าง QR Code อัตโนมัติได้</strong><br>
-                        กรุณาใช้วิธีการด้านล่าง:
-                    </div>
-                    
-                    <!-- ASCII QR representation -->
-                    <div class="qr-ascii">
-█████████████████████████████
-█                           █
-█  QR CODE FOR ATTENDANCE   █
-█  ${currentQRData.name}      █
-█  ${currentQRData.grade}     █
-█  ID: ${currentQRData.id}    █
-█                           █
-█████████████████████████████
-                    </div>
-                    
-                    <div style="margin: 20px 0;">
-                        <h4>📱 วิธีสร้าง QR Code:</h4>
-                        <ol style="text-align: left; margin: 10px 0;">
-                            <li>คัดลอกข้อมูลด้านล่าง</li>
-                            <li>เปิดเว็บ qr-code-generator.com</li>
-                            <li>วางข้อมูลและสร้าง QR Code</li>
-                            <li>บันทึก QR Code ไว้ในมือถือ</li>
-                        </ol>
-                    </div>
-                    
-                    <textarea readonly onclick="this.select();" style="width: 100%; height: 100px; margin: 10px 0; padding: 10px; font-family: monospace; font-size: 11px;">${qrData}</textarea>
-                    
-                    <button onclick="copyQRData()" style="width: 100%; margin: 10px 0; background: #28a745; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px;">
-                        <ion-icon name="copy-outline"></ion-icon>
-                        คัดลอกข้อมูล QR Code
-                    </button>
-                    
-                    <button onclick="openQRGenerator()" style="width: 100%; background: #007bff; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px;">
-                        <ion-icon name="open-outline"></ion-icon>
-                        เปิดเว็บสร้าง QR Code
-                    </button>
-                </div>
-            `;
-        }
-
-        // Copy QR data to clipboard
-        function copyQRData() {
-            const textarea = document.querySelector('#qrCodeContainer textarea');
-            if (textarea) {
-                textarea.select();
-                
-                // Try modern clipboard API first
-                if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(textarea.value).then(() => {
-                        showMessage('คัดลอกข้อมูลเรียบร้อย!', 'success');
-                    }).catch(() => {
-                        // Fallback to document.execCommand
-                        document.execCommand('copy');
-                        showMessage('คัดลอกข้อมูลเรียบร้อย!', 'success');
-                    });
-                } else {
-                    // Fallback for older browsers
-                    document.execCommand('copy');
-                    showMessage('คัดลอกข้อมูลเรียบร้อย!', 'success');
-                }
-            }
-        }
-
-        // Open QR generator website
-        function openQRGenerator() {
-            const textarea = document.querySelector('#qrCodeContainer textarea');
-            if (textarea) {
-                const qrData = encodeURIComponent(textarea.value);
-                const url = `https://www.qr-code-generator.com/?data=${qrData}`;
-                window.open(url, '_blank');
-            }
-        }
-
-        // Show QR Code section
-        function showQRCodeSection() {
-            const section = document.getElementById('qrCodeSection');
-            section.style.display = 'block';
-            
-            // Display student info
-            document.getElementById('displayName').textContent = currentQRData.name;
-            document.getElementById('displayId').textContent = currentQRData.id;
-            document.getElementById('displayGrade').textContent = currentQRData.grade;
-            document.getElementById('displayDate').textContent = new Date(currentQRData.timestamp).toLocaleString('th-TH');
-        }
-
-        // Tab Navigation
-        function setupTabNavigation() {
-            const tabBtns = document.querySelectorAll('.tab-btn');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const targetTab = this.dataset.tab;
-                    
-                    // Update active states
-                    tabBtns.forEach(b => b.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-                    
-                    this.classList.add('active');
-                    const targetContent = document.getElementById(targetTab + 'Tab');
-                    if (targetContent) {
-                        targetContent.classList.add('active');
-                    }
-                    
-                    // Stop scanning if switching away from scan tab
-                    if (targetTab !== 'scan' && html5QrCode) {
-                        stopScanning();
-                    }
-                });
-            });
-        }
-
-        // Load subjects
-        function loadSubjects() {
-            try {
-                let savedData = JSON.parse(localStorage.getItem('studentAttendanceData') || '{}');
-                
-                // Create sample data if none exists
-                if (!savedData.subjects || savedData.subjects.length === 0) {
-                    savedData = {
-                        subjects: [
-                            { id: 1, code: 'TH101', name: 'ภาษาไทย' },
-                            { id: 2, code: 'EN102', name: 'ภาษาอังกฤษ' },
-                            { id: 3, code: 'MA103', name: 'คณิตศาสตร์' },
-                            { id: 4, code: 'SC104', name: 'วิทยาศาสตร์' },
-                            { id: 5, code: 'CS105', name: 'คอมพิวเตอร์' },
-                            { id: 6, code: 'PE106', name: 'พลศึกษา' },
-                            { id: 7, code: 'AR107', name: 'ศิลปะ' },
-                            { id: 8, code: 'MU108', name: 'ดนตรี' }
-                        ],
-                        gradeData: {}
-                    };
-                    localStorage.setItem('studentAttendanceData', JSON.stringify(savedData));
-                }
-                
-                const subjects = savedData.subjects || [];
-                const subjectSelect = document.getElementById('scanSubject');
-                if (subjectSelect) {
-                    subjectSelect.innerHTML = '<option value="">-- เลือกรายวิชา --</option>';
-                    
-                    subjects.forEach(subject => {
-                        const option = document.createElement('option');
-                        option.value = subject.id;
-                        option.textContent = `${subject.code} - ${subject.name}`;
-                        option.dataset.code = subject.code;
-                        option.dataset.name = subject.name;
-                        subjectSelect.appendChild(option);
-                    });
-                }
-                
-                console.log('Loaded subjects:', subjects);
-            } catch (error) {
-                console.error('Error loading subjects:', error);
-            }
-        }
-
-        // Load saved QR Code data
-        function loadSavedQRCode() {
-            const saved = localStorage.getItem('studentQRCode');
-            if (saved) {
-                try {
-                    const savedData = JSON.parse(saved);
-                    const nameInput = document.getElementById('studentName');
-                    const idInput = document.getElementById('studentId');
-                    const gradeSelect = document.getElementById('gradeLevel');
-                    
-                    if (nameInput && savedData.name) nameInput.value = savedData.name;
-                    if (idInput && savedData.id !== 'ไม่ระบุ') idInput.value = savedData.id;
-                    if (gradeSelect && savedData.grade) gradeSelect.value = savedData.grade;
-                    
-                    console.log('Loaded saved QR Code data');
-                } catch (error) {
-                    console.error('Error loading saved QR Code:', error);
-                }
-            }
-        }
-
-        // Load scan history
-        function loadScanHistory() {
-            const saved = localStorage.getItem('scanHistory');
-            if (saved) {
-                try {
-                    scanHistory = JSON.parse(saved);
-                    updateRecentAttendance();
-                } catch (error) {
-                    console.error('Error loading scan history:', error);
-                }
-            }
-        }
-
-        // Update recent attendance display
-        function updateRecentAttendance() {
-            const recentDiv = document.getElementById('recentAttendance');
-            const listDiv = document.getElementById('attendanceList');
-            
-            if (scanHistory.length > 0 && recentDiv && listDiv) {
-                recentDiv.style.display = 'block';
-                listDiv.innerHTML = '';
-                
-                scanHistory.slice(0, 10).forEach(record => {
-                    const item = document.createElement('div');
-                    item.className = 'attendance-item';
-                    const statusIcon = record.status === 'present' ? '✅' : '⚠️';
-                    const statusText = record.status === 'present' ? 'เข้าเรียน' : 'มาสาย';
-                    
-                    item.innerHTML = `
-                        <p><strong>${record.studentName}</strong> (${record.grade})</p>
-                        <p>รหัส: ${record.studentId}</p>
-                        <p>${record.subject}</p>
-                        <p>สถานะ: ${statusIcon} ${statusText} - ${record.time}</p>
-                    `;
-                    listDiv.appendChild(item);
-                });
-            }
-        }
-
-        // Action button functions
-        function downloadQRCode() {
-            const canvas = document.querySelector('#qrCodeContainer canvas');
-            const img = document.querySelector('#qrCodeContainer img');
-            
-            if (canvas) {
-                try {
-                    const link = document.createElement('a');
-                    link.download = `qrcode_${currentQRData.name.replace(/\s+/g, '_')}.png`;
-                    link.href = canvas.toDataURL('image/png');
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    showMessage('ดาวน์โหลด QR Code เรียบร้อย!', 'success');
-                } catch (error) {
-                    showError('ไม่สามารถดาวน์โหลดได้ กรุณาใช้วิธีอื่น');
-                }
-            } else if (img) {
-                try {
-                    const link = document.createElement('a');
-                    link.download = `qrcode_${currentQRData.name.replace(/\s+/g, '_')}.png`;
-                    link.href = img.src;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    showMessage('ดาวน์โหลด QR Code เรียบร้อย!', 'success');
-                } catch (error) {
-                    showError('ไม่สามารถดาวน์โหลดได้ กรุณาใช้วิธีอื่น');
-                }
-            } else {
-                showError('ไม่พบ QR Code ที่จะดาวน์โหลด กรุณาคัดลอกข้อมูลแทน');
-            }
-        }
-
-        function saveToDevice() {
-            if (currentQRData) {
-                localStorage.setItem('studentQRCode', JSON.stringify(currentQRData));
-                showMessage('บันทึก QR Code เรียบร้อย!', 'success');
-            } else {
-                showError('กรุณาสร้าง QR Code ก่อนบันทึก');
-            }
-        }
-
-        function generateNewQR() {
-            document.getElementById('qrCodeSection').style.display = 'none';
-            document.getElementById('qrGeneratorForm').reset();
-            currentQRData = null;
-            window.generatedQRData = null; // Clear stored QR data
-            const statusDiv = document.getElementById('statusMessage');
-            if (statusDiv) statusDiv.innerHTML = '';
-            
-            // Scroll back to form
-            document.getElementById('qrGeneratorForm').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // Test QR Code functionality
-        function testQRData() {
-            if (!currentQRData) {
-                showError('กรุณาสร้าง QR Code ก่อนทดสอบ');
-                return;
-            }
-            
-            const testData = JSON.stringify(currentQRData);
-            console.log('Testing QR Data:');
-            console.log('Original data:', currentQRData);
-            console.log('JSON string:', testData);
-            console.log('String length:', testData.length);
-            
-            try {
-                // Test parsing
-                const parsedData = JSON.parse(testData);
-                console.log('Parse test successful:', parsedData);
-                
-                // Test validation
-                const hasValidName = parsedData.name && parsedData.name.trim().length > 0;
-                const hasValidGrade = parsedData.grade && parsedData.grade.trim().length > 0;
-                const isStudentQR = parsedData.type === 'student_qr';
-                
-                if (hasValidName && hasValidGrade && isStudentQR) {
-                    showMessage('QR Code ทดสอบผ่าน ✅ สามารถใช้งานได้', 'success');
-                } else {
-                    showError('QR Code ทดสอบไม่ผ่าน: ข้อมูลไม่ครบถ้วน');
-                }
-                
-            } catch (error) {
-                console.error('QR Test failed:', error);
-                showError('QR Code ทดสอบไม่ผ่าน: ' + error.message);
-            }
-        }
-
-        // QR Code Scanning functions
-        function startScanning() {
-            const selectedSubject = document.getElementById('scanSubject').value;
-            if (!selectedSubject) {
-                showScanError('กรุณาเลือกรายวิชาก่อนสแกน');
-                return;
-            }
-
-            if (!librariesLoaded.html5qrcode || typeof Html5Qrcode === 'undefined') {
-                showScanError('ไม่สามารถใช้งาน Scanner ได้ กรุณาใช้เบราว์เซอร์อื่นหรือรีเฟรชหน้าเว็บ');
-                return;
-            }
-
-            document.getElementById('qrScanner').style.display = 'block';
-            document.getElementById('startScanBtn').style.display = 'none';
-            document.getElementById('fileUploadBtn').style.display = 'none';
-            document.getElementById('stopScanBtn').style.display = 'inline-flex';
-            document.getElementById('scanResult').style.display = 'none';
-
-            // Clear any previous messages
-            document.getElementById('scanStatusMessage').innerHTML = '';
-
-            try {
-                html5QrCode = new Html5Qrcode("reader");
-                
-                const config = { 
-                    fps: 10, 
-                    qrbox: { width: 300, height: 300 },
-                    aspectRatio: 1.0,
-                    disableFlip: false,
-                    rememberLastUsedCamera: true
-                };
-
-                showScanMessage('กำลังเปิดกล้อง...', 'info');
-
-                html5QrCode.start(
-                    { facingMode: "environment" },
-                    config,
-                    onScanSuccess,
-                    onScanError
-                ).catch(err => {
-                    console.error('Error starting camera scanner:', err);
-                    showScanError('ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตการใช้งานกล้องหรือลองใช้วิธีอัปโหลดรูปแทน');
-                    stopScanning();
-                });
-            } catch (error) {
-                console.error('Error initializing scanner:', error);
-                showScanError('เกิดข้อผิดพลาดในการเริ่มสแกน: ' + error.message);
-                stopScanning();
-            }
-        }
-
-        // Upload QR image file
-        function uploadQRImage() {
-            const selectedSubject = document.getElementById('scanSubject').value;
-            if (!selectedSubject) {
-                showScanError('กรุณาเลือกรายวิชาก่อนอัปโหลดรูป');
-                return;
-            }
-
-            if (!librariesLoaded.html5qrcode || typeof Html5Qrcode === 'undefined') {
-                showScanError('ไม่สามารถใช้งานการสแกนได้ กรุณาใช้เบราว์เซอร์อื่นหรือรีเฟรชหน้าเว็บ');
-                return;
-            }
-
-            document.getElementById('fileInput').click();
-        }
-
-        // Handle file upload
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            // Check file type
-            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
-            if (!allowedTypes.includes(file.type)) {
-                showScanError('รองรับเฉพาะไฟล์ภาพประเภท: JPG, PNG, GIF, BMP, WebP');
-                return;
-            }
-
-            // Check file size (max 10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                showScanError('ขนาดไฟล์ใหญ่เกินไป กรุณาใช้ไฟล์ที่เล็กกว่า 10MB');
-                return;
-            }
-
-            showScanMessage('กำลังประมวลผลรูป QR Code...', 'info');
-
-            try {
-                // Use Html5Qrcode to scan from file
-                const html5QrCodeScanner = new Html5Qrcode("reader");
-                
-                html5QrCodeScanner.scanFile(file, true)
-                    .then(decodedText => {
-                        console.log('QR Code scanned from file successfully');
-                        console.log('Raw decoded text:', decodedText);
-                        console.log('Text length:', decodedText.length);
-                        console.log('First 100 chars:', decodedText.substring(0, 100));
-                        
-                        onScanSuccess(decodedText);
-                        // Clear the file input
-                        event.target.value = '';
-                    })
-                    .catch(err => {
-                        console.error('Error scanning file:', err);
-                        
-                        // Provide more detailed error information
-                        let errorMessage = 'ไม่พบ QR Code ในรูปภาพ หรือ QR Code ไม่ชัดเจน';
-                        
-                        if (err.message && err.message.includes('QR code parse error')) {
-                            errorMessage = 'พบ QR Code แต่ไม่สามารถอ่านข้อมูลได้ กรุณาใช้รูป QR Code ที่ชัดเจนกว่านี้';
-                        } else if (err.message && err.message.includes('Unable to detect QR code')) {
-                            errorMessage = 'ไม่พบ QR Code ในรูปภาพ กรุณาตรวจสอบว่ารูปมี QR Code อยู่และชัดเจน';
-                        }
-                        
-                        showScanError(errorMessage + ' (รายละเอียดข้อผิดพลาด: ' + err.message + ')');
-                        
-                        // Clear the file input
-                        event.target.value = '';
-                    });
-                    
-            } catch (error) {
-                console.error('Error in file scanning:', error);
-                showScanError('เกิดข้อผิดพลาดในการสแกนไฟล์: ' + error.message);
-                // Clear the file input
-                event.target.value = '';
-            }
-        }
-
-        function stopScanning() {
-            if (html5QrCode) {
-                if (html5QrCode.isScanning) {
-                    html5QrCode.stop().then(() => {
-                        resetScanUI();
-                        console.log('Scanner stopped successfully');
-                    }).catch(err => {
-                        console.error('Error stopping scanner:', err);
-                        resetScanUI();
-                    });
-                } else {
-                    resetScanUI();
-                }
-            } else {
-                resetScanUI();
-            }
-        }
-
-        function resetScanUI() {
-            document.getElementById('qrScanner').style.display = 'none';
-            document.getElementById('startScanBtn').style.display = 'inline-flex';
-            document.getElementById('fileUploadBtn').style.display = 'inline-flex';
-            document.getElementById('stopScanBtn').style.display = 'none';
-        }
-
-        function onScanSuccess(decodedText, decodedResult) {
-            console.log('QR Code detected:', decodedText);
-            console.log('QR Code length:', decodedText.length);
-            
-            try {
-                // Try to parse as JSON
-                let qrData;
-                try {
-                    qrData = JSON.parse(decodedText);
-                    console.log('Successfully parsed QR data:', qrData);
-                } catch (parseError) {
-                    console.error('JSON parse error:', parseError);
-                    console.log('Raw QR text:', decodedText);
-                    
-                    // Try to fix common JSON parsing issues
-                    let cleanedText = decodedText.trim();
-                    
-                    // Remove any null characters or invisible characters
-                    cleanedText = cleanedText.replace(/\0/g, '').replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
-                    
-                    // Try parsing the cleaned text
-                    try {
-                        qrData = JSON.parse(cleanedText);
-                        console.log('Successfully parsed cleaned QR data:', qrData);
-                    } catch (secondParseError) {
-                        console.error('Second parse attempt failed:', secondParseError);
-                        
-                        // If we have stored QR data from generation, compare with it
-                        if (window.generatedQRData) {
-                            console.log('Comparing with generated QR data...');
-                            console.log('Generated:', window.generatedQRData);
-                            console.log('Scanned:', decodedText);
-                            
-                            // Check if the scanned text contains the essential data
-                            if (decodedText.includes('"type":"student_qr"') || 
-                                decodedText.includes('student_qr')) {
-                                
-                                // Try to extract data manually
-                                try {
-                                    // Use regex to extract key information
-                                    const nameMatch = decodedText.match(/"name":"([^"]+)"/);
-                                    const gradeMatch = decodedText.match(/"grade":"([^"]+)"/);
-                                    const idMatch = decodedText.match(/"id":"([^"]+)"/);
-                                    const timestampMatch = decodedText.match(/"timestamp":"([^"]+)"/);
-                                    
-                                    if (nameMatch && gradeMatch) {
-                                        qrData = {
-                                            name: nameMatch[1],
-                                            id: idMatch ? idMatch[1] : 'ไม่ระบุ',
-                                            grade: gradeMatch[1],
-                                            timestamp: timestampMatch ? timestampMatch[1] : new Date().toISOString(),
-                                            type: 'student_qr',
-                                            version: '1.1'
-                                        };
-                                        console.log('Manually extracted QR data:', qrData);
-                                    } else {
-                                        throw new Error('ไม่สามารถอ่านข้อมูลจาก QR Code ได้');
-                                    }
-                                } catch (extractError) {
-                                    console.error('Manual extraction failed:', extractError);
-                                    throw new Error('QR Code format ไม่ถูกต้อง กรุณาใช้ QR Code ที่สร้างจากระบบนี้');
-                                }
-                            } else {
-                                throw new Error('QR Code ไม่ใช่รหัสนักเรียนที่ถูกต้อง');
-                            }
-                        } else {
-                            throw new Error('QR Code format ไม่ถูกต้อง กรุณาใช้ QR Code ที่สร้างจากระบบนี้');
-                        }
-                    }
-                }
-                
-                // Validate QR data structure with more flexible checking
-                if (!qrData || typeof qrData !== 'object') {
-                    throw new Error('QR Code ไม่ใช่รูปแบบที่ถูกต้อง');
-                }
-
-                // Check required fields with flexible validation
-                const hasValidName = qrData.name && qrData.name.trim().length > 0;
-                const hasValidGrade = qrData.grade && qrData.grade.trim().length > 0;
-                const isStudentQR = qrData.type === 'student_qr' || 
-                                   (typeof qrData.type === 'undefined' && hasValidName && hasValidGrade);
-
-                if (!hasValidName || !hasValidGrade || !isStudentQR) {
-                    console.log('QR Data validation failed:', {
-                        hasValidName,
-                        hasValidGrade,
-                        isStudentQR,
-                        qrData
-                    });
-                    throw new Error('QR Code ไม่ใช่รหัสนักเรียนที่ถูกต้อง กรุณาใช้ QR Code ที่สร้างจากระบบนี้');
-                }
-
-                // Ensure required fields have default values
-                if (!qrData.id || qrData.id.trim() === '') {
-                    qrData.id = 'ไม่ระบุ';
-                }
-                if (!qrData.type) {
-                    qrData.type = 'student_qr';
-                }
-                if (!qrData.timestamp) {
-                    qrData.timestamp = new Date().toISOString();
-                }
-
-                // Get selected subject information
-                const subjectSelect = document.getElementById('scanSubject');
-                const selectedOption = subjectSelect.options[subjectSelect.selectedIndex];
-                const subjectInfo = {
-                    id: selectedOption.value,
-                    code: selectedOption.dataset.code,
-                    name: selectedOption.dataset.name
-                };
-
-                console.log('Valid QR Code found:', qrData);
-                console.log('Subject info:', subjectInfo);
-
-                // Process attendance
-                checkAttendance(qrData, subjectInfo);
-                
-                // Stop scanning after successful read
-                if (html5QrCode && html5QrCode.isScanning) {
-                    stopScanning();
-                }
-                
-            } catch (error) {
-                console.error('Error processing QR Code:', error);
-                showScanError(error.message || 'QR Code ไม่ถูกต้อง กรุณาใช้ QR Code ที่สร้างจากระบบนี้');
-            }
-        }
-
-        function onScanError(errorMessage) {
-            // Don't show errors for continuous scanning - only log them
-            // This is called continuously when no QR code is detected
-            // console.log('Scan error (normal):', errorMessage);
-        }
-
-        function checkAttendance(studentData, subjectInfo) {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('th-TH', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            
-            // Determine attendance status based on time
-            // Assuming class starts at 8:00 AM, late after 8:15 AM
-            const hour = now.getHours();
-            const minute = now.getMinutes();
-            let status = 'present';
-            
-            if (hour > 8 || (hour === 8 && minute > 15)) {
-                status = 'late';
-            }
-
-            // Create attendance record
-            const attendanceRecord = {
-                studentName: studentData.name,
-                studentId: studentData.id || 'ไม่ระบุ',
-                grade: studentData.grade,
-                subject: `${subjectInfo.code} - ${subjectInfo.name}`,
-                subjectId: subjectInfo.id,
-                status: status,
-                time: timeString,
-                timestamp: now.toISOString(),
-                date: now.toISOString().split('T')[0]
-            };
-
-            console.log('Attendance record created:', attendanceRecord);
-
-            // Save to main attendance system
-            saveAttendanceToMainSystem(attendanceRecord);
-            
-            // Save to scan history
-            saveScanHistory(attendanceRecord);
-            
-            // Display result
-            displayScanResult(attendanceRecord);
-        }
-
-        function saveAttendanceToMainSystem(record) {
-            try {
-                let savedData = JSON.parse(localStorage.getItem('studentAttendanceData') || '{}');
-                
-                if (!savedData.gradeData) {
-                    savedData.gradeData = {};
-                }
-                
-                if (!savedData.gradeData[record.grade]) {
-                    savedData.gradeData[record.grade] = [];
-                }
-
-                // Check if student already checked in for this subject today
-                const existingRecordIndex = savedData.gradeData[record.grade].findIndex(s => 
-                    s.name === record.studentName && 
-                    s.subjectId === parseInt(record.subjectId) &&
-                    s.date === record.date
-                );
-
-                if (existingRecordIndex === -1) {
-                    // Create new record
-                    const newStudent = {
-                        id: Date.now(),
-                        name: record.studentName,
-                        studentId: record.studentId,
-                        grade: record.grade,
-                        status: record.status,
-                        statusTime: record.time,
-                        subjectId: parseInt(record.subjectId),
-                        date: record.date,
-                        timestamp: record.timestamp
-                    };
-                    
-                    savedData.gradeData[record.grade].push(newStudent);
-                    localStorage.setItem('studentAttendanceData', JSON.stringify(savedData));
-                    console.log('New attendance record saved:', newStudent);
-                } else {
-                    // Update existing record if new status is worse (late vs present)
-                    const existingRecord = savedData.gradeData[record.grade][existingRecordIndex];
-                    if (existingRecord.status === 'present' && record.status === 'late') {
-                        existingRecord.status = record.status;
-                        existingRecord.statusTime = record.time;
-                        existingRecord.timestamp = record.timestamp;
-                        localStorage.setItem('studentAttendanceData', JSON.stringify(savedData));
-                        console.log('Updated attendance record to late:', existingRecord);
-                    } else {
-                        console.log('Student already checked in with same or worse status');
-                    }
-                }
-            } catch (error) {
-                console.error('Error saving to main system:', error);
-            }
-        }
-
-        function saveScanHistory(record) {
-            try {
-                scanHistory.unshift(record);
-                if (scanHistory.length > 20) {
-                    scanHistory = scanHistory.slice(0, 20);
-                }
-                localStorage.setItem('scanHistory', JSON.stringify(scanHistory));
-                updateRecentAttendance();
-                console.log('Scan history updated');
-            } catch (error) {
-                console.error('Error saving scan history:', error);
-            }
-        }
-
-        function displayScanResult(record) {
-            document.getElementById('scanResult').style.display = 'block';
-            
-            const statusText = record.status === 'present' ? 'เช็คชื่อสำเร็จ ✅' : 'เช็คชื่อสำเร็จ (มาสาย) ⚠️';
-            const statusColor = record.status === 'present' ? '#28a745' : '#ffc107';
-            
-            document.getElementById('resultStatus').textContent = statusText;
-            document.getElementById('resultStatus').style.color = statusColor;
-            document.getElementById('resultName').textContent = record.studentName;
-            document.getElementById('resultStudentId').textContent = record.studentId;
-            document.getElementById('resultGrade').textContent = record.grade;
-            document.getElementById('resultSubject').textContent = record.subject;
-            document.getElementById('resultTime').textContent = record.time;
-            
-            // Clear scan message and show success
-            document.getElementById('scanStatusMessage').innerHTML = '';
-            showScanMessage(`เช็คชื่อเรียบร้อย! ${record.studentName} (${record.grade})`, 'success');
-            
-            // Scroll to result
-            setTimeout(() => {
-                document.getElementById('scanResult').scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-        }
-
-        function scanAgain() {
-            document.getElementById('scanResult').style.display = 'none';
-            document.getElementById('scanStatusMessage').innerHTML = '';
-            // Don't automatically start camera again, let user choose
         }
         
+        // โหลดข้อมูลรหัส
+        function loadCodes() {
+            if (!generatedCodes) {
+                generatedCodes = {};
+            }
+            updateStats();
+        }
+        
+        // บันทึกข้อมูลรหัส
+        function saveCodes() {
+            updateStats();
+        }
+        
+        // อัปเดตสถิติ
+        function updateStats() {
+            const total = Object.keys(generatedCodes).length;
+            const active = Object.values(generatedCodes).filter(code => !code.used).length;
+            
+            document.getElementById('totalCodes').textContent = total;
+            document.getElementById('activeCodes').textContent = active;
+        }
+        
+        // สร้างรหัส 6 หลัก
+        function generateCode() {
+            return Math.random().toString().substr(2, 6);
+        }
+        
+        // สร้าง URL พารามิเตอร์ที่ใช้งานได้กับ GitHub Pages
+        function createAttendanceURL(data) {
+            // ใช้ relative path ที่ปลอดภัยสำหรับ GitHub Pages
+            const currentPath = window.location.pathname;
+            const basePath = currentPath.substring(0, currentPath.lastIndexOf('/')) || '';
+            const baseURL = window.location.origin + basePath + '/studens.html';
+            
+            const params = new URLSearchParams({
+                auto: 'true',
+                code: data.code,
+                name: data.name,
+                grade: data.grade,
+                subjectCode: data.subjectCode,
+                subjectName: data.subjectName
+            });
+            
+            return baseURL + '?' + params.toString();
+        }
+        
+        // แสดง toast notification
+        function showToast(message, type = 'success', icon = 'checkmark-circle-outline') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const iconEl = document.createElement('ion-icon');
+            iconEl.setAttribute('name', icon);
+            
+            const messageEl = document.createElement('div');
+            messageEl.textContent = message;
+            
+            toast.appendChild(iconEl);
+            toast.appendChild(messageEl);
+            document.body.appendChild(toast);
+            
+            // Animate in
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+            
+            // Remove after 4 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 400);
+            }, 4000);
+        }
+        
+        // คัดลอก URL
+        function copyURL() {
+            const urlText = document.getElementById('generatedURL').textContent;
+            navigator.clipboard.writeText(urlText).then(() => {
+                showToast('คัดลอก URL สำเร็จ!', 'success', 'copy-outline');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = urlText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('คัดลอก URL สำเร็จ!', 'success', 'copy-outline');
+            });
+        }
+        
+        // จัดการฟอร์มสร้างรหัส
+        document.getElementById('generateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.querySelector('#generateForm button[type="submit"]');
+            const btnText = document.getElementById('generateBtnText');
+            const originalText = btnText.innerHTML;
+            
+            // แสดง loading
+            btnText.innerHTML = '<div class="loading-spinner"></div>กำลังสร้างรหัส...';
+            submitBtn.disabled = true;
+            
+            setTimeout(async () => {
+                const name = document.getElementById('studentName').value.trim();
+                const grade = document.getElementById('gradeLevel').value;
+                const subjectCode = document.getElementById('subjectCode').value.trim();
+                const subjectName = document.getElementById('subjectName').value.trim();
+                
+                if (!name || !grade || !subjectCode || !subjectName) {
+                    showToast('กรุณากรอกข้อมูลให้ครบทุกช่อง', 'error', 'alert-circle-outline');
+                    btnText.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    return;
+                }
+                
+                // สร้างรหัสใหม่ (ตรวจสอบไม่ให้ซ้ำ)
+                let code;
+                do {
+                    code = generateCode();
+                } while (generatedCodes[code]);
+                
+                // เก็บข้อมูลรหัส
+                const codeData = {
+                    code: code,
+                    name: name,
+                    grade: grade,
+                    subjectCode: subjectCode,
+                    subjectName: subjectName,
+                    createdAt: new Date().toISOString(),
+                    used: false
+                };
+                
+                generatedCodes[code] = codeData;
+                saveCodes();
+                
+                // สร้าง URL
+                const attendanceURL = createAttendanceURL(codeData);
+                currentGeneratedURL = attendanceURL;
+                
+                // ตรวจสอบว่าไฟล์ studens.html มีอยู่หรือไม่
+                const fileExists = await checkFileExists(attendanceURL);
+                
+                // แสดงผลลัพธ์
+                document.getElementById('codeDisplay').textContent = code;
+                document.getElementById('nameDisplay').textContent = name;
+                document.getElementById('gradeDisplay').textContent = grade;
+                document.getElementById('subjectDisplay').textContent = `${subjectCode} - ${subjectName}`;
+                
+                // แสดงหรือซ่อนคำเตือนไฟล์
+                const fileWarning = document.getElementById('fileWarning');
+                const generatedURLDiv = document.getElementById('generatedURL');
+                
+                if (!fileExists) {
+                    fileWarning.classList.remove('hidden');
+                    generatedURLDiv.textContent = attendanceURL;
+                } else {
+                    fileWarning.classList.add('hidden');
+                }
+                
+                // แสดงส่วนผลลัพธ์และซ่อนฟอร์ม
+                document.getElementById('codeGenerator').style.display = 'none';
+                document.getElementById('resultSection').classList.remove('hidden');
+                
+                // Scroll to result
+                document.getElementById('resultSection').scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+                
+                // Reset button
+                btnText.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                if (fileExists) {
+                    showToast('สร้างรหัสเข้าเรียนสำเร็จ!', 'success', 'checkmark-circle-outline');
+                } else {
+                    showToast('สร้างรหัสสำเร็จ แต่ไม่พบไฟล์เป้าหมาย', 'error', 'warning-outline');
+                }
+            }, 1500);
+        });
+        
+        // เปิดหน้าเช็คชื่อทันที
+        async function openAttendancePage() {
+            // สร้าง URL จากข้อมูลที่แสดงอยู่
+            const code = document.getElementById('codeDisplay').textContent;
+            const name = document.getElementById('nameDisplay').textContent;
+            const grade = document.getElementById('gradeDisplay').textContent;
+            const subjectInfo = document.getElementById('subjectDisplay').textContent;
+            const [subjectCode, subjectName] = subjectInfo.split(' - ');
+            
+            const codeData = {
+                code: code,
+                name: name,
+                grade: grade,
+                subjectCode: subjectCode,
+                subjectName: subjectName
+            };
+            
+            const url = createAttendanceURL(codeData);
+            
+            // ตรวจสอบว่าไฟล์มีอยู่หรือไม่
+            const fileExists = await checkFileExists(url);
+            
+            if (fileExists) {
+                window.open(url, '_blank');
+                showToast('เปิดหน้าเช็คชื่อใหม่แล้ว', 'success', 'open-outline');
+            } else {
+                showToast('ไม่พบไฟล์ studens.html กรุณาตรวจสอบไฟล์', 'error', 'alert-circle-outline');
+                // แสดงคำเตือนและ URL
+                document.getElementById('fileWarning').classList.remove('hidden');
+                document.getElementById('generatedURL').textContent = url;
+                currentGeneratedURL = url;
+            }
+        }
+        
+        // รีเซ็ตฟอร์ม
+        function resetForm() {
+            document.getElementById('generateForm').reset();
+            document.getElementById('codeGenerator').style.display = 'block';
+            document.getElementById('resultSection').classList.add('hidden');
+            document.getElementById('fileWarning').classList.add('hidden');
+            
+            // Scroll to form
+            document.getElementById('codeGenerator').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+        
+        // จัดการฟอร์มตรวจสอบรหัส
+        document.getElementById('checkCodeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const inputCode = document.getElementById('inputCode').value.trim();
+            const submitBtn = document.querySelector('#checkCodeForm button[type="submit"]');
+            
+            if (!inputCode) {
+                showToast('กรุณากรอกรหัส', 'error', 'alert-circle-outline');
+                return;
+            }
+            
+            // แสดง loading
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<div class="loading-spinner"></div>กำลังตรวจสอบ...';
+            submitBtn.disabled = true;
+            
+            setTimeout(async () => {
+                // ตรวจสอบรหัส
+                if (generatedCodes[inputCode]) {
+                    const codeData = generatedCodes[inputCode];
+                    
+                    // สร้าง URL และตรวจสอบไฟล์
+                    const attendanceURL = createAttendanceURL(codeData);
+                    const fileExists = await checkFileExists(attendanceURL);
+                    
+                    if (fileExists) {
+                        // ทำเครื่องหมายว่าใช้แล้ว
+                        generatedCodes[inputCode].used = true;
+                        generatedCodes[inputCode].usedAt = new Date().toISOString();
+                        saveCodes();
+                        
+                        // เปิดหน้าเช็คชื่อ
+                        window.open(attendanceURL, '_blank');
+                        
+                        // แสดงข้อความยืนยัน
+                        showToast(`เข้าเช็คชื่อสำเร็จ! ${codeData.name} - ${codeData.grade}`, 'success', 'checkmark-circle-outline');
+                        
+                        // รีเซ็ตช่องกรอกรหัส
+                        document.getElementById('inputCode').value = '';
+                    } else {
+                        showToast('รหัสถูกต้อง แต่ไม่พบไฟล์เป้าหมาย', 'error', 'warning-outline');
+                    }
+                } else {
+                    showToast('รหัสไม่ถูกต้องหรือไม่มีอยู่ในระบบ', 'error', 'close-circle-outline');
+                }
+                
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 1000);
+        });
+        
+        // Auto-format input code (numbers only)
+        document.getElementById('inputCode').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            e.target.value = value;
+        });
+        
+        // โหลดข้อมูลเมื่อเริ่มต้น
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCodes();
+            
+            // Add smooth scroll behavior to all internal links
+            document.documentElement.style.scrollBehavior = 'smooth';
+            
+            // ตรวจสอบ URL parameters สำหรับ auto-redirect
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('auto') === 'true') {
+                // ถ้ามีการ redirect มาจากหน้าอื่น ให้แสดงข้อความ
+                showToast('เข้าสู่ระบบผ่านลิงค์อัตโนมัติ', 'success', 'link-outline');
+            }
+        });
+        
+        // ทำความสะอาดรหัสเก่า (เก็บไว้ 7 วัน)
+        function cleanOldCodes() {
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            
+            Object.keys(generatedCodes).forEach(code => {
+                const codeData = generatedCodes[code];
+                if (codeData && codeData.createdAt) {
+                    const createdDate = new Date(codeData.createdAt);
+                    
+                    if (createdDate < sevenDaysAgo) {
+                        delete generatedCodes[code];
+                    }
+                }
+            });
+            
+            saveCodes();
+        }
+        
+        // ทำความสะอาดรหัสเก่าทุกครั้งที่โหลดหน้า
+        cleanOldCodes();
+        
+        // เพิ่มการจัดการ keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + Enter ในฟอร์มสร้างรหัส
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                if (document.getElementById('codeGenerator').style.display !== 'none') {
+                    document.getElementById('generateForm').dispatchEvent(new Event('submit'));
+                }
+            }
+            
+            // Escape เพื่อรีเซ็ตฟอร์ม
+            if (e.key === 'Escape' && !document.getElementById('resultSection').classList.contains('hidden')) {
+                resetForm();
+            }
+        });
+        
+        // เพิ่มการแสดงสถานะการเชื่อมต่อ
+        window.addEventListener('online', function() {
+            showToast('เชื่อมต่ออินเทอร์เน็ตแล้ว', 'success', 'wifi-outline');
+        });
+        
+        window.addEventListener('offline', function() {
+            showToast('ขาดการเชื่อมต่ออินเทอร์เน็ต', 'error', 'wifi-outline');
+        });
     </script>
 </body>
 </html>
