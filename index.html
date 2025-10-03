@@ -1071,7 +1071,7 @@ body {
     height: 150px;
     border-radius: 50%;
     opacity: 0.03;
-}
+    }
 
 .stat-card.attendance::before {
     background: var(--success-color);
@@ -1307,13 +1307,13 @@ body {
     font-weight: 500;
 }
 
-/* ===== FOOTER ===== */
+/* ===== FOOTER - แก้ไขให้อยู่ตรงกลาง ===== */
 .main-footer {
     background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
     color: var(--text-white);
     margin-top: 4rem;
-    margin-left: -140px;
     position: relative;
+    width: 100%;
 }
 
 .footer-container {
@@ -1327,6 +1327,12 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem;
     margin-bottom: 2rem;
+    text-align: center;
+    justify-items: center;
+}
+
+.footer-section {
+    max-width: 300px;
 }
 
 .footer-section h4 {
@@ -1346,6 +1352,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    align-items: center;
 }
 
 .footer-links a {
@@ -1405,6 +1412,10 @@ body {
     
     .welcome-illustration {
         height: 200px;
+    }
+    
+    .main-footer {
+        margin-left: 0;
     }
 }
 
@@ -1483,8 +1494,9 @@ body {
         padding: 1.5rem;
     }
     
-    .main-footer {
-        margin-left: 0;
+    .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
     }
 }
 
@@ -1631,7 +1643,7 @@ body {
                 </a>
             </li>
             
-            <li class="nav-item" data-tooltip="เข้าเรียน">
+            <li class="nav-item" data-tooltip="สแกน QR Code">
                 <a href="./member.html" class="nav-link" role="button" tabindex="0" aria-label="เข้าเรียน">
                     <ion-icon name="school" class="nav-icon"></ion-icon>
                     <span class="nav-ripple"></span>
@@ -1761,13 +1773,13 @@ body {
             <div class="action-grid">
                 <div class="action-card scan-card">
                     <div class="action-icon">
-                        <ion-icon name="school"></ion-icon>
+                        <ion-icon name="qr-code"></ion-icon>
                     </div>
-                    <h4>เข้าเรียน</h4>
-                    <p>เช็คอินเข้าเรียนด้วย สร้าง ID Code</p>
+                    <h4>สแกน QR Code</h4>
+                    <p>เช็คอินเข้าเรียนด้วย QR Code</p>
                     <a href="./member.html" class="action-btn primary">
-                        <ion-icon name="checkmark-done-circle"></ion-icon>
-                        <span>เริ่มเข้าเรียน</span>
+                        <ion-icon name="camera"></ion-icon>
+                        <span>เริ่มสแกน</span>
                         <div class="btn-ripple"></div>
                     </a>
                 </div>
@@ -2402,8 +2414,5 @@ if (document.readyState === 'loading') {
 console.log('✅ Fixed Navigation System loaded successfully!');
     </script>
 </html>
-
-
-
 
 
