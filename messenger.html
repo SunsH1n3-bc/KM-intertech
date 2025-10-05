@@ -53,7 +53,6 @@
             margin: 0 auto;
         }
 
-        /* Sidebar */
         .sidebar {
             width: 350px;
             background: var(--bg-card);
@@ -221,12 +220,18 @@
             font-weight: 600;
         }
 
-        /* Main Chat Area */
         .chat-main {
             flex: 1;
             display: flex;
             flex-direction: column;
             background: white;
+        }
+
+        #activeChatArea {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            height: 100%;
         }
 
         .chat-header {
@@ -398,7 +403,6 @@
             box-shadow: var(--shadow-lg);
         }
 
-        /* Empty State */
         .empty-chat {
             flex: 1;
             display: flex;
@@ -414,7 +418,6 @@
             opacity: 0.5;
         }
 
-        /* Modals */
         .modal {
             position: fixed;
             top: 0;
@@ -564,27 +567,191 @@
             margin-top: 1rem;
         }
 
+        .floating-chat {
+            position: fixed;
+            bottom: 0;
+            right: 20px;
+            width: 450px;
+            max-height: 700px;
+            background: white;
+            border-radius: 16px 16px 0 0;
+            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.25);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            transition: var(--transition-smooth);
+        }
+
+        .floating-chat.active {
+            display: flex;
+        }
+
+        .floating-chat.minimized {
+            max-height: 60px;
+        }
+
+        .floating-chat-header {
+            padding: 1rem 1.25rem;
+            background: var(--primary-gradient);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .floating-chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+        }
+
+        .floating-chat-avatar {
+            width: 38px;
+            height: 38px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .floating-chat-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .floating-chat-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
+            font-size: 18px;
+        }
+
+        .floating-chat-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(1.05);
+        }
+
+        .floating-chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.25rem;
+            background: #f9fafb;
+            max-height: 550px;
+        }
+
+        .floating-chat.minimized .floating-chat-body,
+        .floating-chat.minimized .floating-chat-footer {
+            display: none;
+        }
+
+        .floating-chat-footer {
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .floating-input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .floating-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid rgba(226, 232, 240, 0.8);
+            border-radius: 24px;
+            font-size: 0.95rem;
+            outline: none;
+            font-family: inherit;
+            transition: var(--transition-smooth);
+        }
+
+        .floating-input:focus {
+            border-color: var(--info-color);
+        }
+
+        .floating-send-btn {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
+            font-size: 18px;
+        }
+
+        .floating-send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+
+        .back-btn {
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%;
                 position: absolute;
                 z-index: 10;
                 height: 100vh;
+                transition: var(--transition-smooth);
             }
 
             .sidebar.hidden {
-                display: none;
+                transform: translateX(-100%);
             }
 
             .chat-main {
                 width: 100%;
+            }
+
+            .floating-chat {
+                width: calc(100% - 20px);
+                right: 10px;
+                max-height: 75vh;
+            }
+
+            .floating-chat-body {
+                max-height: calc(75vh - 140px);
+            }
+
+            .back-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 36px;
+                height: 36px;
+                background: rgba(107, 91, 246, 0.1);
+                border: none;
+                border-radius: 8px;
+                color: var(--info-color);
+                cursor: pointer;
+                margin-right: 0.5rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="chat-container">
-        <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-header">
                 <div class="user-profile">
@@ -614,9 +781,7 @@
                 <input type="text" class="search-input" placeholder="ค้นหา..." id="sidebarSearch">
             </div>
 
-            <div class="chat-list" id="chatList">
-                <!-- Chat items will be inserted here -->
-            </div>
+            <div class="chat-list" id="chatList"></div>
 
             <div style="padding: 1rem; border-top: 1px solid rgba(226, 232, 240, 0.8);">
                 <button class="add-btn" style="width: 100%;" onclick="showNewChatModal()">
@@ -626,7 +791,6 @@
             </div>
         </div>
 
-        <!-- Main Chat Area -->
         <div class="chat-main">
             <div id="emptyChatState" class="empty-chat">
                 <div class="empty-icon">
@@ -636,10 +800,13 @@
                 <p>หรือเริ่มแชทใหม่กับเพื่อนของคุณ</p>
             </div>
 
-            <div id="activeChatArea" style="display: none; flex-direction: column; flex: 1;">
+            <div id="activeChatArea" style="display: none;">
                 <div class="chat-header">
                     <div class="chat-header-left">
-                        <div class="chat-avatar">
+                        <button class="back-btn" onclick="closeChatOnMobile()">
+                            <ion-icon name="arrow-back"></ion-icon>
+                        </button>
+                        <div class="chat-avatar" id="mainChatAvatar">
                             <ion-icon name="person"></ion-icon>
                         </div>
                         <div>
@@ -654,9 +821,7 @@
                     </div>
                 </div>
 
-                <div class="messages-area" id="messagesArea">
-                    <!-- Messages will be inserted here -->
-                </div>
+                <div class="messages-area" id="messagesArea"></div>
 
                 <div class="message-input-container">
                     <div class="message-input-wrapper">
@@ -665,6 +830,7 @@
                             id="messageInput" 
                             placeholder="พิมพ์ข้อความ..."
                             rows="1"
+                            onkeypress="handleEnter(event)"
                         ></textarea>
                         <button class="send-btn" onclick="sendMessage()">
                             <ion-icon name="send"></ion-icon>
@@ -675,7 +841,44 @@
         </div>
     </div>
 
-    <!-- New Chat Modal -->
+    <div class="floating-chat" id="floatingChat">
+        <div class="floating-chat-header" onclick="toggleFloatingChat()">
+            <div class="floating-chat-header-info">
+                <div class="floating-chat-avatar">
+                    <ion-icon name="person"></ion-icon>
+                </div>
+                <div>
+                    <div style="font-weight: 600; font-size: 1rem;" id="floatingChatName">ชื่อผู้ใช้</div>
+                    <div style="font-size: 0.8rem; opacity: 0.9;" id="floatingChatStatus">ออนไลน์</div>
+                </div>
+            </div>
+            <div class="floating-chat-controls">
+                <button class="floating-chat-btn" onclick="event.stopPropagation(); toggleFloatingChat()">
+                    <ion-icon name="remove" id="floatingMinimizeIcon"></ion-icon>
+                    <ion-icon name="add" id="floatingExpandIcon" style="display: none;"></ion-icon>
+                </button>
+                <button class="floating-chat-btn" onclick="event.stopPropagation(); openChatInMainView()">
+                    <ion-icon name="close"></ion-icon>
+                </button>
+            </div>
+        </div>
+        <div class="floating-chat-body" id="floatingMessagesArea"></div>
+        <div class="floating-chat-footer">
+            <div class="floating-input-wrapper">
+                <input 
+                    type="text" 
+                    class="floating-input" 
+                    id="floatingMessageInput" 
+                    placeholder="พิมพ์ข้อความ..."
+                    onkeypress="handleFloatingEnter(event)"
+                >
+                <button class="floating-send-btn" onclick="sendFloatingMessage()">
+                    <ion-icon name="send"></ion-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal" id="newChatModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -691,7 +894,6 @@
         </div>
     </div>
 
-    <!-- Create Group Modal -->
     <div class="modal" id="createGroupModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -703,7 +905,8 @@
             <form onsubmit="createGroup(event)">
                 <div class="form-group">
                     <label class="form-label">ชื่อกลุ่ม</label>
-                    <input type="text" class="form-input" id="groupName" placeholder="ใส่ชื่อกลุ่ม" required>
+                    <input type="text" class="form-input" id="groupName
+                    " placeholder="ใส่ชื่อกลุ่ม" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">เลือกสมาชิก</label>
@@ -715,484 +918,728 @@
     </div>
 
     <script>
-        // Global Variables
-        let currentUser = null;
-        let allUsers = {};
-        let friends = [];
-        let chats = {};
-        let groups = {};
-        let activeChat = null;
-        let currentTab = 'chats';
+let currentUser = null;
+let allUsers = {};
+let friends = [];
+let chats = {};
+let groups = {};
+let activeChat = null;
+let currentTab = 'chats';
+let floatingChatMinimized = false;
+let isFloatingMode = false;
 
-        // Initialize
-        function init() {
-            loadCurrentUser();
-            loadAllUsers();
-            loadFriends();
-            loadChats();
-            loadGroups();
-            renderChatList();
-            setupEventListeners();
+function init() {
+    loadCurrentUser();
+    loadAllUsers();
+    loadFriends();
+    loadChats();
+    loadGroups();
+    renderChatList();
+    setupEventListeners();
+    loadUserAvatar();
+    setupProfileSyncListeners();
+    checkScreenSize();
+}
+
+function checkScreenSize() {
+    handleResize();
+    window.addEventListener('resize', handleResize);
+}
+
+function handleResize() {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile && activeChat) {
+        if (!isFloatingMode) {
+            switchToFloatingMode();
         }
-
-        function loadCurrentUser() {
-            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-            const username = localStorage.getItem('username');
-            
-            if (userData.firstName) {
-                currentUser = {
-                    id: username || userData.studentId,
-                    username: username,
-                    name: `${userData.firstName} ${userData.lastName}`,
-                    role: userData.role,
-                    ...userData
-                };
-            } else {
-                currentUser = {
-                    id: 'guest',
-                    username: 'guest',
-                    name: 'ผู้ใช้ทั่วไป',
-                    role: 'guest'
-                };
-            }
-
-            document.getElementById('currentUserName').textContent = currentUser.name;
-            document.getElementById('currentUserRole').textContent = 
-                currentUser.role === 'teacher' ? 'ครู' : 
-                currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียน';
+    } else {
+        if (isFloatingMode) {
+            switchToNormalMode();
         }
+    }
+}
 
-        function loadAllUsers() {
-            const storedUsers = JSON.parse(localStorage.getItem('userDatabase') || '{}');
-            const defaultUsers = {
-                'student001': {
-                    username: 'student001',
-                    firstName: 'สมชาย',
-                    lastName: 'ใจดี',
-                    role: 'student',
-                    studentId: '63010001'
-                },
-                'teacher001': {
-                    username: 'teacher001',
-                    firstName: 'อาจารย์สมหญิง',
-                    lastName: 'ประเสริฐ',
-                    role: 'teacher',
-                    studentId: 'T001'
-                }
-            };
+function switchToFloatingMode() {
+    isFloatingMode = true;
+    if (activeChat) {
+        document.getElementById('activeChatArea').style.display = 'none';
+        document.getElementById('emptyChatState').style.display = 'none';
+        const floatingChat = document.getElementById('floatingChat');
+        floatingChat.classList.add('active');
+        floatingChat.classList.remove('minimized');
+        floatingChatMinimized = false;
+        document.getElementById('floatingMinimizeIcon').style.display = 'block';
+        document.getElementById('floatingExpandIcon').style.display = 'none';
+        updateFloatingChatInfo();
+        renderFloatingMessages();
+        setTimeout(() => {
+            document.getElementById('floatingMessageInput').focus();
+        }, 100);
+    }
+}
 
-            allUsers = { ...defaultUsers, ...storedUsers };
-        }
+function switchToNormalMode() {
+    isFloatingMode = false;
+    const floatingChat = document.getElementById('floatingChat');
+    floatingChat.classList.remove('active');
+    if (activeChat) {
+        document.getElementById('activeChatArea').style.display = 'flex';
+        renderMessages();
+    } else {
+        document.getElementById('emptyChatState').style.display = 'flex';
+    }
+}
 
-        function loadFriends() {
-            if (!currentUser || !currentUser.id) return;
-            const saved = localStorage.getItem(`friends_${currentUser.id}`);
-            friends = saved ? JSON.parse(saved) : [];
-        }
+function updateFloatingChatInfo() {
+    if (!activeChat) return;
+    document.getElementById('floatingChatName').textContent = activeChat.name;
+    document.getElementById('floatingChatStatus').textContent = 
+        activeChat.members ? `${activeChat.members.length} สมาชิก` : 'ออนไลน์';
+}
 
-        function loadChats() {
-            if (!currentUser || !currentUser.id) return;
-            const saved = localStorage.getItem(`chats_${currentUser.id}`);
-            chats = saved ? JSON.parse(saved) : {};
-        }
-
-        function loadGroups() {
-            if (!currentUser || !currentUser.id) return;
-            const saved = localStorage.getItem(`groups_${currentUser.id}`);
-            groups = saved ? JSON.parse(saved) : {};
-        }
-
-        function saveChats() {
-            if (!currentUser || !currentUser.id) return;
-            localStorage.setItem(`chats_${currentUser.id}`, JSON.stringify(chats));
-        }
-
-        function saveGroups() {
-            if (!currentUser || !currentUser.id) return;
-            localStorage.setItem(`groups_${currentUser.id}`, JSON.stringify(groups));
-        }
-
-        function setupEventListeners() {
-            document.getElementById('sidebarSearch').addEventListener('input', renderChatList);
-            document.getElementById('userSearchInput').addEventListener('input', searchUsers);
-            document.getElementById('messageInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-        }
-
-        function switchTab(tab) {
-            currentTab = tab;
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.closest('.tab-btn').classList.add('active');
-
-            if (tab === 'groups') {
-                const addBtn = document.querySelector('.sidebar > div:last-child button');
-                addBtn.innerHTML = '<ion-icon name="add-circle" style="vertical-align: middle;"></ion-icon> สร้างกลุ่มใหม่';
-                addBtn.onclick = showCreateGroupModal;
-            } else {
-                const addBtn = document.querySelector('.sidebar > div:last-child button');
-                addBtn.innerHTML = '<ion-icon name="add-circle" style="vertical-align: middle;"></ion-icon> เริ่มแชทใหม่';
-                addBtn.onclick = showNewChatModal;
-            }
-
-            renderChatList();
-        }
-
-        function renderChatList() {
-            const container = document.getElementById('chatList');
-            const searchTerm = document.getElementById('sidebarSearch').value.toLowerCase();
-            let items = [];
-
-            if (currentTab === 'chats') {
-                items = Object.keys(chats).map(chatId => ({
-                    id: chatId,
-                    ...chats[chatId],
-                    type: 'chat'
-                }));
-            } else if (currentTab === 'friends') {
-                items = friends.map(friend => ({
-                    id: friend.username,
-                    name: `${friend.firstName} ${friend.lastName}`,
-                    role: friend.role,
-                    lastMessage: '',
-                    timestamp: 0,
-                    type: 'friend'
-                }));
-            } else if (currentTab === 'groups') {
-                items = Object.keys(groups).map(groupId => ({
-                    id: groupId,
-                    ...groups[groupId],
-                    type: 'group'
-                }));
-            }
-
-            if (searchTerm) {
-                items = items.filter(item => 
-                    item.name?.toLowerCase().includes(searchTerm)
-                );
-            }
-
-            items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
-            if (items.length === 0) {
-                container.innerHTML = `
-                    <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
-                        <ion-icon name="chatbubbles-outline" style="font-size: 48px; opacity: 0.5;"></ion-icon>
-                        <p>ยังไม่มี${currentTab === 'chats' ? 'แชท' : currentTab === 'friends' ? 'เพื่อน' : 'กลุ่ม'}</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = items.map(item => {
-                const isActive = activeChat && activeChat.id === item.id;
-                return `
-                    <div class="chat-item ${isActive ? 'active' : ''}" onclick="openChat('${item.id}', '${item.type}')">
-                        <div class="chat-avatar">
-                            <ion-icon name="${item.type === 'group' ? 'people' : 'person'}"></ion-icon>
-                            ${item.type !== 'group' ? '<span class="online-status"></span>' : ''}
-                        </div>
-                        <div class="chat-info">
-                            <div class="chat-header-info">
-                                <span class="chat-name">${item.name || 'ไม่ระบุชื่อ'}</span>
-                                <span class="chat-time">${formatTime(item.timestamp)}</span>
-                            </div>
-                            <div class="chat-preview">${item.lastMessage || 'เริ่มแชทใหม่'}</div>
-                        </div>
-                        ${item.unread ? `<span class="unread-badge">${item.unread}</span>` : ''}
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function formatTime(timestamp) {
-            if (!timestamp) return '';
-            const date = new Date(timestamp);
-            const now = new Date();
-            const diff = now - date;
-            const minutes = Math.floor(diff / 60000);
-            const hours = Math.floor(diff / 3600000);
-            const days = Math.floor(diff / 86400000);
-
-            if (minutes < 1) return 'เมื่อสักครู่';
-            if (minutes < 60) return `${minutes} นาทีที่แล้ว`;
-            if (hours < 24) return `${hours} ชั่วโมงที่แล้ว`;
-            if (days < 7) return `${days} วันที่แล้ว`;
-            return date.toLocaleDateString('th-TH');
-        }
-
-        function showNewChatModal() {
-            document.getElementById('newChatModal').classList.add('active');
-            searchUsers();
-        }
-
-        function showCreateGroupModal() {
-            document.getElementById('createGroupModal').classList.add('active');
-            renderMemberSelection();
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        function searchUsers() {
-            const searchTerm = document.getElementById('userSearchInput').value.toLowerCase();
-            const container = document.getElementById('userSearchResults');
-            
-            const users = Object.keys(allUsers)
-                .filter(username => username !== currentUser.username)
-                .map(username => ({
-                    username,
-                    ...allUsers[username]
-                }))
-                .filter(user => {
-                    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-                    return !searchTerm || fullName.includes(searchTerm) || user.username.toLowerCase().includes(searchTerm);
-                });
-
-            if (users.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">ไม่พบผู้ใช้</p>';
-                return;
-            }
-
-            container.innerHTML = users.map(user => {
-                const isFriend = friends.some(f => f.username === user.username);
-                return `
-                    <div class="user-list-item" onclick="startChat('${user.username}')">
-                        <div class="user-list-avatar">
-                            <ion-icon name="person"></ion-icon>
-                        </div>
-                        <div class="user-list-info">
-                            <div class="user-list-name">${user.firstName} ${user.lastName}</div>
-                            <div class="user-list-role">${user.role === 'teacher' ? 'ครู' : user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียน'}</div>
-                        </div>
-                        <button class="add-btn ${isFriend ? 'added' : ''}" onclick="event.stopPropagation(); toggleFriend('${user.username}')">
-                            ${isFriend ? 'เพื่อนแล้ว' : 'เพิ่มเพื่อน'}
-                        </button>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function toggleFriend(username) {
-            const user = allUsers[username];
-            if (!user) return;
-
-            const index = friends.findIndex(f => f.username === username);
-            if (index > -1) {
-                friends.splice(index, 1);
-            } else {
-                friends.push({
-                    username: user.username,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    role: user.role
-                });
-            }
-
-            localStorage.setItem(`friends_${currentUser.id}`, JSON.stringify(friends));
-            searchUsers();
-        }
-
-        function startChat(username) {
-            const chatId = [currentUser.username, username].sort().join('_');
-            
-            if (!chats[chatId]) {
-                const user = allUsers[username];
-                chats[chatId] = {
-                    id: chatId,
-                    participants: [currentUser.username, username],
-                    name: `${user.firstName} ${user.lastName}`,
-                    messages: [],
-                    timestamp: Date.now()
-                };
-                saveChats();
-            }
-
-            closeModal('newChatModal');
-            openChat(chatId, 'chat');
-            switchTab('chats');
-        }
-
-        function openChat(chatId, type) {
-            if (type === 'chat') {
-                activeChat = chats[chatId];
-            } else if (type === 'group') {
-                activeChat = groups[chatId];
-            } else if (type === 'friend') {
-                startChat(chatId);
-                return;
-            }
-
-            if (!activeChat) return;
-
-            document.getElementById('emptyChatState').style.display = 'none';
-            document.getElementById('activeChatArea').style.display = 'flex';
-            
-            document.getElementById('activeChatName').textContent = activeChat.name;
-            document.getElementById('activeChatStatus').textContent = type === 'group' ? 
-                `${activeChat.members?.length || 0} สมาชิก` : 'ออนไลน์';
-
-            renderMessages();
-            renderChatList();
-        }
-
-        function renderMessages() {
-            const container = document.getElementById('messagesArea');
-            if (!activeChat || !activeChat.messages) {
-                container.innerHTML = '';
-                return;
-            }
-
-            container.innerHTML = activeChat.messages.map(msg => {
-                const isOwn = msg.senderId === currentUser.username;
-                return `
-                    <div class="message ${isOwn ? 'own' : ''}">
-                        ${!isOwn ? `
-                            <div class="message-avatar">
-                                <ion-icon name="person"></ion-icon>
-                            </div>
-                        ` : ''}
-                        <div class="message-content">
-                            ${!isOwn ? `<div class="message-sender">${msg.senderName}</div>` : ''}
-                            <div class="message-bubble">
-                                <div class="message-text">${msg.text}</div>
-                            </div>
-                            <div class="message-time">${formatTime(msg.timestamp)}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
-            
-            if (!text || !activeChat) return;
-
-            const message = {
-                id: Date.now(),
-                senderId: currentUser.username,
-                senderName: currentUser.name,
-                text: text,
-                timestamp: Date.now()
-            };
-
-            if (!activeChat.messages) {
-                activeChat.messages = [];
-            }
-
-            activeChat.messages.push(message);
-            activeChat.lastMessage = text;
-            activeChat.timestamp = Date.now();
-
-            if (chats[activeChat.id]) {
-                chats[activeChat.id] = activeChat;
-                saveChats();
-            } else if (groups[activeChat.id]) {
-                groups[activeChat.id] = activeChat;
-                saveGroups();
-            }
-
-            input.value = '';
-            renderMessages();
-            renderChatList();
-        }
-
-        function renderMemberSelection() {
-            const container = document.getElementById('memberSelection');
-            
-            const users = Object.keys(allUsers)
-                .filter(username => username !== currentUser.username)
-                .map(username => ({
-                    username,
-                    ...allUsers[username]
-                }));
-
-            container.innerHTML = users.map(user => `
-                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--bg-primary); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" value="${user.username}" style="width: 18px; height: 18px;">
-                    <div class="user-list-avatar" style="width: 36px; height: 36px; font-size: 16px;">
+function renderFloatingMessages() {
+    const container = document.getElementById('floatingMessagesArea');
+    if (!activeChat) {
+        container.innerHTML = '';
+        return;
+    }
+    if (!activeChat.messages) {
+        activeChat.messages = [];
+    }
+    if (activeChat.messages.length === 0) {
+        container.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 250px; color: var(--text-muted); text-align: center; padding: 1rem;">
+                <ion-icon name="chatbubbles-outline" style="font-size: 56px; opacity: 0.3; margin-bottom: 0.75rem;"></ion-icon>
+                <p style="font-size: 0.95rem; font-weight: 500;">ยังไม่มีข้อความ</p>
+                <p style="font-size: 0.85rem; margin-top: 0.25rem;">เริ่มต้นการสนทนา</p>
+            </div>
+        `;
+        return;
+    }
+    container.innerHTML = activeChat.messages.map(msg => {
+        const isOwn = msg.senderId === currentUser.username;
+        return `
+            <div class="message ${isOwn ? 'own' : ''}" style="margin-bottom: 1.25rem;">
+                ${!isOwn ? `
+                    <div class="message-avatar" style="width: 32px; height: 32px; font-size: 16px;">
                         <ion-icon name="person"></ion-icon>
                     </div>
-                    <div>
-                        <div style="font-weight: 600;">${user.firstName} ${user.lastName}</div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary);">${user.role === 'teacher' ? 'ครู' : 'นักเรียน'}</div>
+                ` : ''}
+                <div class="message-content" style="max-width: 75%;">
+                    ${!isOwn ? `<div class="message-sender" style="font-size: 0.8rem;">${msg.senderName}</div>` : ''}
+                    <div class="message-bubble" style="padding: 0.75rem 1rem; font-size: 0.95rem;">
+                        <div class="message-text">${msg.text}</div>
                     </div>
-                </label>
-            `).join('');
+                    <div class="message-time" style="font-size: 0.75rem;">${formatTime(msg.timestamp)}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    container.scrollTop = container.scrollHeight;
+}
+
+function toggleFloatingChat() {
+    floatingChatMinimized = !floatingChatMinimized;
+    const floatingChat = document.getElementById('floatingChat');
+    const minimizeIcon = document.getElementById('floatingMinimizeIcon');
+    const expandIcon = document.getElementById('floatingExpandIcon');
+    if (floatingChatMinimized) {
+        floatingChat.classList.add('minimized');
+        minimizeIcon.style.display = 'none';
+        expandIcon.style.display = 'block';
+    } else {
+        floatingChat.classList.remove('minimized');
+        minimizeIcon.style.display = 'block';
+        expandIcon.style.display = 'none';
+    }
+}
+
+function openChatInMainView() {
+    const floatingChat = document.getElementById('floatingChat');
+    floatingChat.classList.remove('active');
+    isFloatingMode = false;
+    
+    if (activeChat) {
+        const sidebar = document.querySelector('.sidebar');
+        sidebar.classList.remove('hidden');
+        
+        document.getElementById('emptyChatState').style.display = 'none';
+        document.getElementById('activeChatArea').style.display = 'flex';
+        
+        document.getElementById('activeChatName').textContent = activeChat.name || 'ไม่ระบุชื่อ';
+        document.getElementById('activeChatStatus').textContent = activeChat.members ? 
+            `${activeChat.members.length} สมาชิก` : 'ออนไลน์';
+        
+        const mainChatAvatar = document.getElementById('mainChatAvatar');
+        if (mainChatAvatar) {
+            mainChatAvatar.innerHTML = `<ion-icon name="${activeChat.members ? 'people' : 'person'}"></ion-icon>`;
         }
+        
+        renderMessages();
+        renderChatList();
+        
+        setTimeout(() => {
+            const input = document.getElementById('messageInput');
+            if (input) input.focus();
+        }, 100);
+    }
+}
 
-        function createGroup(event) {
-            event.preventDefault();
-            
-            const groupName = document.getElementById('groupName').value.trim();
-            const selectedMembers = Array.from(document.querySelectorAll('#memberSelection input:checked'))
-                .map(input => input.value);
+function closeFloatingChat() {
+    document.getElementById('floatingChat').classList.remove('active');
+    activeChat = null;
+    isFloatingMode = false;
+    renderChatList();
+}
 
-            if (!groupName) {
-                alert('กรุณาใส่ชื่อกลุ่ม');
-                return;
-            }
-
-            if (selectedMembers.length === 0) {
-                alert('กรุณาเลือกสมาชิกอย่างน้อย 1 คน');
-                return;
-            }
-
-            const groupId = `group_${Date.now()}`;
-            const members = [currentUser.username, ...selectedMembers];
-
-            groups[groupId] = {
-                id: groupId,
-                name: groupName,
-                members: members,
-                messages: [],
-                timestamp: Date.now(),
-                createdBy: currentUser.username,
-                lastMessage: 'สร้างกลุ่มแล้ว'
-            };
-
-            saveGroups();
-            closeModal('createGroupModal');
-            openChat(groupId, 'group');
-            switchTab('groups');
+function closeChatOnMobile() {
+    if (window.innerWidth <= 768) {
+        document.getElementById('activeChatArea').style.display = 'none';
+        document.getElementById('emptyChatState').style.display = 'flex';
+        document.querySelector('.sidebar').classList.remove('hidden');
+        if (activeChat) {
+            switchToFloatingMode();
         }
+    }
+}
 
-        function showChatInfo() {
-            if (!activeChat) return;
-            
-            let info = `ชื่อ: ${activeChat.name}\n`;
-            if (activeChat.members) {
-                info += `สมาชิก: ${activeChat.members.length} คน\n`;
-                info += activeChat.members.map(username => {
-                    const user = allUsers[username] || { firstName: username, lastName: '' };
-                    return `- ${user.firstName} ${user.lastName}`;
-                }).join('\n');
-            } else {
-                info += `แชทส่วนตัว`;
-            }
-            
-            alert(info);
+function sendFloatingMessage() {
+    const input = document.getElementById('floatingMessageInput');
+    const text = input.value.trim();
+    if (!text || !activeChat) return;
+    const message = {
+        id: Date.now(),
+        senderId: currentUser.username,
+        senderName: currentUser.name,
+        text: text,
+        timestamp: Date.now()
+    };
+    if (!activeChat.messages) {
+        activeChat.messages = [];
+    }
+    activeChat.messages.push(message);
+    activeChat.lastMessage = text;
+    activeChat.timestamp = Date.now();
+    if (chats[activeChat.id]) {
+        chats[activeChat.id] = activeChat;
+        saveChats();
+    } else if (groups[activeChat.id]) {
+        groups[activeChat.id] = activeChat;
+        saveGroups();
+    }
+    input.value = '';
+    renderFloatingMessages();
+    renderChatList();
+}
+
+function handleFloatingEnter(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        sendFloatingMessage();
+    }
+}
+
+function handleEnter(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+function loadCurrentUser() {
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    const username = localStorage.getItem('username');
+    if (userData.firstName) {
+        currentUser = {
+            id: username || userData.studentId,
+            username: username,
+            name: `${userData.firstName} ${userData.lastName}`,
+            role: userData.role,
+            avatar: localStorage.getItem('userAvatar') || userData.avatar,
+            ...userData
+        };
+    } else {
+        currentUser = {
+            id: 'guest',
+            username: 'guest',
+            name: 'ผู้ใช้ทั่วไป',
+            role: 'guest',
+            avatar: null
+        };
+    }
+    document.getElementById('currentUserName').textContent = currentUser.name;
+    document.getElementById('currentUserRole').textContent = 
+        currentUser.role === 'teacher' ? 'ครู' : 
+        currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียน';
+}
+
+function loadUserAvatar() {
+    try {
+        let avatarSrc = localStorage.getItem('userAvatar');
+        if (!avatarSrc) {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            avatarSrc = userData.avatar;
         }
-
-        // Click outside modal to close
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('active');
+        if (!avatarSrc) {
+            const sessionData = JSON.parse(sessionStorage.getItem('userData') || '{}');
+            avatarSrc = sessionData.avatar;
+        }
+        if (avatarSrc && avatarSrc !== 'https://via.placeholder.com/120x120/2563eb/ffffff?text=User') {
+            const sidebarAvatar = document.querySelector('.sidebar-header .user-avatar');
+            if (sidebarAvatar) {
+                const existingIcon = sidebarAvatar.querySelector('ion-icon');
+                if (existingIcon) {
+                    existingIcon.remove();
                 }
-            });
-        });
+                let imgElement = sidebarAvatar.querySelector('img');
+                if (!imgElement) {
+                    imgElement = document.createElement('img');
+                    imgElement.style.cssText = `width: 100%; height: 100%; object-fit: cover; border-radius: 50%;`;
+                    sidebarAvatar.appendChild(imgElement);
+                }
+                imgElement.src = avatarSrc;
+            }
+        }
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการโหลดรูปโปรไฟล์:', error);
+    }
+}
 
-        // Initialize on load
-        init();
+function setupProfileSyncListeners() {
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'userAvatar' || e.key === 'userData') {
+            loadUserAvatar();
+        }
+    });
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            loadUserAvatar();
+        }
+    });
+}
+
+function loadAllUsers() {
+    const storedUsers = JSON.parse(localStorage.getItem('userDatabase') || '{}');
+    const defaultUsers = {
+        'student001': {
+            username: 'student001',
+            firstName: 'สมชาย',
+            lastName: 'ใจดี',
+            role: 'student',
+            studentId: '63010001'
+        },
+        'teacher001': {
+            username: 'teacher001',
+            firstName: 'อาจารย์สมหญิง',
+            lastName: 'ประเสริฐ',
+            role: 'teacher',
+            studentId: 'T001'
+        }
+    };
+    allUsers = { ...defaultUsers, ...storedUsers };
+}
+
+function loadFriends() {
+    if (!currentUser || !currentUser.id) return;
+    const saved = localStorage.getItem(`friends_${currentUser.id}`);
+    friends = saved ? JSON.parse(saved) : [];
+}
+
+function loadChats() {
+    if (!currentUser || !currentUser.id) return;
+    const saved = localStorage.getItem(`chats_${currentUser.id}`);
+    chats = saved ? JSON.parse(saved) : {};
+}
+
+function loadGroups() {
+    if (!currentUser || !currentUser.id) return;
+    const saved = localStorage.getItem(`groups_${currentUser.id}`);
+    groups = saved ? JSON.parse(saved) : {};
+}
+
+function saveChats() {
+    if (!currentUser || !currentUser.id) return;
+    localStorage.setItem(`chats_${currentUser.id}`, JSON.stringify(chats));
+}
+
+function saveGroups() {
+    if (!currentUser || !currentUser.id) return;
+    localStorage.setItem(`groups_${currentUser.id}`, JSON.stringify(groups));
+}
+
+function setupEventListeners() {
+    document.getElementById('sidebarSearch').addEventListener('input', renderChatList);
+    document.getElementById('userSearchInput').addEventListener('input', searchUsers);
+}
+
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.closest('.tab-btn').classList.add('active');
+    if (tab === 'groups') {
+        const addBtn = document.querySelector('.sidebar > div:last-child button');
+        addBtn.innerHTML = '<ion-icon name="add-circle" style="vertical-align: middle;"></ion-icon> สร้างกลุ่มใหม่';
+        addBtn.onclick = showCreateGroupModal;
+    } else {
+        const addBtn = document.querySelector('.sidebar > div:last-child button');
+        addBtn.innerHTML = '<ion-icon name="add-circle" style="vertical-align: middle;"></ion-icon> เริ่มแชทใหม่';
+        addBtn.onclick = showNewChatModal;
+    }
+    renderChatList();
+}
+
+function renderChatList() {
+    const container = document.getElementById('chatList');
+    const searchTerm = document.getElementById('sidebarSearch').value.toLowerCase();
+    let items = [];
+    if (currentTab === 'chats') {
+        items = Object.keys(chats).map(chatId => ({
+            id: chatId,
+            ...chats[chatId],
+            type: 'chat'
+        }));
+    } else if (currentTab === 'friends') {
+        items = friends.map(friend => ({
+            id: friend.username,
+            name: `${friend.firstName} ${friend.lastName}`,
+            role: friend.role,
+            lastMessage: '',
+            timestamp: 0,
+            type: 'friend'
+        }));
+    } else if (currentTab === 'groups') {
+        items = Object.keys(groups).map(groupId => ({
+            id: groupId,
+            ...groups[groupId],
+            type: 'group'
+        }));
+    }
+    if (searchTerm) {
+        items = items.filter(item => 
+            item.name?.toLowerCase().includes(searchTerm)
+        );
+    }
+    items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    if (items.length === 0) {
+        container.innerHTML = `
+            <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                <ion-icon name="chatbubbles-outline" style="font-size: 48px; opacity: 0.5;"></ion-icon>
+                <p>ยังไม่มี${currentTab === 'chats' ? 'แชท' : currentTab === 'friends' ? 'เพื่อน' : 'กลุ่ม'}</p>
+            </div>
+        `;
+        return;
+    }
+    container.innerHTML = items.map(item => {
+        const isActive = activeChat && activeChat.id === item.id;
+        return `
+            <div class="chat-item ${isActive ? 'active' : ''}" onclick="openChat('${item.id}', '${item.type}')">
+                <div class="chat-avatar">
+                    <ion-icon name="${item.type === 'group' ? 'people' : 'person'}"></ion-icon>
+                    ${item.type !== 'group' ? '<span class="online-status"></span>' : ''}
+                </div>
+                <div class="chat-info">
+                    <div class="chat-header-info">
+                        <span class="chat-name">${item.name || 'ไม่ระบุชื่อ'}</span>
+                        <span class="chat-time">${formatTime(item.timestamp)}</span>
+                    </div>
+                    <div class="chat-preview">${item.lastMessage || 'เริ่มแชทใหม่'}</div>
+                </div>
+                ${item.unread ? `<span class="unread-badge">${item.unread}</span>` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+function formatTime(timestamp) {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    if (minutes < 1) return 'เมื่อสักครู่';
+    if (minutes < 60) return `${minutes} นาทีที่แล้ว`;
+    if (hours < 24) return `${hours} ชั่วโมงที่แล้ว`;
+    if (days < 7) return `${days} วันที่แล้ว`;
+    return date.toLocaleDateString('th-TH');
+}
+
+function showNewChatModal() {
+    document.getElementById('newChatModal').classList.add('active');
+    searchUsers();
+}
+
+function showCreateGroupModal() {
+    document.getElementById('createGroupModal').classList.add('active');
+    renderMemberSelection();
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+function searchUsers() {
+    const searchTerm = document.getElementById('userSearchInput').value.toLowerCase();
+    const container = document.getElementById('userSearchResults');
+    const users = Object.keys(allUsers)
+        .filter(username => username !== currentUser.username)
+        .map(username => ({
+            username,
+            ...allUsers[username]
+        }))
+        .filter(user => {
+            const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+            return !searchTerm || fullName.includes(searchTerm) || user.username.toLowerCase().includes(searchTerm);
+        });
+    if (users.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">ไม่พบผู้ใช้</p>';
+        return;
+    }
+    container.innerHTML = users.map(user => {
+        const isFriend = friends.some(f => f.username === user.username);
+        return `
+            <div class="user-list-item" onclick="startChat('${user.username}')">
+                <div class="user-list-avatar">
+                    <ion-icon name="person"></ion-icon>
+                </div>
+                <div class="user-list-info">
+                    <div class="user-list-name">${user.firstName} ${user.lastName}</div>
+                    <div class="user-list-role">${user.role === 'teacher' ? 'ครู' : user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'นักเรียน'}</div>
+                </div>
+                <button class="add-btn ${isFriend ? 'added' : ''}" onclick="event.stopPropagation(); toggleFriend('${user.username}')">
+                    ${isFriend ? 'เพื่อนแล้ว' : 'เพิ่มเพื่อน'}
+                </button>
+            </div>
+        `;
+    }).join('');
+}
+
+function toggleFriend(username) {
+    const user = allUsers[username];
+    if (!user) return;
+    const index = friends.findIndex(f => f.username === username);
+    if (index > -1) {
+        friends.splice(index, 1);
+    } else {
+        friends.push({
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role
+        });
+    }
+    localStorage.setItem(`friends_${currentUser.id}`, JSON.stringify(friends));
+    searchUsers();
+}
+
+function startChat(username) {
+    const chatId = [currentUser.username, username].sort().join('_');
+    if (!chats[chatId]) {
+        const user = allUsers[username];
+        chats[chatId] = {
+            id: chatId,
+            participants: [currentUser.username, username],
+            name: `${user.firstName} ${user.lastName}`,
+            messages: [],
+            timestamp: Date.now()
+        };
+        saveChats();
+    }
+    closeModal('newChatModal');
+    openChat(chatId, 'chat');
+    switchTab('chats');
+}
+
+function openChat(chatId, type) {
+    if (type === 'chat') {
+        activeChat = chats[chatId];
+    } else if (type === 'group') {
+        activeChat = groups[chatId];
+    } else if (type === 'friend') {
+        startChat(chatId);
+        return;
+    }
+    if (!activeChat) return;
+    if (!activeChat.messages) {
+        activeChat.messages = [];
+    }
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+        switchToFloatingMode();
+        document.querySelector('.sidebar').classList.add('hidden');
+    } else {
+        const emptyChatState = document.getElementById('emptyChatState');
+        const activeChatArea = document.getElementById('activeChatArea');
+        emptyChatState.style.display = 'none';
+        activeChatArea.style.display = 'flex';
+        document.getElementById('activeChatName').textContent = activeChat.name || 'ไม่ระบุชื่อ';
+        document.getElementById('activeChatStatus').textContent = type === 'group' ? 
+            `${activeChat.members?.length || 0} สมาชิก` : 'ออนไลน์';
+        const mainChatAvatar = document.getElementById('mainChatAvatar');
+        if (mainChatAvatar) {
+            mainChatAvatar.innerHTML = `<ion-icon name="${type === 'group' ? 'people' : 'person'}"></ion-icon>`;
+        }
+        renderMessages();
+        setTimeout(() => {
+            const input = document.getElementById('messageInput');
+            if (input) input.focus();
+        }, 100);
+    }
+    renderChatList();
+}
+
+function renderMessages() {
+    const container = document.getElementById('messagesArea');
+    if (!activeChat) {
+        container.innerHTML = '';
+        return;
+    }
+    if (!activeChat.messages) {
+        activeChat.messages = [];
+    }
+    if (activeChat.messages.length === 0) {
+        container.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted);">
+                <ion-icon name="chatbubbles-outline" style="font-size: 64px; opacity: 0.3; margin-bottom: 1rem;"></ion-icon>
+                <p>ยังไม่มีข้อความ</p>
+                <p style="font-size: 0.85rem;">เริ่มต้นการสนทนาของคุณ</p>
+            </div>
+        `;
+        return;
+    }
+    container.innerHTML = activeChat.messages.map(msg => {
+        const isOwn = msg.senderId === currentUser.username;
+        let avatarHTML = '';
+        if (!isOwn) {
+            avatarHTML = `
+                <div class="message-avatar">
+                    <ion-icon name="person"></ion-icon>
+                </div>
+            `;
+        }
+        return `
+            <div class="message ${isOwn ? 'own' : ''}">
+                ${avatarHTML}
+                <div class="message-content">
+                    ${!isOwn ? `<div class="message-sender">${msg.senderName}</div>` : ''}
+                    <div class="message-bubble">
+                        <div class="message-text">${msg.text}</div>
+                    </div>
+                    <div class="message-time">${formatTime(msg.timestamp)}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    container.scrollTop = container.scrollHeight;
+}
+
+function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const text = input.value.trim();
+    if (!text || !activeChat) return;
+    const message = {
+        id: Date.now(),
+        senderId: currentUser.username,
+        senderName: currentUser.name,
+        text: text,
+        timestamp: Date.now()
+    };
+    if (!activeChat.messages) {
+        activeChat.messages = [];
+    }
+    activeChat.messages.push(message);
+    activeChat.lastMessage = text;
+    activeChat.timestamp = Date.now();
+    if (chats[activeChat.id]) {
+        chats[activeChat.id] = activeChat;
+        saveChats();
+    } else if (groups[activeChat.id]) {
+        groups[activeChat.id] = activeChat;
+        saveGroups();
+    }
+    input.value = '';
+    input.style.height = 'auto';
+    renderMessages();
+    renderChatList();
+}
+
+function renderMemberSelection() {
+    const container = document.getElementById('memberSelection');
+    const users = Object.keys(allUsers)
+        .filter(username => username !== currentUser.username)
+        .map(username => ({
+            username,
+            ...allUsers[username]
+        }));
+    container.innerHTML = users.map(user => `
+        <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--bg-primary); border-radius: 8px; margin-bottom: 0.5rem; cursor: pointer;">
+            <input type="checkbox" value="${user.username}" style="width: 18px; height: 18px;">
+            <div class="user-list-avatar" style="width: 36px; height: 36px; font-size: 16px;">
+                <ion-icon name="person"></ion-icon>
+            </div>
+            <div>
+                <div style="font-weight: 600;">${user.firstName} ${user.lastName}</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">${user.role === 'teacher' ? 'ครู' : 'นักเรียน'}</div>
+            </div>
+        </label>
+    `).join('');
+}
+
+function createGroup(event) {
+    event.preventDefault();
+    const groupName = document.getElementById('groupName').value.trim();
+    const selectedMembers = Array.from(document.querySelectorAll('#memberSelection input:checked'))
+        .map(input => input.value);
+    if (!groupName) {
+        alert('กรุณาใส่ชื่อกลุ่ม');
+        return;
+    }
+    if (selectedMembers.length === 0) {
+        alert('กรุณาเลือกสมาชิกอย่างน้อย 1 คน');
+        return;
+    }
+    const groupId = `group_${Date.now()}`;
+    const members = [currentUser.username, ...selectedMembers];
+    groups[groupId] = {
+        id: groupId,
+        name: groupName,
+        members: members,
+        messages: [],
+        timestamp: Date.now(),
+        createdBy: currentUser.username,
+        lastMessage: 'สร้างกลุ่มแล้ว'
+    };
+    saveGroups();
+    closeModal('createGroupModal');
+    openChat(groupId, 'group');
+    switchTab('groups');
+}
+
+function showChatInfo() {
+    if (!activeChat) return;
+    let info = `ชื่อ: ${activeChat.name}\n`;
+    if (activeChat.members) {
+        info += `สมาชิก: ${activeChat.members.length} คน\n`;
+        info += activeChat.members.map(username => {
+            const user = allUsers[username] || { firstName: username, lastName: '' };
+            return `- ${user.firstName} ${user.lastName}`;
+        }).join('\n');
+    } else {
+        info += `แชทส่วนตัว`;
+    }
+    alert(info);
+}
+
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+        }
+    });
+});
+
+init();
     </script>
 </body>
 </html>
