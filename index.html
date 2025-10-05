@@ -2048,7 +2048,6 @@ body {
     <!-- JavaScript - แก้ไขแล้ว -->
     <script>
 // ===== REAL-TIME SCHEDULE UPDATE SYSTEM FOR INDEX.HTML =====
-// แทนที่โค้ด JavaScript เดิมทั้งหมดใน index.html ด้วยโค้ดนี้
 
 // ===== 1. ตัวแปรสำหรับจัดการสถานะ =====
 let currentUserRole = null;
@@ -2062,7 +2061,7 @@ let attendanceStatistics = {
     lastUpdated: null
 };
 
-// ข้อมูลตารางเรียนวันนี้ (ปรับตามความต้องการจริง)
+// ข้อมูลตารางเรียนวันนี้
 const todayScheduleTemplate = [
     { 
         time: '08:00', 
@@ -2100,10 +2099,10 @@ function loadAttendanceData() {
         if (!savedData) return null;
         
         const data = JSON.parse(savedData);
-        console.log('✅ โหลดข้อมูลการเช็คชื่อสำเร็จ:', data);
+        console.log('โหลดข้อมูลการเช็คชื่อสำเร็จ:', data);
         return data;
     } catch (error) {
-        console.error('❌ เกิดข้อผิดพลาดในการโหลดข้อมูล:', error);
+        console.error('เกิดข้อผิดพลาดในการโหลดข้อมูล:', error);
         return null;
     }
 }
@@ -2117,13 +2116,12 @@ function getClassStatus(classTime, attendanceData, subjectInfo) {
     
     const [hour, minute] = classTime.split(':').map(Number);
     const classTimeInMinutes = hour * 60 + minute;
-    const classEndTime = classTimeInMinutes + 90; // ถือว่าเรียน 90 นาที
+    const classEndTime = classTimeInMinutes + 90;
     
-    let status = 'upcoming'; // รอเช็คอิน
+    let status = 'upcoming';
     let checkedInCount = 0;
     let totalStudents = 0;
     
-    // ตรวจสอบข้อมูลการเช็คชื่อ
     if (attendanceData && attendanceData.subjects && attendanceData.gradeData) {
         const subject = attendanceData.subjects.find(s => 
             s.code === subjectInfo.subjectCode || s.name === subjectInfo.subjectName
@@ -2139,7 +2137,6 @@ function getClassStatus(classTime, attendanceData, subjectInfo) {
         }
     }
     
-    // กำหนดสถานะตามเวลา
     if (currentTimeInMinutes < classTimeInMinutes) {
         status = 'upcoming';
     } else if (currentTimeInMinutes >= classTimeInMinutes && currentTimeInMinutes < classEndTime) {
@@ -2179,25 +2176,20 @@ function getStudentList(attendanceData, subjectInfo) {
 function updateTodaySchedule() {
     const scheduleContainer = document.querySelector('.today-schedule .schedule-container');
     if (!scheduleContainer) {
-        console.log('ℹ️ ไม่พบ schedule container');
+        console.log('ไม่พบ schedule container');
         return;
     }
     
     const attendanceData = loadAttendanceData();
-    
-    // ล้างข้อมูลเดิม
     scheduleContainer.innerHTML = '';
     
-    // สร้างรายการตารางเรียนใหม่
     todayScheduleTemplate.forEach((classInfo, index) => {
         const classStatus = getClassStatus(classInfo.time, attendanceData, classInfo);
         const studentList = getStudentList(attendanceData, classInfo);
         
-        // สร้าง HTML สำหรับแต่ละวิชา
         const scheduleItem = document.createElement('div');
         scheduleItem.className = `schedule-item ${classStatus.status}`;
         
-        // กำหนดสีและไอคอนตามสถานะ
         let statusBadgeClass = '';
         let statusIcon = '';
         let statusText = '';
@@ -2220,7 +2212,6 @@ function updateTodaySchedule() {
                 break;
         }
         
-        // สร้างรายชื่อนักเรียนแบบย่อ
         let studentListHTML = '';
         if (studentList.length > 0) {
             const displayStudents = studentList.slice(0, 3);
@@ -2299,7 +2290,7 @@ function updateTodaySchedule() {
         scheduleContainer.appendChild(scheduleItem);
     });
     
-    console.log('✅ อัพเดทตารางเรียนสำเร็จ');
+    console.log('อัพเดทตารางเรียนสำเร็จ');
 }
 
 // ===== 6. ฟังก์ชันคำนวณสถิติการเข้าเรียน =====
@@ -2365,7 +2356,7 @@ function updateIndexStatistics() {
     
     updateProgressBars();
     
-    console.log('📊 อัพเดทสถิติสำเร็จ:', stats);
+    console.log('อัพเดทสถิติสำเร็จ:', stats);
 }
 
 // ===== 8. ฟังก์ชันอัพเดทแถบความคืบหน้า =====
@@ -2393,12 +2384,12 @@ function updateProgressBars() {
 // ===== 9. ระบบแจ้งเตือน =====
 const NotificationManager = {
     show: function(message, type = 'info', duration = 4000) {
-        const container = document.getElementById('notificationContainer');
+        let container = document.getElementById('notificationContainer');
         if (!container) {
-            const newContainer = document.createElement('div');
-            newContainer.id = 'notificationContainer';
-            newContainer.style.cssText = 'position: fixed; top: 80px; right: 20px; z-index: 9999;';
-            document.body.appendChild(newContainer);
+            container = document.createElement('div');
+            container.id = 'notificationContainer';
+            container.style.cssText = 'position: fixed; top: 80px; right: 20px; z-index: 9999;';
+            document.body.appendChild(container);
         }
         
         const notification = document.createElement('div');
@@ -2426,8 +2417,7 @@ const NotificationManager = {
             <span>${message}</span>
         `;
         
-        const container2 = document.getElementById('notificationContainer');
-        container2.appendChild(notification);
+        container.appendChild(notification);
         
         setTimeout(() => {
             notification.style.transform = 'translateX(0)';
@@ -2440,7 +2430,51 @@ const NotificationManager = {
     }
 };
 
-// ===== 10. ฟังก์ชันจัดการบทบาทผู้ใช้ =====
+// ===== 10. ฟังก์ชันโหลดรูปโปรไฟล์ =====
+function loadUserAvatar() {
+    try {
+        let avatarSrc = localStorage.getItem('userAvatar');
+        
+        if (!avatarSrc) {
+            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+            avatarSrc = userData.avatar;
+        }
+        
+        if (!avatarSrc) {
+            const sessionData = JSON.parse(sessionStorage.getItem('userData') || '{}');
+            avatarSrc = sessionData.avatar;
+        }
+        
+        if (avatarSrc && avatarSrc !== 'https://via.placeholder.com/120x120/2563eb/ffffff?text=User') {
+            const profileImg = document.querySelector('.user-info .profile-img');
+            if (profileImg) {
+                const existingIcon = profileImg.querySelector('ion-icon');
+                if (existingIcon) {
+                    existingIcon.remove();
+                }
+                
+                let imgElement = profileImg.querySelector('img');
+                if (!imgElement) {
+                    imgElement = document.createElement('img');
+                    imgElement.style.cssText = `
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        border-radius: 50%;
+                    `;
+                    profileImg.appendChild(imgElement);
+                }
+                imgElement.src = avatarSrc;
+                
+                console.log('โหลดรูปโปรไฟล์สำเร็จ');
+            }
+        }
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการโหลดรูปโปรไฟล์:', error);
+    }
+}
+
+// ===== 11. ฟังก์ชันจัดการบทบาทผู้ใช้ =====
 function setUserRole(role) {
     currentUserRole = role;
     console.log('User role set to:', role);
@@ -2496,7 +2530,7 @@ function updateUIByRole(role) {
     }
 }
 
-// ===== 11. ฟังก์ชันอัพเดทเวลา =====
+// ===== 12. ฟังก์ชันอัพเดทเวลา =====
 function updateDateTime() {
     const now = new Date();
     
@@ -2521,7 +2555,7 @@ function updateDateTime() {
     }
 }
 
-// ===== 12. ฟังก์ชันโหลดข้อมูลผู้ใช้ =====
+// ===== 13. ฟังก์ชันโหลดข้อมูลผู้ใช้ =====
 function loadUserData() {
     try {
         const isLoggedIn = localStorage.getItem('isLoggedIn');
@@ -2546,6 +2580,8 @@ function loadUserData() {
                 };
                 userRoleElement.textContent = roleNames[userRole] || 'ผู้ใช้งาน';
             }
+            
+            loadUserAvatar();
         } else {
             setUserRole('student');
         }
@@ -2555,24 +2591,22 @@ function loadUserData() {
     }
 }
 
-// ===== 13. ฟังก์ชันเริ่มต้นระบบ Real-time =====
+// ===== 14. ฟังก์ชันเริ่มต้นระบบ Real-time =====
 function initializeRealtimeSystem() {
-    console.log('🚀 เริ่มต้นระบบ Real-time Schedule Update');
+    console.log('เริ่มต้นระบบ Real-time Schedule Update');
     
-    // อัพเดทครั้งแรก
     updateTodaySchedule();
     updateIndexStatistics();
     
-    // Polling ทุก 5 วินาที
     setInterval(() => {
         updateTodaySchedule();
         updateIndexStatistics();
     }, 5000);
     
-    console.log('✅ ระบบ Real-time พร้อมใช้งาน (อัพเดททุก 5 วินาที)');
+    console.log('ระบบ Real-time พร้อมใช้งาน (อัพเดททุก 5 วินาที)');
 }
 
-// ===== 14. ฟังก์ชันเริ่มต้นแอพ =====
+// ===== 15. ฟังก์ชันเริ่มต้นแอพ =====
 function initializeApp() {
     console.log('Initializing app...');
     
@@ -2584,11 +2618,12 @@ function initializeApp() {
     calculateAttendanceStatistics();
     updateIndexStatistics();
     
-    // เริ่มระบบ Real-time
     initializeRealtimeSystem();
     
     const role = getUserRole();
     updateUIByRole(role);
+    
+    setupProfileSyncListeners();
     
     setTimeout(() => {
         NotificationManager.show('ระบบพร้อมใช้งานแล้ว', 'success');
@@ -2597,15 +2632,39 @@ function initializeApp() {
     console.log('App initialization complete');
 }
 
-// ===== 15. Event Listeners =====
+// ===== 16. ฟังก์ชันการซิงค์โปรไฟล์ =====
+function setupProfileSyncListeners() {
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'userAvatar' || e.key === 'userData') {
+            console.log('ตรวจพบการเปลี่ยนแปลงรูปโปรไฟล์');
+            loadUserAvatar();
+            
+            if (window.NotificationManager) {
+                NotificationManager.show('อัปเดตรูปโปรไฟล์แล้ว', 'success');
+            }
+        }
+    });
+    
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            loadUserAvatar();
+        }
+    });
+}
+
+// ===== 17. Event Listeners =====
 function setupEventListeners() {
-    // ฟัง Storage Events (เมื่อข้อมูลเปลี่ยนในแท็บอื่น)
     window.addEventListener('storage', function(e) {
         if (e.key === 'studentAttendanceData') {
-            console.log('🔄 ตรวจพบการเปลี่ยนแปลงข้อมูล - อัพเดทอัตโนมัติ');
+            console.log('ตรวจพบการเปลี่ยนแปลงข้อมูล - อัพเดทอัตโนมัติ');
             updateTodaySchedule();
             updateIndexStatistics();
             NotificationManager.show('ข้อมูลได้รับการอัพเดท', 'success');
+        }
+        
+        if (e.key === 'userAvatar' || e.key === 'userData') {
+            console.log('ตรวจพบการเปลี่ยนแปลงรูปโปรไฟล์');
+            loadUserAvatar();
         }
         
         if (e.key === 'isLoggedIn' && e.newValue !== 'true') {
@@ -2613,17 +2672,15 @@ function setupEventListeners() {
         }
     });
     
-    // ฟัง Page Visibility (เมื่อกลับมาที่แท็บ)
     document.addEventListener('visibilitychange', function() {
         if (!document.hidden) {
-            console.log('👁️ กลับมาที่หน้าเว็บ - รีเฟรชข้อมูล');
+            console.log('กลับมาที่หน้าเว็บ - รีเฟรชข้อมูล');
             updateTodaySchedule();
             updateIndexStatistics();
             updateDateTime();
         }
     });
     
-    // จัดการ Error
     window.addEventListener('error', function(e) {
         console.error('Global error:', e.error);
     });
@@ -2633,7 +2690,7 @@ function setupEventListeners() {
     });
 }
 
-// ===== 16. Keyboard Support =====
+// ===== 18. Keyboard Support =====
 function setupKeyboardSupport() {
     document.addEventListener('keydown', function(e) {
         if (e.target.matches('[role="button"]') && (e.key === 'Enter' || e.key === ' ')) {
@@ -2643,14 +2700,14 @@ function setupKeyboardSupport() {
     });
 }
 
-// ===== 17. Legacy Functions =====
+// ===== 19. Legacy Functions =====
 function navigateToPage(targetPage) {
     if (targetPage && targetPage !== '#') {
         window.location.href = targetPage;
     }
 }
 
-// ===== 18. Global Exports =====
+// ===== 20. Global Exports =====
 window.navigateToPage = navigateToPage;
 window.setUserRole = setUserRole;
 window.getUserRole = getUserRole;
@@ -2658,7 +2715,7 @@ window.NotificationManager = NotificationManager;
 window.updateTodaySchedule = updateTodaySchedule;
 window.updateIndexStatistics = updateIndexStatistics;
 
-// ===== 19. DOM Ready Initialization =====
+// ===== 21. DOM Ready Initialization =====
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function() {
         initializeApp();
@@ -2673,8 +2730,6 @@ if (document.readyState === 'loading') {
     }, 100);
 }
 
-console.log('✅ Real-time Schedule System loaded successfully!');
+console.log('Real-time Schedule System loaded successfully!');
     </script>
 </html>
-
-
