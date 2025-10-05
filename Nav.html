@@ -1422,271 +1422,338 @@ input:checked + .toggle-slider:before {
 
     <script>
         // Profile Edit JavaScript
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if user is logged in
-            const isLoggedIn = sessionStorage.getItem('isLoggedIn') || localStorage.getItem('isLoggedIn');
-            const userData = JSON.parse(sessionStorage.getItem('userData') || localStorage.getItem('userData') || '{}');
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if user is logged in
+    const isLoggedIn = sessionStorage.getItem('isLoggedIn') || localStorage.getItem('isLoggedIn');
+    const userData = JSON.parse(sessionStorage.getItem('userData') || localStorage.getItem('userData') || '{}');
+    
+    if (!isLoggedIn || !userData.username) {
+        // Redirect to login page if not logged in
+        window.location.href = 'Profile.html';
+        return;
+    }
+
+    // Load user data into form
+    loadUserData(userData);
+    
+    // Initialize event listeners
+    initializeEventListeners();
+    
+    // Add input focus handlers for icons
+    addInputFocusHandlers();
+});
+
+// Add input focus handlers for icon color changes
+function addInputFocusHandlers() {
+    const inputContainers = document.querySelectorAll('.input-container');
+    
+    inputContainers.forEach(container => {
+        const input = container.querySelector('input, select, textarea');
+        
+        if (input) {
+            input.addEventListener('focus', function() {
+                container.classList.add('focused');
+            });
             
-            if (!isLoggedIn || !userData.username) {
-                // Redirect to login page if not logged in
-                window.location.href = 'Profile.html';
+            input.addEventListener('blur', function() {
+                container.classList.remove('focused');
+            });
+        }
+    });
+}
+
+// Toggle password visibility
+function togglePassword(targetId) {
+    const passwordInput = document.getElementById(targetId);
+    const button = document.querySelector(`button[onclick="togglePassword('${targetId}')"]`);
+    const icon = button.querySelector('ion-icon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.name = 'eye-off-outline';
+    } else {
+        passwordInput.type = 'password';
+        icon.name = 'eye-outline';
+    }
+}
+
+// Load user data into form fields
+function loadUserData(userData) {
+    // Profile header
+    document.getElementById('profileName').textContent = `${userData.firstName || 'ชื่อ'} ${userData.lastName || 'นามสกุล'}`;
+    document.getElementById('profileRole').textContent = userData.role || 'นักเรียน';
+    document.getElementById('attendanceRate').textContent = `${userData.attendanceRate || 95}%`;
+    document.getElementById('attendedDays').textContent = userData.attendedDays || 42;
+    document.getElementById('absentDays').textContent = userData.absentDays || 3;
+    
+    // Form fields
+    document.getElementById('firstName').value = userData.firstName || '';
+    document.getElementById('lastName').value = userData.lastName || '';
+    document.getElementById('email').value = userData.email || '';
+    document.getElementById('phone').value = userData.phone || '';
+    document.getElementById('studentId').value = userData.studentId || '';
+    document.getElementById('class').value = userData.class || '';
+    document.getElementById('address').value = userData.address || '';
+    document.getElementById('username').value = userData.username || '';
+    
+    // Privacy settings
+    document.getElementById('showOnlineStatus').checked = userData.showOnlineStatus !== false;
+    document.getElementById('emailNotifications').checked = userData.emailNotifications !== false;
+    document.getElementById('browserNotifications').checked = userData.browserNotifications || false;
+    
+    // Update avatar if exists
+    const savedAvatar = localStorage.getItem('userAvatar') || userData.avatar;
+    if (savedAvatar) {
+        document.getElementById('avatarImage').src = savedAvatar;
+    }
+}
+
+// Initialize all event listeners
+function initializeEventListeners() {
+    // Avatar upload functionality
+    document.getElementById('profileAvatar').addEventListener('click', function() {
+        document.getElementById('avatarUpload').click();
+    });
+
+    document.getElementById('avatarUpload').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // ตรวจสอบประเภทไฟล์
+            if (!file.type.startsWith('image/')) {
+                alert('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
                 return;
             }
-
-            // Load user data into form
-            loadUserData(userData);
             
-            // Initialize event listeners
-            initializeEventListeners();
-            
-            // Add input focus handlers for icons
-            addInputFocusHandlers();
-        });
-
-        // Add input focus handlers for icon color changes
-        function addInputFocusHandlers() {
-            const inputContainers = document.querySelectorAll('.input-container');
-            
-            inputContainers.forEach(container => {
-                const input = container.querySelector('input, select, textarea');
-                
-                if (input) {
-                    input.addEventListener('focus', function() {
-                        container.classList.add('focused');
-                    });
-                    
-                    input.addEventListener('blur', function() {
-                        container.classList.remove('focused');
-                    });
-                }
-            });
-        }
-
-        // Toggle password visibility
-        function togglePassword(targetId) {
-            const passwordInput = document.getElementById(targetId);
-            const button = document.querySelector(`button[onclick="togglePassword('${targetId}')"]`);
-            const icon = button.querySelector('ion-icon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                icon.name = 'eye-off-outline';
-            } else {
-                passwordInput.type = 'password';
-                icon.name = 'eye-outline';
-            }
-        }
-
-        // Load user data into form fields
-        function loadUserData(userData) {
-            // Profile header
-            document.getElementById('profileName').textContent = `${userData.firstName || 'ชื่อ'} ${userData.lastName || 'นามสกุล'}`;
-            document.getElementById('profileRole').textContent = userData.role || 'นักเรียน';
-            document.getElementById('attendanceRate').textContent = `${userData.attendanceRate || 95}%`;
-            document.getElementById('attendedDays').textContent = userData.attendedDays || 42;
-            document.getElementById('absentDays').textContent = userData.absentDays || 3;
-            
-            // Form fields
-            document.getElementById('firstName').value = userData.firstName || '';
-            document.getElementById('lastName').value = userData.lastName || '';
-            document.getElementById('email').value = userData.email || '';
-            document.getElementById('phone').value = userData.phone || '';
-            document.getElementById('studentId').value = userData.studentId || '';
-            document.getElementById('class').value = userData.class || '';
-            document.getElementById('address').value = userData.address || '';
-            document.getElementById('username').value = userData.username || '';
-            
-            // Privacy settings
-            document.getElementById('showOnlineStatus').checked = userData.showOnlineStatus !== false;
-            document.getElementById('emailNotifications').checked = userData.emailNotifications !== false;
-            document.getElementById('browserNotifications').checked = userData.browserNotifications || false;
-            
-            // Update avatar if exists
-            if (userData.avatar) {
-                document.getElementById('avatarImage').src = userData.avatar;
-            }
-        }
-
-        // Initialize all event listeners
-        function initializeEventListeners() {
-            // Avatar upload functionality
-            document.getElementById('profileAvatar').addEventListener('click', function() {
-                document.getElementById('avatarUpload').click();
-            });
-
-            document.getElementById('avatarUpload').addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        document.getElementById('avatarImage').src = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
-            // Form submission
-            document.getElementById('profileForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                handleFormSubmission();
-            });
-
-            // Cancel button
-            document.getElementById('cancelBtn').addEventListener('click', function() {
-                const userData = JSON.parse(sessionStorage.getItem('userData') || localStorage.getItem('userData') || '{}');
-                loadUserData(userData);
-                showMessage('การเปลี่ยนแปลงถูกยกเลิก');
-            });
-
-            // Modal close buttons
-            document.getElementById('closeSuccessModal').addEventListener('click', function() {
-                hideModal('successModal');
-            });
-
-            document.getElementById('closeErrorModal').addEventListener('click', function() {
-                hideModal('errorModal');
-            });
-
-            document.getElementById('cancelConfirm').addEventListener('click', function() {
-                hideModal('confirmModal');
-            });
-
-            document.getElementById('confirmSave').addEventListener('click', function() {
-                hideModal('confirmModal');
-                saveUserData();
-            });
-
-            // Logout functionality
-            document.getElementById('logoutBtn').addEventListener('click', function(e) {
-                e.preventDefault();
-                if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
-                    sessionStorage.removeItem('isLoggedIn');
-                    sessionStorage.removeItem('userData');
-                    localStorage.removeItem('isLoggedIn');
-                    localStorage.removeItem('userData');
-                    window.location.href = 'Profile.html';
-                }
-            });
-        }
-
-        // Handle form submission
-        function handleFormSubmission() {
-            // Validate form
-            if (!validateForm()) {
+            // ตรวจสอบขนาดไฟล์ (ไม่เกิน 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('ขนาดไฟล์ต้องไม่เกิน 2MB');
                 return;
             }
-
-            // Show confirmation modal
-            showModal('confirmModal');
-        }
-
-        // Validate form data
-        function validateForm() {
-            const firstName = document.getElementById('firstName').value.trim();
-            const lastName = document.getElementById('lastName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const studentId = document.getElementById('studentId').value.trim();
-            const currentPassword = document.getElementById('currentPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-
-            // Check required fields
-            if (!firstName || !lastName || !email || !phone || !studentId) {
-                showErrorModal('กรุณากรอกข้อมูลให้ครบถ้วน');
-                return false;
-            }
-
-            // Validate email format
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showErrorModal('รูปแบบอีเมลไม่ถูกต้อง');
-                return false;
-            }
-
-            // Validate phone number
-            const phoneRegex = /^[0-9\-\s]{10,}$/;
-            if (!phoneRegex.test(phone)) {
-                showErrorModal('หมายเลขโทรศัพท์ไม่ถูกต้อง');
-                return false;
-            }
-
-            // Validate password change
-            if (newPassword || confirmPassword) {
-                if (!currentPassword) {
-                    showErrorModal('กรุณากรอกรหัสผ่านปัจจุบัน');
-                    return false;
-                }
-                
-                if (newPassword !== confirmPassword) {
-                    showErrorModal('รหัสผ่านใหม่ไม่ตรงกัน');
-                    return false;
-                }
-                
-                if (newPassword.length < 6) {
-                    showErrorModal('รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร');
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        // Save user data
-        function saveUserData() {
-            showLoading();
             
-            // Simulate API call
-            setTimeout(() => {
-                hideLoading();
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const avatarImg = document.getElementById('avatarImage');
+                avatarImg.src = e.target.result;
                 
-                try {
-                    // Get current user data
-                    const currentUserData = JSON.parse(sessionStorage.getItem('userData') || localStorage.getItem('userData') || '{}');
-                    
-                    // Update user data
-                    const updatedUserData = {
-                        ...currentUserData,
-                        firstName: document.getElementById('firstName').value.trim(),
-                        lastName: document.getElementById('lastName').value.trim(),
-                        email: document.getElementById('email').value.trim(),
-                        phone: document.getElementById('phone').value.trim(),
-                        studentId: document.getElementById('studentId').value.trim(),
-                        class: document.getElementById('class').value,
-                        address: document.getElementById('address').value.trim(),
-                        showOnlineStatus: document.getElementById('showOnlineStatus').checked,
-                        emailNotifications: document.getElementById('emailNotifications').checked,
-                        browserNotifications: document.getElementById('browserNotifications').checked,
-                        avatar: document.getElementById('avatarImage').src,
-                        lastUpdated: new Date().toISOString()
-                    };
-                    
-                    // Save to both sessionStorage and localStorage
-                    sessionStorage.setItem('userData', JSON.stringify(updatedUserData));
-                    localStorage.setItem('userData', JSON.stringify(updatedUserData));
-                    
-                    // Update profile header
-                    document.getElementById('profileName').textContent = `${updatedUserData.firstName} ${updatedUserData.lastName}`;
-                    
-                    // Clear password fields
-                    document.getElementById('currentPassword').value = '';
-                    document.getElementById('newPassword').value = '';
-                    document.getElementById('confirmPassword').value = '';
-                    
-                    // Show success message
-                    showSuccessModal();
-                    
-                } catch (error) {
-                    console.error('Error saving user data:', error);
-                    showErrorModal('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
-                }
-            }, 1500);
+                // บันทึกรูปทันทีเมื่ออัปโหลด
+                localStorage.setItem('userAvatar', e.target.result);
+                
+                console.log('อัปโหลดรูปโปรไฟล์สำเร็จ');
+            };
+            reader.readAsDataURL(file);
         }
+    });
 
-        // Show loading overlay
+    // Form submission
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        handleFormSubmission();
+    });
+
+    // Cancel button
+    document.getElementById('cancelBtn').addEventListener('click', function() {
+        const userData = JSON.parse(sessionStorage.getItem('userData') || localStorage.getItem('userData') || '{}');
+        loadUserData(userData);
+        showMessage('การเปลี่ยนแปลงถูกยกเลิก');
+    });
+
+    // Modal close buttons
+    document.getElementById('closeSuccessModal').addEventListener('click', function() {
+        hideModal('successModal');
+    });
+
+    document.getElementById('closeErrorModal').addEventListener('click', function() {
+        hideModal('errorModal');
+    });
+
+    document.getElementById('cancelConfirm').addEventListener('click', function() {
+        hideModal('confirmModal');
+    });
+
+    document.getElementById('confirmSave').addEventListener('click', function() {
+        hideModal('confirmModal');
+        saveUserData();
+    });
+
+    // Logout functionality
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+            sessionStorage.removeItem('isLoggedIn');
+            sessionStorage.removeItem('userData');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userData');
+            window.location.href = 'Profile.html';
+        }
+    });
+}
+
+// Handle form submission
+function handleFormSubmission() {
+    // Validate form
+    if (!validateForm()) {
+        return;
+    }
+
+    // Show confirmation modal
+    showModal('confirmModal');
+}
+
+// Validate form data
+function validateForm() {
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const studentId = document.getElementById('studentId').value.trim();
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    // Check required fields
+    if (!firstName || !lastName || !email || !phone || !studentId) {
+        showErrorModal('กรุณากรอกข้อมูลให้ครบถ้วน');
+        return false;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showErrorModal('รูปแบบอีเมลไม่ถูกต้อง');
+        return false;
+    }
+
+    // Validate phone number
+    const phoneRegex = /^[0-9\-\s]{10,}$/;
+    if (!phoneRegex.test(phone)) {
+        showErrorModal('หมายเลขโทรศัพท์ไม่ถูกต้อง');
+        return false;
+    }
+
+    // Validate password change
+    if (newPassword || confirmPassword) {
+        if (!currentPassword) {
+            showErrorModal('กรุณากรอกรหัสผ่านปัจจุบัน');
+            return false;
+        }
+        
+        if (newPassword !== confirmPassword) {
+            showErrorModal('รหัสผ่านใหม่ไม่ตรงกัน');
+            return false;
+        }
+        
+        if (newPassword.length < 6) {
+            showErrorModal('รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร');
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Save user data
+function saveUserData() {
+    showLoading();
+    
+    // Simulate API call
+    setTimeout(() => {
+        hideLoading();
+        
+        try {
+            // Get current user data
+            const currentUserData = JSON.parse(sessionStorage.getItem('userData') || localStorage.getItem('userData') || '{}');
+            
+            // Get avatar image
+            const avatarImage = document.getElementById('avatarImage').src;
+            
+            // Update user data
+            const updatedUserData = {
+                ...currentUserData,
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                studentId: document.getElementById('studentId').value.trim(),
+                class: document.getElementById('class').value,
+                address: document.getElementById('address').value.trim(),
+                showOnlineStatus: document.getElementById('showOnlineStatus').checked,
+                emailNotifications: document.getElementById('emailNotifications').checked,
+                browserNotifications: document.getElementById('browserNotifications').checked,
+                avatar: avatarImage,
+                lastUpdated: new Date().toISOString()
+            };
+            
+            // Save to both sessionStorage and localStorage
+            sessionStorage.setItem('userData', JSON.stringify(updatedUserData));
+            localStorage.setItem('userData', JSON.stringify(updatedUserData));
+            
+            // Save avatar separately for easy access
+            localStorage.setItem('userAvatar', avatarImage);
+            
+            // Update profile header
+            document.getElementById('profileName').textContent = `${updatedUserData.firstName} ${updatedUserData.lastName}`;
+            
+            // Clear password fields
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            // Show success message
+            showSuccessModal();
+            
+        } catch (error) {
+            console.error('Error saving user data:', error);
+            showErrorModal('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        }
+    }, 1500);
+}
+
+// Show loading overlay
+function showLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.classList.add('active');
+}
+
+// Hide loading overlay
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.classList.remove('active');
+}
+
+// Show success modal
+function showSuccessModal() {
+    const modal = document.getElementById('successModal');
+    if (modal) modal.classList.add('active');
+}
+
+// Show error modal
+function showErrorModal(message) {
+    const modal = document.getElementById('errorModal');
+    const messageElement = document.getElementById('errorMessage');
+    if (messageElement) messageElement.textContent = message;
+    if (modal) modal.classList.add('active');
+}
+
+// Show modal
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.add('active');
+}
+
+// Hide modal
+function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.remove('active');
+}
+
+// Show message (simple alert alternative)
+function showMessage(message) {
+    console.log(message);
+}
     </script>
 </body>
 </html>
+
 
 
 
