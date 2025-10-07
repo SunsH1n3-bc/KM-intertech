@@ -36,6 +36,7 @@
             color: #1f2937;
         }
 
+        /* Background Animation */
         .bg-container {
             position: fixed;
             top: 0;
@@ -73,6 +74,7 @@
             z-index: 10;
         }
 
+        /* Header Section */
         .header {
             text-align: center;
             margin-bottom: 60px;
@@ -127,6 +129,7 @@
             color: #6b7280;
         }
 
+        /* Glass Card Design */
         .glass-card {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
@@ -144,6 +147,7 @@
             border-color: rgba(59, 130, 246, 0.3);
         }
 
+        /* Section Headers */
         .section-header {
             display: flex;
             align-items: center;
@@ -164,6 +168,7 @@
             color: #1f2937;
         }
 
+        /* Form Styling */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -213,6 +218,7 @@
             background: rgba(255, 255, 255, 0.95);
         }
 
+        /* Premium Buttons */
         .btn {
             position: relative;
             display: inline-flex;
@@ -253,6 +259,17 @@
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
         }
 
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
+        }
+
         .btn-block {
             width: 100%;
         }
@@ -263,6 +280,7 @@
             transform: none !important;
         }
 
+        /* Code Display */
         .code-showcase {
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 197, 253, 0.1));
             border-radius: 24px;
@@ -301,6 +319,7 @@
             margin: 20px 0;
         }
 
+        /* Info Grid */
         .info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -345,6 +364,7 @@
             color: #1f2937;
         }
 
+        /* Button Groups */
         .btn-group {
             display: flex;
             gap: 20px;
@@ -353,6 +373,7 @@
             margin-top: 30px;
         }
 
+        /* Notifications */
         .toast {
             position: fixed;
             top: 30px;
@@ -398,6 +419,7 @@
             color: #ef4444;
         }
 
+        /* Loading Animation */
         .loading-spinner {
             display: inline-block;
             width: 20px;
@@ -413,6 +435,7 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* File Not Found Section */
         .file-warning {
             background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(251, 191, 36, 0.1));
             border: 2px solid rgba(245, 158, 11, 0.3);
@@ -433,6 +456,7 @@
             margin-bottom: 15px;
         }
 
+        /* URL Display */
         .url-display {
             background: rgba(255, 255, 255, 0.8);
             border: 2px solid rgba(59, 130, 246, 0.2);
@@ -447,6 +471,7 @@
             overflow-y: auto;
         }
 
+        /* Responsive Design */
         @media (max-width: 768px) {
             .container {
                 padding: 20px 15px;
@@ -496,10 +521,12 @@
             }
         }
 
+        /* Hidden utility */
         .hidden {
             display: none !important;
         }
 
+        /* Copy button styling */
         .copy-btn {
             background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
             color: white;
@@ -518,42 +545,6 @@
             background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
             transform: translateY(-1px);
         }
-
-        .sync-indicator {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 12px;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-            font-weight: 500;
-            box-shadow: var(--shadow-light);
-            z-index: 999;
-        }
-
-        .sync-indicator ion-icon {
-            font-size: 1.2rem;
-        }
-
-        .sync-indicator.synced {
-            color: #10b981;
-            border-color: rgba(16, 185, 129, 0.3);
-        }
-
-        .sync-indicator.syncing {
-            color: #3b82f6;
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-
-        .sync-indicator.error {
-            color: #ef4444;
-            border-color: rgba(239, 68, 68, 0.3);
-        }
     </style>
 </head>
 <body>
@@ -561,10 +552,11 @@
     <div class="bg-grid"></div>
 
     <div class="container">
+        <!-- Header Section -->
         <div class="header">
             <div class="header-content">
                 <h1>ระบบสร้างรหัสเช็คชื่อ</h1>
-                <p class="header-subtitle">แพลตฟอร์มจัดการเข้าเรียนสำหรับสถาบันการศึกษา (Real-time Sync)</p>
+                <p class="header-subtitle">แพลตฟอร์มจัดการเข้าเรียนสำหรับสถาบันการศึกษา</p>
                 <div class="header-stats">
                     <div class="stat-item">
                         <div class="stat-number" id="totalCodes">0</div>
@@ -582,6 +574,7 @@
             </div>
         </div>
 
+        <!-- Code Generator Section -->
         <div id="codeGenerator" class="glass-card">
             <div class="section-header">
                 <ion-icon name="add-circle-outline"></ion-icon>
@@ -649,6 +642,7 @@
             </form>
         </div>
         
+        <!-- Result Section -->
         <div id="resultSection" class="glass-card hidden">
             <div class="section-header">
                 <ion-icon name="checkmark-circle-outline"></ion-icon>
@@ -686,6 +680,7 @@
                 </div>
             </div>
 
+            <!-- File warning section -->
             <div id="fileWarning" class="file-warning hidden">
                 <ion-icon name="warning-outline"></ion-icon>
                 <p><strong>ไม่พบไฟล์ studens.html</strong></p>
@@ -712,6 +707,7 @@
             </div>
         </div>
         
+        <!-- Code Checker Section -->
         <div id="codeChecker" class="glass-card">
             <div class="section-header">
                 <ion-icon name="search-outline"></ion-icon>
@@ -735,187 +731,12 @@
         </div>
     </div>
 
-    <div class="sync-indicator synced" id="syncIndicator">
-        <ion-icon name="cloud-done-outline"></ion-icon>
-        <span id="syncStatus">พร้อมซิงค์</span>
-    </div>
-
-    <script type="module">
-        // =============================================
-        // Firebase Realtime Database Integration
-        // =============================================
-        
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, set, get, onValue, update, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-
-        // Firebase Configuration (ใช้ Firebase ของคุณเอง)
-        const firebaseConfig = {
-            apiKey: "AIzaSyDEMOKEY123456789",  // เปลี่ยนเป็น API Key ของคุณ
-            authDomain: "your-project.firebaseapp.com",  // เปลี่ยนเป็นของคุณ
-            databaseURL: "https://your-project-default-rtdb.firebaseio.com",  // เปลี่ยนเป็นของคุณ
-            projectId: "your-project",  // เปลี่ยนเป็นของคุณ
-            storageBucket: "your-project.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef123456"
-        };
-
-        // Initialize Firebase
-        let app, database, isFirebaseReady = false;
-        
-        try {
-            app = initializeApp(firebaseConfig);
-            database = getDatabase(app);
-            isFirebaseReady = true;
-            updateSyncStatus('synced', 'เชื่อมต่อสำเร็จ');
-            console.log('Firebase initialized successfully');
-        } catch (error) {
-            console.error('Firebase initialization error:', error);
-            updateSyncStatus('error', 'ไม่สามารถเชื่อมต่อ');
-            isFirebaseReady = false;
-        }
-
-        // Local cache
+    <script>
+        // เก็บข้อมูลรหัสที่สร้าง
         let generatedCodes = {};
         let currentGeneratedURL = '';
-
-        // =============================================
-        // Sync Functions
-        // =============================================
-
-        function updateSyncStatus(status, text) {
-            const indicator = document.getElementById('syncIndicator');
-            const statusText = document.getElementById('syncStatus');
-            
-            indicator.className = `sync-indicator ${status}`;
-            statusText.textContent = text;
-            
-            const iconMap = {
-                'synced': 'cloud-done-outline',
-                'syncing': 'cloud-upload-outline',
-                'error': 'cloud-offline-outline'
-            };
-            
-            const iconEl = indicator.querySelector('ion-icon');
-            if (iconEl) {
-                iconEl.setAttribute('name', iconMap[status] || 'cloud-outline');
-            }
-        }
-
-        // Load codes from Firebase
-        async function loadCodesFromFirebase() {
-            if (!isFirebaseReady) {
-                loadCodesFromLocalStorage();
-                return;
-            }
-
-            try {
-                updateSyncStatus('syncing', 'กำลังโหลดข้อมูล...');
-                const codesRef = ref(database, 'attendance_codes');
-                const snapshot = await get(codesRef);
-                
-                if (snapshot.exists()) {
-                    generatedCodes = snapshot.val();
-                    saveToLocalStorage();
-                } else {
-                    generatedCodes = {};
-                }
-                
-                updateStats();
-                updateSyncStatus('synced', 'ซิงค์สำเร็จ');
-            } catch (error) {
-                console.error('Error loading from Firebase:', error);
-                loadCodesFromLocalStorage();
-                updateSyncStatus('error', 'ใช้ข้อมูลออฟไลน์');
-            }
-        }
-
-        // Save code to Firebase
-        async function saveCodeToFirebase(code, data) {
-            if (!isFirebaseReady) {
-                saveToLocalStorage();
-                return;
-            }
-
-            try {
-                updateSyncStatus('syncing', 'กำลังบันทึก...');
-                const codeRef = ref(database, `attendance_codes/${code}`);
-                await set(codeRef, data);
-                updateSyncStatus('synced', 'บันทึกสำเร็จ');
-                saveToLocalStorage();
-            } catch (error) {
-                console.error('Error saving to Firebase:', error);
-                updateSyncStatus('error', 'บันทึกออฟไลน์');
-                saveToLocalStorage();
-            }
-        }
-
-        // Update code in Firebase
-        async function updateCodeInFirebase(code, updates) {
-            if (!isFirebaseReady) {
-                saveToLocalStorage();
-                return;
-            }
-
-            try {
-                updateSyncStatus('syncing', 'กำลังอัปเดต...');
-                const codeRef = ref(database, `attendance_codes/${code}`);
-                await update(codeRef, updates);
-                updateSyncStatus('synced', 'อัปเดตสำเร็จ');
-                saveToLocalStorage();
-            } catch (error) {
-                console.error('Error updating Firebase:', error);
-                updateSyncStatus('error', 'อัปเดตออฟไลน์');
-                saveToLocalStorage();
-            }
-        }
-
-        // Listen to Firebase changes (Real-time sync)
-        function setupFirebaseListener() {
-            if (!isFirebaseReady) return;
-
-            const codesRef = ref(database, 'attendance_codes');
-            onValue(codesRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    generatedCodes = snapshot.val();
-                    saveToLocalStorage();
-                    updateStats();
-                    updateSyncStatus('synced', 'ข้อมูลล่าสุด');
-                }
-            }, (error) => {
-                console.error('Firebase listener error:', error);
-                updateSyncStatus('error', 'การฟังข้อมูลผิดพลาด');
-            });
-        }
-
-        // LocalStorage functions (Fallback)
-        function saveToLocalStorage() {
-            try {
-                const data = JSON.stringify(generatedCodes);
-                localStorage.setItem('attendance_codes', data);
-            } catch (error) {
-                console.error('LocalStorage save error:', error);
-            }
-        }
-
-        function loadCodesFromLocalStorage() {
-            try {
-                const data = localStorage.getItem('attendance_codes');
-                if (data) {
-                    generatedCodes = JSON.parse(data);
-                } else {
-                    generatedCodes = {};
-                }
-                updateStats();
-            } catch (error) {
-                console.error('LocalStorage load error:', error);
-                generatedCodes = {};
-            }
-        }
-
-        // =============================================
-        // Core Functions
-        // =============================================
-
+        
+        // ตรวจสอบว่าไฟล์ studens.html มีอยู่หรือไม่
         async function checkFileExists(url) {
             try {
                 const response = await fetch(url, { method: 'HEAD' });
@@ -924,7 +745,21 @@
                 return false;
             }
         }
-
+        
+        // โหลดข้อมูลรหัส
+        function loadCodes() {
+            if (!generatedCodes) {
+                generatedCodes = {};
+            }
+            updateStats();
+        }
+        
+        // บันทึกข้อมูลรหัส
+        function saveCodes() {
+            updateStats();
+        }
+        
+        // อัปเดตสถิติ
         function updateStats() {
             const total = Object.keys(generatedCodes).length;
             const active = Object.values(generatedCodes).filter(code => !code.used).length;
@@ -932,12 +767,15 @@
             document.getElementById('totalCodes').textContent = total;
             document.getElementById('activeCodes').textContent = active;
         }
-
+        
+        // สร้างรหัส 6 หลัก
         function generateCode() {
             return Math.random().toString().substr(2, 6);
         }
-
+        
+        // สร้าง URL พารามิเตอร์ที่ใช้งานได้กับ GitHub Pages
         function createAttendanceURL(data) {
+            // ใช้ relative path ที่ปลอดภัยสำหรับ GitHub Pages
             const currentPath = window.location.pathname;
             const basePath = currentPath.substring(0, currentPath.lastIndexOf('/')) || '';
             const baseURL = window.location.origin + basePath + '/studens.html';
@@ -953,7 +791,8 @@
             
             return baseURL + '?' + params.toString();
         }
-
+        
+        // แสดง toast notification
         function showToast(message, type = 'success', icon = 'checkmark-circle-outline') {
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
@@ -968,10 +807,12 @@
             toast.appendChild(messageEl);
             document.body.appendChild(toast);
             
+            // Animate in
             requestAnimationFrame(() => {
                 toast.classList.add('show');
             });
             
+            // Remove after 4 seconds
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => {
@@ -981,12 +822,14 @@
                 }, 400);
             }, 4000);
         }
-
-        window.copyURL = function() {
+        
+        // คัดลอก URL
+        function copyURL() {
             const urlText = document.getElementById('generatedURL').textContent;
             navigator.clipboard.writeText(urlText).then(() => {
                 showToast('คัดลอก URL สำเร็จ!', 'success', 'copy-outline');
             }).catch(() => {
+                // Fallback for older browsers
                 const textArea = document.createElement('textarea');
                 textArea.value = urlText;
                 document.body.appendChild(textArea);
@@ -996,11 +839,8 @@
                 showToast('คัดลอก URL สำเร็จ!', 'success', 'copy-outline');
             });
         }
-
-        // =============================================
-        // Form Handlers
-        // =============================================
-
+        
+        // จัดการฟอร์มสร้างรหัส
         document.getElementById('generateForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -1008,6 +848,7 @@
             const btnText = document.getElementById('generateBtnText');
             const originalText = btnText.innerHTML;
             
+            // แสดง loading
             btnText.innerHTML = '<div class="loading-spinner"></div>กำลังสร้างรหัส...';
             submitBtn.disabled = true;
             
@@ -1024,11 +865,13 @@
                     return;
                 }
                 
+                // สร้างรหัสใหม่ (ตรวจสอบไม่ให้ซ้ำ)
                 let code;
                 do {
                     code = generateCode();
                 } while (generatedCodes[code]);
                 
+                // เก็บข้อมูลรหัส
                 const codeData = {
                     code: code,
                     name: name,
@@ -1040,18 +883,22 @@
                 };
                 
                 generatedCodes[code] = codeData;
-                await saveCodeToFirebase(code, codeData);
+                saveCodes();
                 
+                // สร้าง URL
                 const attendanceURL = createAttendanceURL(codeData);
                 currentGeneratedURL = attendanceURL;
                 
+                // ตรวจสอบว่าไฟล์ studens.html มีอยู่หรือไม่
                 const fileExists = await checkFileExists(attendanceURL);
                 
+                // แสดงผลลัพธ์
                 document.getElementById('codeDisplay').textContent = code;
                 document.getElementById('nameDisplay').textContent = name;
                 document.getElementById('gradeDisplay').textContent = grade;
                 document.getElementById('subjectDisplay').textContent = `${subjectCode} - ${subjectName}`;
                 
+                // แสดงหรือซ่อนคำเตือนไฟล์
                 const fileWarning = document.getElementById('fileWarning');
                 const generatedURLDiv = document.getElementById('generatedURL');
                 
@@ -1062,14 +909,17 @@
                     fileWarning.classList.add('hidden');
                 }
                 
+                // แสดงส่วนผลลัพธ์และซ่อนฟอร์ม
                 document.getElementById('codeGenerator').style.display = 'none';
                 document.getElementById('resultSection').classList.remove('hidden');
                 
+                // Scroll to result
                 document.getElementById('resultSection').scrollIntoView({ 
                     behavior: 'smooth',
                     block: 'start'
                 });
                 
+                // Reset button
                 btnText.innerHTML = originalText;
                 submitBtn.disabled = false;
                 
@@ -1080,8 +930,10 @@
                 }
             }, 1500);
         });
-
-        window.openAttendancePage = async function() {
+        
+        // เปิดหน้าเช็คชื่อทันที
+        async function openAttendancePage() {
+            // สร้าง URL จากข้อมูลที่แสดงอยู่
             const code = document.getElementById('codeDisplay').textContent;
             const name = document.getElementById('nameDisplay').textContent;
             const grade = document.getElementById('gradeDisplay').textContent;
@@ -1097,6 +949,8 @@
             };
             
             const url = createAttendanceURL(codeData);
+            
+            // ตรวจสอบว่าไฟล์มีอยู่หรือไม่
             const fileExists = await checkFileExists(url);
             
             if (fileExists) {
@@ -1104,24 +958,28 @@
                 showToast('เปิดหน้าเช็คชื่อใหม่แล้ว', 'success', 'open-outline');
             } else {
                 showToast('ไม่พบไฟล์ studens.html กรุณาตรวจสอบไฟล์', 'error', 'alert-circle-outline');
+                // แสดงคำเตือนและ URL
                 document.getElementById('fileWarning').classList.remove('hidden');
                 document.getElementById('generatedURL').textContent = url;
                 currentGeneratedURL = url;
             }
         }
-
-        window.resetForm = function() {
+        
+        // รีเซ็ตฟอร์ม
+        function resetForm() {
             document.getElementById('generateForm').reset();
             document.getElementById('codeGenerator').style.display = 'block';
             document.getElementById('resultSection').classList.add('hidden');
             document.getElementById('fileWarning').classList.add('hidden');
             
+            // Scroll to form
             document.getElementById('codeGenerator').scrollIntoView({ 
                 behavior: 'smooth',
                 block: 'start'
             });
         }
-
+        
+        // จัดการฟอร์มตรวจสอบรหัส
         document.getElementById('checkCodeForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -1133,27 +991,33 @@
                 return;
             }
             
+            // แสดง loading
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<div class="loading-spinner"></div>กำลังตรวจสอบ...';
             submitBtn.disabled = true;
             
             setTimeout(async () => {
+                // ตรวจสอบรหัส
                 if (generatedCodes[inputCode]) {
                     const codeData = generatedCodes[inputCode];
                     
+                    // สร้าง URL และตรวจสอบไฟล์
                     const attendanceURL = createAttendanceURL(codeData);
                     const fileExists = await checkFileExists(attendanceURL);
                     
                     if (fileExists) {
+                        // ทำเครื่องหมายว่าใช้แล้ว
                         generatedCodes[inputCode].used = true;
                         generatedCodes[inputCode].usedAt = new Date().toISOString();
-                        await updateCodeInFirebase(inputCode, {
-                            used: true,
-                            usedAt: new Date().toISOString()
-                        });
+                        saveCodes();
                         
+                        // เปิดหน้าเช็คชื่อ
                         window.open(attendanceURL, '_blank');
+                        
+                        // แสดงข้อความยืนยัน
                         showToast(`เข้าเช็คชื่อสำเร็จ! ${codeData.name} - ${codeData.grade}`, 'success', 'checkmark-circle-outline');
+                        
+                        // รีเซ็ตช่องกรอกรหัส
                         document.getElementById('inputCode').value = '';
                     } else {
                         showToast('รหัสถูกต้อง แต่ไม่พบไฟล์เป้าหมาย', 'error', 'warning-outline');
@@ -1162,45 +1026,38 @@
                     showToast('รหัสไม่ถูกต้องหรือไม่มีอยู่ในระบบ', 'error', 'close-circle-outline');
                 }
                 
+                // Reset button
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
             }, 1000);
         });
-
+        
+        // Auto-format input code (numbers only)
         document.getElementById('inputCode').addEventListener('input', function(e) {
             let value = e.target.value.replace(/[^0-9]/g, '');
             e.target.value = value;
         });
-
-        // =============================================
-        // Initialization
-        // =============================================
-
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Load codes from Firebase or LocalStorage
-            await loadCodesFromFirebase();
+        
+        // โหลดข้อมูลเมื่อเริ่มต้น
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCodes();
             
-            // Setup real-time listener
-            if (isFirebaseReady) {
-                setupFirebaseListener();
-            }
-            
+            // Add smooth scroll behavior to all internal links
             document.documentElement.style.scrollBehavior = 'smooth';
             
+            // ตรวจสอบ URL parameters สำหรับ auto-redirect
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('auto') === 'true') {
+                // ถ้ามีการ redirect มาจากหน้าอื่น ให้แสดงข้อความ
                 showToast('เข้าสู่ระบบผ่านลิงค์อัตโนมัติ', 'success', 'link-outline');
             }
-            
-            // Clean old codes
-            cleanOldCodes();
         });
-
-        async function cleanOldCodes() {
+        
+        // ทำความสะอาดรหัสเก่า (เก็บไว้ 7 วัน)
+        function cleanOldCodes() {
             const sevenDaysAgo = new Date();
             sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
             
-            let hasChanges = false;
             Object.keys(generatedCodes).forEach(code => {
                 const codeData = generatedCodes[code];
                 if (codeData && codeData.createdAt) {
@@ -1208,47 +1065,40 @@
                     
                     if (createdDate < sevenDaysAgo) {
                         delete generatedCodes[code];
-                        hasChanges = true;
-                        
-                        if (isFirebaseReady) {
-                            const codeRef = ref(database, `attendance_codes/${code}`);
-                            remove(codeRef).catch(err => console.error('Error removing old code:', err));
-                        }
                     }
                 }
             });
             
-            if (hasChanges) {
-                saveToLocalStorage();
-                updateStats();
-            }
+            saveCodes();
         }
-
-        // Keyboard shortcuts
+        
+        // ทำความสะอาดรหัสเก่าทุกครั้งที่โหลดหน้า
+        cleanOldCodes();
+        
+        // เพิ่มการจัดการ keyboard shortcuts
         document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + Enter ในฟอร์มสร้างรหัส
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                 if (document.getElementById('codeGenerator').style.display !== 'none') {
                     document.getElementById('generateForm').dispatchEvent(new Event('submit'));
                 }
             }
             
+            // Escape เพื่อรีเซ็ตฟอร์ม
             if (e.key === 'Escape' && !document.getElementById('resultSection').classList.contains('hidden')) {
                 resetForm();
             }
         });
-
-        // Network status monitoring
+        
+        // เพิ่มการแสดงสถานะการเชื่อมต่อ
         window.addEventListener('online', function() {
             showToast('เชื่อมต่ออินเทอร์เน็ตแล้ว', 'success', 'wifi-outline');
-            if (isFirebaseReady) {
-                loadCodesFromFirebase();
-            }
         });
         
         window.addEventListener('offline', function() {
-            showToast('ขาดการเชื่อมต่ออินเทอร์เน็ต - ใช้งานแบบออฟไลน์', 'error', 'wifi-outline');
-            updateSyncStatus('error', 'ออฟไลน์');
+            showToast('ขาดการเชื่อมต่ออินเทอร์เน็ต', 'error', 'wifi-outline');
         });
     </script>
 </body>
 </html>
+
