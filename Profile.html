@@ -1,16 +1,50 @@
-    <!DOCTYPE html>
-    <html lang="th">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Scan Check-in | สมัครสมาชิก</title>
-        <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-        <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-        <style>
-/* Import Google Fonts */
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Check-in | สมัครสมาชิก</title>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, update, child } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOu2MSd4fXzJppzoRn_3ZrCRiKoBVK11M",
+            authDomain: "km-intertech.firebaseapp.com",
+            databaseURL: "https://km-intertech-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "km-intertech",
+            storageBucket: "km-intertech.firebasestorage.app",
+            messagingSenderId: "378139509245",
+            appId: "1:378139509245:web:c9a7d7bf3b92945be09994",
+            measurementId: "G-23PJCBSTNF"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        window.firebaseApp = app;
+        window.firebaseDB = db;
+        window.firebaseAuth = auth;
+        window.firebaseRef = ref;
+        window.firebaseSet = set;
+        window.firebaseGet = get;
+        window.firebaseUpdate = update;
+        window.firebaseChild = child;
+        window.createUser = createUserWithEmailAndPassword;
+        window.signInUser = signInWithEmailAndPassword;
+        window.resetPassword = sendPasswordResetEmail;
+        window.authStateChanged = onAuthStateChanged;
+    </script>
+    
+    <style>
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
 
-/* CSS Variables */
 :root {
     --primary-blue: #2563eb;
     --primary-blue-dark: #1d4ed8;
@@ -19,7 +53,6 @@
     --accent-blue: #93c5fd;
     --light-blue: #dbeafe;
     --extra-light-blue: #f0f9ff;
-    
     --white: #ffffff;
     --off-white: #fafafa;
     --light-gray: #f5f7fa;
@@ -41,7 +74,6 @@
     --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Reset and Base Styles */
 * {
     margin: 0;
     padding: 0;
@@ -57,7 +89,6 @@ body {
     overflow-x: hidden;
 }
 
-/* Background Pattern */
 .background-pattern {
     position: fixed;
     top: 0;
@@ -127,22 +158,6 @@ body {
     animation-delay: -10s;
 }
 
-.floating-element.element-4 {
-    width: 100px;
-    height: 100px;
-    top: 10%;
-    right: 25%;
-    animation-delay: -7s;
-}
-
-.floating-element.element-5 {
-    width: 90px;
-    height: 90px;
-    bottom: 20%;
-    right: 35%;
-    animation-delay: -12s;
-}
-
 @keyframes float {
     0%, 100% { transform: translateY(0) rotate(0deg); }
     25% { transform: translateY(-20px) rotate(90deg); }
@@ -150,7 +165,6 @@ body {
     75% { transform: translateY(-20px) rotate(270deg); }
 }
 
-/* Navigation */
 .navbar {
     position: fixed;
     top: 0;
@@ -214,14 +228,12 @@ body {
     background: var(--light-blue);
 }
 
-/* Main Container */
 .main-container {
     display: flex;
     min-height: 100vh;
     padding-top: 80px;
 }
 
-/* Left Section - Information */
 .info-section {
     flex: 1;
     display: flex;
@@ -322,7 +334,6 @@ body {
     line-height: 1.6;
 }
 
-/* Right Section - Login Form */
 .login-section {
     flex: 1;
     display: flex;
@@ -373,7 +384,6 @@ body {
     font-size: 1rem;
 }
 
-/* Form Styles */
 .login-form {
     display: flex;
     flex-direction: column;
@@ -418,7 +428,6 @@ body {
     background: var(--white);
 }
 
-/* แก้ไขปัญหาไอคอนซ้อนกัน - เฉพาะ input ที่มี password-toggle */
 .input-container.has-toggle .form-input {
     padding-right: 3rem;
 }
@@ -536,6 +545,13 @@ body {
     transform: translateY(0);
 }
 
+.login-btn:disabled {
+    background: var(--gray);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
 .divider {
     display: flex;
     align-items: center;
@@ -557,39 +573,6 @@ body {
     white-space: nowrap;
 }
 
-.quick-login {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-}
-
-.quick-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1rem;
-    background: var(--white);
-    border: 2px solid var(--light-blue);
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: var(--transition);
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--gray);
-    flex: 1;
-}
-
-.quick-btn:hover {
-    border-color: var(--primary-blue);
-    color: var(--primary-blue);
-    background: var(--extra-light-blue);
-}
-
-.quick-btn ion-icon {
-    font-size: 1.5rem;
-}
-
 .login-footer {
     margin-top: 2rem;
     padding-top: 1.5rem;
@@ -606,11 +589,32 @@ body {
     font-size: 0.85rem;
 }
 
-.footer-text ion-icon {
+.footer-text a {
     color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 600;
 }
 
-/* Loading Overlay */
+.footer-text a:hover {
+    text-decoration: underline;
+}
+
+.form-hint {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    padding-left: 0.5rem;
+    transition: var(--transition);
+    min-height: 1rem;
+}
+
+.form-hint.success {
+    color: #10b981;
+}
+
+.form-hint.error {
+    color: #ef4444;
+}
+
 .loading-overlay {
     position: fixed;
     top: 0;
@@ -675,7 +679,6 @@ body {
     color: var(--gray);
 }
 
-/* Modals */
 .success-modal,
 .error-modal {
     position: fixed;
@@ -794,77 +797,12 @@ body {
     color: var(--white);
 }
 
-/* Footer */
-.footer {
-    background: var(--white);
-    border-top: 1px solid var(--light-blue);
-    padding: 2rem 0;
-    margin-top: auto;
+.name-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
 }
 
-.footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 2rem;
-}
-
-.footer-left p {
-    color: var(--gray);
-    font-size: 0.9rem;
-}
-
-.footer-right {
-    display: flex;
-    gap: 1.5rem;
-}
-
-.footer-link {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--gray);
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: var(--transition);
-}
-
-.footer-link:hover {
-    color: var(--primary-blue);
-}
-
-/* Additional CSS for Registration System */
-
-/* Form Hints */
-.form-hint {
-    font-size: 0.8rem;
-    margin-top: 0.25rem;
-    padding-left: 0.5rem;
-    transition: var(--transition);
-    min-height: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.form-hint::before {
-    content: '';
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: currentColor;
-    opacity: 0;
-    transition: var(--transition);
-}
-
-.form-hint:not(:empty)::before {
-    opacity: 1;
-}
-
-/* Select Input Styling */
-.form-input select,
 select.form-input {
     appearance: none;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
@@ -875,246 +813,6 @@ select.form-input {
     cursor: pointer;
 }
 
-.form-input select:focus,
-select.form-input:focus {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%232563eb' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-}
-
-/* Grid Layout for Name Fields */
-.name-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
-
-/* Form Toggle Animation */
-.login-container {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-origin: center;
-}
-
-.login-container[style*="display: none"] {
-    opacity: 0;
-    transform: scale(0.95) translateY(20px);
-}
-
-/* Enhanced Input Focus States */
-.input-container.focused {
-    transform: translateY(-2px);
-}
-
-.input-container.focused .form-input {
-    border-color: var(--primary-blue);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1), var(--shadow-md);
-}
-
-/* Enhanced Checkbox Styling for Terms */
-.checkbox-container.terms {
-    font-size: 0.85rem;
-    line-height: 1.4;
-    margin: 1rem 0;
-}
-
-.checkbox-container.terms .checkbox-text {
-    color: var(--dark-gray);
-}
-
-.checkbox-container.terms a {
-    color: var(--primary-blue);
-    text-decoration: none;
-    font-weight: 500;
-    border-bottom: 1px solid transparent;
-    transition: var(--transition);
-}
-
-.checkbox-container.terms a:hover {
-    border-bottom-color: var(--primary-blue);
-}
-
-/* Enhanced Login Footer Link */
-.login-footer .footer-text {
-    color: var(--dark-gray);
-    font-size: 0.9rem;
-}
-
-.login-footer a {
-    color: var(--primary-blue);
-    text-decoration: none;
-    font-weight: 600;
-    padding: 0.25rem 0;
-    border-bottom: 1px solid transparent;
-    transition: var(--transition);
-}
-
-.login-footer a:hover {
-    border-bottom-color: var(--primary-blue);
-    color: var(--primary-blue-dark);
-}
-
-/* Form Validation States */
-.form-input.valid {
-    border-color: #10b981;
-    background: #f0fdf4;
-}
-
-.form-input.invalid {
-    border-color: #ef4444;
-    background: #fef2f2;
-}
-
-.form-input.valid:focus {
-    border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.form-input.invalid:focus {
-    border-color: #ef4444;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-}
-
-/* Success/Error Hint Colors */
-.form-hint[style*="color: #4ecdc4"],
-.form-hint[style*="color: rgb(78, 205, 196)"] {
-    color: #10b981 !important;
-}
-
-.form-hint[style*="color: #ff6b6b"],
-.form-hint[style*="color: rgb(255, 107, 107)"] {
-    color: #ef4444 !important;
-}
-
-/* Enhanced Button States */
-.login-btn:disabled {
-    background: var(--gray);
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-.login-btn:disabled:hover {
-    background: var(--gray);
-    transform: none;
-}
-
-/* Loading States */
-.login-btn.loading {
-    position: relative;
-    color: transparent;
-}
-
-.login-btn.loading::after {
-    content: '';
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border: 2px solid transparent;
-    border-top: 2px solid var(--white);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-/* Enhanced Modal Animations */
-.success-modal.active .modal-content,
-.error-modal.active .modal-content {
-    animation: modalSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes modalSlideUp {
-    0% {
-        opacity: 0;
-        transform: translateY(30px) scale(0.95);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-/* Success Icon Animation */
-.success-icon {
-    animation: successPulse 0.6s ease-out;
-}
-
-@keyframes successPulse {
-    0% {
-        transform: scale(0.8);
-        opacity: 0;
-    }
-    50% {
-        transform: scale(1.1);
-    }
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-/* Error Icon Animation */
-.error-icon {
-    animation: errorShake 0.6s ease-out;
-}
-
-@keyframes errorShake {
-    0%, 100% {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    10%, 30%, 50%, 70%, 90% {
-        transform: translateX(-5px);
-    }
-    20%, 40%, 60%, 80% {
-        transform: translateX(5px);
-    }
-}
-
-/* Form Container Transitions */
-.login-section {
-    position: relative;
-    overflow: hidden;
-}
-
-/* Enhanced Quick Login Buttons */
-.quick-btn {
-    position: relative;
-    overflow: hidden;
-}
-
-.quick-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.1), transparent);
-    transition: left 0.5s;
-}
-
-.quick-btn:hover::before {
-    left: 100%;
-}
-
-/* Loading Text Animation */
-.loading-content h3 {
-    animation: loadingPulse 2s ease-in-out infinite;
-}
-
-@keyframes loadingPulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.7;
-    }
-}
-
-/* Form Field Focus Ring */
-.form-input:focus-visible {
-    outline: 2px solid var(--primary-blue);
-    outline-offset: 2px;
-}
-
-/* Responsive Design */
 @media (max-width: 768px) {
     .main-container {
         flex-direction: column;
@@ -1139,1286 +837,708 @@ select.form-input:focus {
         overflow-y: auto;
     }
     
-    .nav-container {
-        padding: 0 1rem;
-    }
-    
-    .nav-link span {
-        display: none;
-    }
-    
-    .footer-content {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-        padding: 0 1rem;
-    }
-    
-    .footer-right {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .quick-login {
-        flex-direction: column;
-    }
-    
-    .modal-actions {
-        flex-direction: column;
-    }
-    
     .name-grid {
         grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .checkbox-container.terms {
-        font-size: 0.8rem;
-    }
-    
-    .form-hint {
-        font-size: 0.75rem;
     }
 }
-
-@media (max-width: 480px) {
-    .info-title {
-        font-size: 1.8rem;
-    }
-    
-    .login-title {
-        font-size: 1.5rem;
-    }
-    
-    .login-container {
-        padding: 1.5rem;
-        margin: 0.5rem;
-        max-height: calc(100vh - 100px);
-    }
-    
-    .feature-item {
-        padding: 1rem;
-    }
-    
-    .features-list {
-        gap: 1rem;
-    }
-    
-    .modal-content {
-        padding: 2rem;
-        margin: 1rem;
-    }
-    
-    .success-icon,
-    .error-icon {
-        width: 60px;
-        height: 60px;
-        font-size: 2rem;
-    }
-}
-
-/* Dark Mode Support (Optional) */
-@media (prefers-color-scheme: dark) {
-    .form-hint[style*="color: #10b981"] {
-        color: #34d399 !important;
-    }
-    
-    .form-hint[style*="color: #ef4444"] {
-        color: #f87171 !important;
-    }
-}
-        </style>
-    </head>
-
+    </style>
+</head>
 <body>
-        <!-- Background Pattern -->
-        <div class="background-pattern">
-            <div class="pattern-grid"></div>
-            <div class="floating-elements">
-                <div class="floating-element element-1"></div>
-                <div class="floating-element element-2"></div>
-                <div class="floating-element element-3"></div>
-                <div class="floating-element element-4"></div>
-                <div class="floating-element element-5"></div>
-            </div>
+    <div class="background-pattern">
+        <div class="pattern-grid"></div>
+        <div class="floating-elements">
+            <div class="floating-element element-1"></div>
+            <div class="floating-element element-2"></div>
+            <div class="floating-element element-3"></div>
         </div>
+    </div>
 
-        <!-- Navigation Bar -->
-        <nav class="navbar">
-            <div class="nav-container">
-                <div class="nav-brand">
-                    <div class="nav-logo">
-                        <ion-icon name="scan-outline"></ion-icon>
-                    </div>
-                    <span class="nav-title">Scan Check-in</span>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="nav-logo">
+                    <ion-icon name="scan-outline"></ion-icon>
                 </div>
-                    <a href="./help.html" onclick="showHelp()" class="nav-link">
-                        <ion-icon name="help-circle-outline"></ion-icon>
-                        <span>ช่วยเหลือ</span>
-                    </a>
-                </div>
+                <span class="nav-title">Scan Check-in</span>
             </div>
-        </nav>
+            <a href="#" class="nav-link">
+                <ion-icon name="help-circle-outline"></ion-icon>
+                <span>ช่วยเหลือ</span>
+            </a>
+        </div>
+    </nav>
 
-        <!-- Main Container -->
-        <main class="main-container">
-            <!-- Left Side - Information -->
-            <div class="info-section">
-                <div class="info-content">
-                    <div class="info-header">
-                        <div class="info-icon">
-                            <ion-icon name="scan-circle-outline"></ion-icon>
+    <main class="main-container">
+        <div class="info-section">
+            <div class="info-content">
+                <div class="info-header">
+                    <div class="info-icon">
+                        <ion-icon name="scan-circle-outline"></ion-icon>
+                    </div>
+                    <h1 class="info-title">ระบบเช็คอินอัตโนมัติ</h1>
+                    <p class="info-subtitle">เทคโนโลยีที่ทันสมัยสำหรับการจัดการการเข้าเรียน</p>
+                </div>
+                
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <ion-icon name="flash-outline"></ion-icon>
                         </div>
-                        <h1 class="info-title">ระบบเช็คอินอัตโนมัติ</h1>
-                        <p class="info-subtitle">เทคโนโลยีที่ทันสมัยสำหรับการจัดการการเข้าเรียน</p>
+                        <div class="feature-content">
+                            <h3>เช็คอินรวดเร็ว</h3>
+                            <p>สแกน QR Code หรือใช้ระบบสแกนใบหน้าเพื่อเข้าสู่ระบบได้ทันที</p>
+                        </div>
                     </div>
                     
-                    <div class="features-list">
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <ion-icon name="flash-outline"></ion-icon>
-                            </div>
-                            <div class="feature-content">
-                                <h3>เช็คอินรวดเร็ว</h3>
-                                <p>สแกน QR Code หรือใช้ระบบสแกนใบหน้าเพื่อเข้าสู่ระบบได้ทันที</p>
-                            </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <ion-icon name="shield-checkmark-outline"></ion-icon>
                         </div>
-                        
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <ion-icon name="shield-checkmark-outline"></ion-icon>
-                            </div>
-                            <div class="feature-content">
-                                <h3>ความปลอดภัยสูง</h3>
-                                <p>ระบบรักษาความปลอดภัยขั้นสูงด้วยการเข้ารหัสข้อมูล</p>
-                            </div>
-                        </div>
-                        
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <ion-icon name="analytics-outline"></ion-icon>
-                            </div>
-                            <div class="feature-content">
-                                <h3>รายงานแบบเรียลไทม์</h3>
-                                <p>ติดตามสถิติการเข้าเรียนและวิเคราะห์ข้อมูลได้ทันที</p>
-                            </div>
+                        <div class="feature-content">
+                            <h3>ความปลอดภัยสูง</h3>
+                            <p>ระบบรักษาความปลอดภัยขั้นสูงด้วยการเข้ารหัสข้อมูล</p>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Right Side - Forms -->
-            <div class="login-section">
-                <!-- Login Form -->
-                <div class="login-container" id="loginContainer">
-                    <div class="login-header">
-                        <div class="login-icon">
-                            <ion-icon name="person-circle-outline"></ion-icon>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <ion-icon name="analytics-outline"></ion-icon>
                         </div>
-                        <h2 class="login-title">เข้าสู่ระบบ</h2>
-                        <p class="login-subtitle">กรุณาป้อนข้อมูลเพื่อเข้าใช้งานระบบ</p>
+                        <div class="feature-content">
+                            <h3>รายงานแบบเรียลไทม์</h3>
+                            <p>ติดตามสถิติการเข้าเรียนและวิเคราะห์ข้อมูลได้ทันที</p>
+                        </div>
                     </div>
-
-                    <form class="login-form" id="loginForm">
-                        <div class="form-group">
-                            <label for="username" class="form-label">ชื่อผู้ใช้งาน</label>
-                            <div class="input-container">
-                                <ion-icon name="person-outline" class="input-icon"></ion-icon>
-                                <input type="text" id="username" name="username" class="form-input" 
-                                    placeholder="กรอกชื่อผู้ใช้งาน" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="password" class="form-label">รหัสผ่าน</label>
-                            <div class="input-container">
-                                <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
-                                <input type="password" id="password" name="password" class="form-input" 
-                                    placeholder="กรอกรหัสผ่าน" required>
-                                <button type="button" class="password-toggle" id="passwordToggle">
-                                    <ion-icon name="eye-outline" id="toggleIcon"></ion-icon>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="form-options">
-                            <label class="checkbox-container">
-                                <input type="checkbox" id="remember" name="remember">
-                                <span class="checkmark"></span>
-                                <span class="checkbox-text">จดจำการเข้าสู่ระบบ</span>
-                            </label>
-                            <a href="#" class="forgot-link" onclick="toggleForm('forgot')">ลืมรหัสผ่าน?</a>
-                        </div>
-
-                        <button type="submit" class="login-btn">
-                            <span class="btn-text">เข้าสู่ระบบ</span>
-                            <ion-icon name="arrow-forward-outline" class="btn-icon"></ion-icon>
-                        </button>
-
-                        <div class="divider">
-                            <span class="divider-text">หรือเข้าสู่ระบบด้วย</span>
-                        </div>
-
-                        <div class="quick-login">
-                            <button type="button" class="quick-btn qr-btn">
-                                <ion-icon name="qr-code-outline"></ion-icon>
-                                <span>QR Code</span>
-                            </button>
-                            <button type="button" class="quick-btn face-btn">
-                                <ion-icon name="camera-outline"></ion-icon>
-                                <span>Face ID</span>
-                            </button>
-                            <button type="button" class="quick-btn fingerprint-btn">
-                                <ion-icon name="finger-print-outline"></ion-icon>
-                                <span>Fingerprint</span>
-                            </button>
-                        </div>
-                    </form>
-
-                    <div class="login-footer">
-                        <p class="footer-text">
-                            ยังไม่มีบัญชี? 
-                            <a href="#" onclick="toggleForm('register')" style="color: #667eea; text-decoration: none; font-weight: 600;">
-                                สมัครสมาชิก
-                            </a>
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Register Form -->
-                <div class="login-container" id="registerContainer" style="display: none;">
-                    <div class="login-header">
-                        <div class="login-icon">
-                            <ion-icon name="person-add-outline"></ion-icon>
-                        </div>
-                        <h2 class="login-title">สมัครสมาชิก</h2>
-                        <p class="login-subtitle">กรุณากรอกข้อมูลเพื่อสร้างบัญชีใหม่</p>
-                    </div>
-
-                    <form class="login-form" id="registerForm">
-                        <!-- Role Selection -->
-                        <div class="form-group">
-                            <label for="role" class="form-label">ประเภทผู้ใช้งาน</label>
-                            <div class="input-container">
-                                <ion-icon name="accessibility-outline" class="input-icon"></ion-icon>
-                                <select id="role" name="role" class="form-input" required>
-                                    <option value="">เลือกประเภทผู้ใช้งาน</option>
-                                    <option value="student">นักเรียน</option>
-                                    <option value="teacher">ครู</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Username -->
-                        <div class="form-group">
-                            <label for="regUsername" class="form-label">ชื่อผู้ใช้งาน</label>
-                            <div class="input-container">
-                                <ion-icon name="person-outline" class="input-icon"></ion-icon>
-                                <input type="text" id="regUsername" name="username" class="form-input" 
-                                    placeholder="กรอกชื่อผู้ใช้งาน" required>
-                            </div>
-                            <div class="form-hint" id="usernameHint"></div>
-                        </div>
-
-                        <!-- Name Fields -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <div class="form-group">
-                                <label for="firstName" class="form-label">ชื่อ</label>
-                                <div class="input-container">
-                                    <ion-icon name="person-outline" class="input-icon"></ion-icon>
-                                    <input type="text" id="firstName" name="firstName" class="form-input" 
-                                        placeholder="ชื่อจริง" required>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="lastName" class="form-label">นามสกุล</label>
-                                <div class="input-container">
-                                    <ion-icon name="person-outline" class="input-icon"></ion-icon>
-                                    <input type="text" id="lastName" name="lastName" class="form-input" 
-                                        placeholder="นามสกุล" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="form-group">
-                            <label for="email" class="form-label">อีเมล</label>
-                            <div class="input-container">
-                                <ion-icon name="mail-outline" class="input-icon"></ion-icon>
-                                <input type="email" id="email" name="email" class="form-input" 
-                                    placeholder="example@school.ac.th" required>
-                            </div>
-                        </div>
-
-                        <!-- Phone -->
-                        <div class="form-group">
-                            <label for="phone" class="form-label">เบอร์โทรศัพท์</label>
-                            <div class="input-container">
-                                <ion-icon name="call-outline" class="input-icon"></ion-icon>
-                                <input type="tel" id="phone" name="phone" class="form-input" 
-                                    placeholder="0812345678" required>
-                            </div>
-                        </div>
-
-                        <!-- Student ID / Teacher ID -->
-                        <div class="form-group">
-                            <label for="studentId" class="form-label">รหัสประจำตัว</label>
-                            <div class="input-container">
-                                <ion-icon name="card-outline" class="input-icon"></ion-icon>
-                                <input type="text" id="studentId" name="studentId" class="form-input" 
-                                    placeholder="กรอกรหัสนักเรียน/ครู" required>
-                            </div>
-                        </div>
-
-                        <!-- Class -->
-                        <div class="form-group">
-                            <label for="class" class="form-label">ชั้นเรียน/แผนก</label>
-                            <div class="input-container">
-                                <ion-icon name="school-outline" class="input-icon"></ion-icon>
-                                <input type="text" id="class" name="class" class="form-input" 
-                                    placeholder="เช่น 3/1 หรือ แผนกคอมพิวเตอร์" required>
-                            </div>
-                        </div>
-
-                        <!-- Date of Birth -->
-                        <div class="form-group">
-                            <label for="birthDate" class="form-label">วันเดือนปีเกิด</label>
-                            <div class="input-container">
-                                <ion-icon name="calendar-outline" class="input-icon"></ion-icon>
-                                <input type="date" id="birthDate" name="birthDate" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <!-- Password -->
-                        <div class="form-group">
-                            <label for="regPassword" class="form-label">รหัสผ่าน</label>
-                            <div class="input-container">
-                                <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
-                                <input type="password" id="regPassword" name="password" class="form-input" 
-                                    placeholder="กรอกรหัสผ่าน (อย่างน้อย 6 ตัวอักษร)" required>
-                                <button type="button" class="password-toggle" id="regPasswordToggle">
-                                    <ion-icon name="eye-outline"></ion-icon>
-                                </button>
-                            </div>
-                            <div class="form-hint" id="passwordHint"></div>
-                        </div>
-
-                        <!-- Confirm Password -->
-                        <div class="form-group">
-                            <label for="confirmPassword" class="form-label">ยืนยันรหัสผ่าน</label>
-                            <div class="input-container">
-                                <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
-                                <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" 
-                                    placeholder="ยืนยันรหัสผ่านอีกครั้ง" required>
-                                <button type="button" class="password-toggle" id="confirmPasswordToggle">
-                                    <ion-icon name="eye-outline"></ion-icon>
-                                </button>
-                            </div>
-                            <div class="form-hint" id="confirmPasswordHint"></div>
-                        </div>
-
-                        <!-- Terms and Conditions -->
-                        <div class="form-options">
-                            <label class="checkbox-container">
-                                <input type="checkbox" id="acceptTerms" name="acceptTerms" required>
-                                <span class="checkmark"></span>
-                                <span class="checkbox-text">
-                                    ฉันยอมรับ <a href="#" onclick="showTerms()" style="color: #667eea;">เงื่อนไขการใช้งาน</a> 
-                                    และ <a href="#" onclick="showPrivacy()" style="color: #667eea;">นโยบายความเป็นส่วนตัว</a>
-                                </span>
-                            </label>
-                        </div>
-
-                        <button type="submit" class="login-btn">
-                            <span class="btn-text">สมัครสมาชิก</span>
-                            <ion-icon name="checkmark-outline" class="btn-icon"></ion-icon>
-                        </button>
-                    </form>
-
-                    <div class="login-footer">
-                        <p class="footer-text">
-                            มีบัญชีอยู่แล้ว? 
-                            <a href="#" onclick="toggleForm('login')" style="color: #667eea; text-decoration: none; font-weight: 600;">
-                                เข้าสู่ระบบ
-                            </a>
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Forgot Password Form -->
-                <div class="login-container" id="forgotContainer" style="display: none;">
-                    <div class="login-header">
-                        <div class="login-icon">
-                            <ion-icon name="key-outline"></ion-icon>
-                        </div>
-                        <h2 class="login-title">ลืมรหัสผ่าน</h2>
-                        <p class="login-subtitle">กรุณากรอกข้อมูลเพื่อยืนยันตัวตน</p>
-                    </div>
-
-                    <form class="login-form" id="forgotForm">
-                        <!-- Username -->
-                        <div class="form-group">
-                            <label for="forgotUsername" class="form-label">ชื่อผู้ใช้งาน</label>
-                            <div class="input-container">
-                                <ion-icon name="person-outline" class="input-icon"></ion-icon>
-                                <input type="text" id="forgotUsername" name="username" class="form-input" 
-                                    placeholder="กรอกชื่อผู้ใช้งาน" required>
-                            </div>
-                        </div>
-
-                        <!-- Student ID -->
-                        <div class="form-group">
-                            <label for="forgotStudentId" class="form-label">รหัสประจำตัว</label>
-                            <div class="input-container">
-                                <ion-icon name="card-outline" class="input-icon"></ion-icon>
-                                <input type="text" id="forgotStudentId" name="studentId" class="form-input" 
-                                    placeholder="กรอกรหัสนักเรียน/ครู" required>
-                            </div>
-                        </div>
-
-                        <!-- Date of Birth -->
-                        <div class="form-group">
-                            <label for="forgotBirthDate" class="form-label">วันเดือนปีเกิด</label>
-                            <div class="input-container">
-                                <ion-icon name="calendar-outline" class="input-icon"></ion-icon>
-                                <input type="date" id="forgotBirthDate" name="birthDate" class="form-input" required>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="login-btn">
-                            <span class="btn-text">ยืนยันตัวตน</span>
-                            <ion-icon name="checkmark-outline" class="btn-icon"></ion-icon>
-                        </button>
-                    </form>
-
-                    <div class="login-footer">
-                        <p class="footer-text">
-                            จำรหัสผ่านได้แล้ว? 
-                            <a href="#" onclick="toggleForm('login')" style="color: #667eea; text-decoration: none; font-weight: 600;">
-                                เข้าสู่ระบบ
-                            </a>
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Reset Password Form -->
-                <div class="login-container" id="resetContainer" style="display: none;">
-                    <div class="login-header">
-                        <div class="login-icon">
-                            <ion-icon name="refresh-outline"></ion-icon>
-                        </div>
-                        <h2 class="login-title">ตั้งรหัสผ่านใหม่</h2>
-                        <p class="login-subtitle">กรุณากรอกรหัสผ่านใหม่ของคุณ</p>
-                    </div>
-
-                    <form class="login-form" id="resetForm">
-                        <!-- New Password -->
-                        <div class="form-group">
-                            <label for="newPassword" class="form-label">รหัสผ่านใหม่</label>
-                            <div class="input-container">
-                                <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
-                                <input type="password" id="newPassword" name="newPassword" class="form-input" 
-                                    placeholder="กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)" required>
-                                <button type="button" class="password-toggle" id="newPasswordToggle">
-                                    <ion-icon name="eye-outline"></ion-icon>
-                                </button>
-                            </div>
-                            <div class="form-hint" id="newPasswordHint"></div>
-                        </div>
-
-                        <!-- Confirm New Password -->
-                        <div class="form-group">
-                            <label for="confirmNewPassword" class="form-label">ยืนยันรหัสผ่านใหม่</label>
-                            <div class="input-container">
-                                <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
-                                <input type="password" id="confirmNewPassword" name="confirmNewPassword" class="form-input" 
-                                    placeholder="ยืนยันรหัสผ่านใหม่อีกครั้ง" required>
-                                <button type="button" class="password-toggle" id="confirmNewPasswordToggle">
-                                    <ion-icon name="eye-outline"></ion-icon>
-                                </button>
-                            </div>
-                            <div class="form-hint" id="confirmNewPasswordHint"></div>
-                        </div>
-
-                        <button type="submit" class="login-btn">
-                            <span class="btn-text">เปลี่ยนรหัสผ่าน</span>
-                            <ion-icon name="save-outline" class="btn-icon"></ion-icon>
-                        </button>
-                    </form>
-
-                    <div class="login-footer">
-                        <p class="footer-text">
-                            <a href="#" onclick="toggleForm('login')" style="color: #667eea; text-decoration: none; font-weight: 600;">
-                                ← กลับไปเข้าสู่ระบบ
-                            </a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <!-- Loading Overlay -->
-        <div class="loading-overlay" id="loadingOverlay">
-            <div class="loading-content">
-                <div class="loading-spinner">
-                    <ion-icon name="reload-outline"></ion-icon>
-                </div>
-                <h3 id="loadingText">กำลังเข้าสู่ระบบ</h3>
-                <p>กรุณารอสักครู่...</p>
-            </div>
-        </div>
-
-        <!-- Success Modal -->
-        <div class="success-modal" id="successModal">
-            <div class="modal-content">
-                <div class="success-icon">
-                    <ion-icon name="checkmark-circle"></ion-icon>
-                </div>
-                <h3 id="successTitle">เข้าสู่ระบบสำเร็จ!</h3>
-                <p id="successMessage">ยินดีต้อนรับสู่ระบบ Scan Check-in</p>
-                <div class="modal-actions">
-                    <button class="modal-btn primary" id="successPrimaryBtn">
-                        <ion-icon name="person-outline"></ion-icon>
-                        ไปที่โปรไฟล์
-                    </button>
-                    <button class="modal-btn secondary" id="successSecondaryBtn">
-                        <ion-icon name="home-outline"></ion-icon>
-                        หน้าหลัก
-                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Error Modal -->
-        <div class="error-modal" id="errorModal">
-            <div class="modal-content">
-                <div class="error-icon">
-                    <ion-icon name="alert-circle"></ion-icon>
+        <div class="login-section">
+            <!-- Login Form -->
+            <div class="login-container" id="loginContainer">
+                <div class="login-header">
+                    <div class="login-icon">
+                        <ion-icon name="person-circle-outline"></ion-icon>
+                    </div>
+                    <h2 class="login-title">เข้าสู่ระบบ</h2>
+                    <p class="login-subtitle">กรุณาป้อนข้อมูลเพื่อเข้าใช้งานระบบ</p>
                 </div>
-                <h3>เกิดข้อผิดพลาด</h3>
-                <p id="errorMessage">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</p>
-                <div class="modal-actions">
-                    <button class="modal-btn primary" id="tryAgain">
-                        <ion-icon name="refresh-outline"></ion-icon>
-                        ลองอีกครั้ง
+
+                <form class="login-form" id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail" class="form-label">อีเมล</label>
+                        <div class="input-container">
+                            <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+                            <input type="email" id="loginEmail" class="form-input" 
+                                placeholder="example@school.ac.th" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword" class="form-label">รหัสผ่าน</label>
+                        <div class="input-container has-toggle">
+                            <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+                            <input type="password" id="loginPassword" class="form-input" 
+                                placeholder="กรอกรหัสผ่าน" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">
+                                <ion-icon name="eye-outline"></ion-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="remember">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">จดจำการเข้าสู่ระบบ</span>
+                        </label>
+                        <a href="#" class="forgot-link" onclick="showForgotForm(event)">ลืมรหัสผ่าน?</a>
+                    </div>
+
+                    <button type="submit" class="login-btn">
+                        <span>เข้าสู่ระบบ</span>
+                        <ion-icon name="arrow-forward-outline"></ion-icon>
                     </button>
+                </form>
+
+                <div class="login-footer">
+                    <p class="footer-text">
+                        ยังไม่มีบัญชี? 
+                        <a href="#" onclick="showRegisterForm(event)">สมัครสมาชิก</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div class="login-container" id="registerContainer" style="display: none;">
+                <div class="login-header">
+                    <div class="login-icon">
+                        <ion-icon name="person-add-outline"></ion-icon>
+                    </div>
+                    <h2 class="login-title">สมัครสมาชิก</h2>
+                    <p class="login-subtitle">กรุณากรอกข้อมูลเพื่อสร้างบัญชีใหม่</p>
+                </div>
+
+                <form class="login-form" id="registerForm">
+                    <div class="form-group">
+                        <label for="role" class="form-label">ประเภทผู้ใช้งาน</label>
+                        <div class="input-container">
+                            <ion-icon name="accessibility-outline" class="input-icon"></ion-icon>
+                            <select id="role" class="form-input" required>
+                                <option value="">เลือกประเภทผู้ใช้งาน</option>
+                                <option value="student">นักเรียน</option>
+                                <option value="teacher">ครู</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="name-grid">
+                        <div class="form-group">
+                            <label for="firstName" class="form-label">ชื่อ</label>
+                            <div class="input-container">
+                                <ion-icon name="person-outline" class="input-icon"></ion-icon>
+                                <input type="text" id="firstName" class="form-input" 
+                                    placeholder="ชื่อจริง" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName" class="form-label">นามสกุล</label>
+                            <div class="input-container">
+                                <ion-icon name="person-outline" class="input-icon"></ion-icon>
+                                <input type="text" id="lastName" class="form-input" 
+                                    placeholder="นามสกุล" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regEmail" class="form-label">อีเมล</label>
+                        <div class="input-container">
+                            <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+                            <input type="email" id="regEmail" class="form-input" 
+                                placeholder="example@school.ac.th" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone" class="form-label">เบอร์โทรศัพท์</label>
+                        <div class="input-container">
+                            <ion-icon name="call-outline" class="input-icon"></ion-icon>
+                            <input type="tel" id="phone" class="form-input" 
+                                placeholder="0812345678" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="studentId" class="form-label">รหัสประจำตัว</label>
+                        <div class="input-container">
+                            <ion-icon name="card-outline" class="input-icon"></ion-icon>
+                            <input type="text" id="studentId" class="form-input" 
+                                placeholder="กรอกรหัสนักเรียน/ครู" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="classField" class="form-label">ชั้นเรียน/แผนก</label>
+                        <div class="input-container">
+                            <ion-icon name="school-outline" class="input-icon"></ion-icon>
+                            <input type="text" id="classField" class="form-input" 
+                                placeholder="เช่น 3/1 หรือ แผนกคอมพิวเตอร์" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regPassword" class="form-label">รหัสผ่าน</label>
+                        <div class="input-container has-toggle">
+                            <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+                            <input type="password" id="regPassword" class="form-input" 
+                                placeholder="อย่างน้อย 6 ตัวอักษร" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('regPassword')">
+                                <ion-icon name="eye-outline"></ion-icon>
+                            </button>
+                        </div>
+                        <div class="form-hint" id="passwordHint"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">ยืนยันรหัสผ่าน</label>
+                        <div class="input-container has-toggle">
+                            <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+                            <input type="password" id="confirmPassword" class="form-input" 
+                                placeholder="ยืนยันรหัสผ่านอีกครั้ง" required>
+                            <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                                <ion-icon name="eye-outline"></ion-icon>
+                            </button>
+                        </div>
+                        <div class="form-hint" id="confirmHint"></div>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="acceptTerms" required>
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">ฉันยอมรับเงื่อนไขการใช้งาน</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="login-btn">
+                        <span>สมัครสมาชิก</span>
+                        <ion-icon name="checkmark-outline"></ion-icon>
+                    </button>
+                </form>
+
+                <div class="login-footer">
+                    <p class="footer-text">
+                        มีบัญชีอยู่แล้ว? 
+                        <a href="#" onclick="showLoginForm(event)">เข้าสู่ระบบ</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Forgot Password Form -->
+            <div class="login-container" id="forgotContainer" style="display: none;">
+                <div class="login-header">
+                    <div class="login-icon">
+                        <ion-icon name="key-outline"></ion-icon>
+                    </div>
+                    <h2 class="login-title">ลืมรหัสผ่าน</h2>
+                    <p class="login-subtitle">กรุณากรอกข้อมูลเพื่อยืนยันตัวตน</p>
+                </div>
+
+                <form class="login-form" id="forgotForm">
+                    <div class="form-group">
+                        <label for="forgotEmail" class="form-label">อีเมล</label>
+                        <div class="input-container">
+                            <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+                            <input type="email" id="forgotEmail" class="form-input" 
+                                placeholder="example@school.ac.th" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="forgotStudentId" class="form-label">รหัสประจำตัว</label>
+                        <div class="input-container">
+                            <ion-icon name="card-outline" class="input-icon"></ion-icon>
+                            <input type="text" id="forgotStudentId" class="form-input" 
+                                placeholder="กรอกรหัสนักเรียน/ครู" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="forgotPhone" class="form-label">เบอร์โทรศัพท์</label>
+                        <div class="input-container">
+                            <ion-icon name="call-outline" class="input-icon"></ion-icon>
+                            <input type="tel" id="forgotPhone" class="form-input" 
+                                placeholder="0812345678" required>
+                        </div>
+                    </div>
+
+                    <div class="form-hint" id="forgotHint" style="text-align: center; color: var(--gray); margin-top: 1rem;">
+                        💡 กรุณากรอกข้อมูลให้ตรงกับที่สมัครไว้
+                    </div>
+
+                    <button type="submit" class="login-btn">
+                        <span>ยืนยันตัวตนและส่งอีเมล</span>
+                        <ion-icon name="send-outline"></ion-icon>
+                    </button>
+                </form>
+
+                <div class="login-footer">
+                    <p class="footer-text">
+                        จำรหัสผ่านได้แล้ว? 
+                        <a href="#" onclick="showLoginForm(event)">เข้าสู่ระบบ</a>
+                    </p>
                 </div>
             </div>
         </div>
+    </main>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-content">
-                <div class="footer-left">
-                    <p>&copy; 2024 Scan Check-in System. สงวนลิขสิทธิ์.</p>
-                </div>
-                <div class="footer-right">
-                    <a href="#" class="footer-link" onclick="showPrivacy()">
-                        <ion-icon name="document-text-outline"></ion-icon>
-                        นโยบายความเป็นส่วนตัว
-                    </a>
-                    <a href="#" class="footer-link" onclick="showTerms()">
-                        <ion-icon name="information-circle-outline"></ion-icon>
-                        เงื่อนไขการใช้งาน
-                    </a>
-                </div>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <ion-icon name="reload-outline"></ion-icon>
             </div>
-        </footer>
+            <h3 id="loadingText">กำลังประมวลผล</h3>
+            <p>กรุณารอสักครู่...</p>
+        </div>
+    </div>
 
-        <script>
-            // Extended user database with birth dates
-    let userDatabase = {
-        'student001': {
-            username: 'student001',
-            password: 'password123',
-            firstName: 'สมชาย',
-            lastName: 'ใจดี',
-            email: 'somchai@school.ac.th',
-            phone: '0812345678',
-            studentId: '63010001',
-            class: '3/1',
-            role: 'student',
-            roleDisplay: 'นักเรียน',
-            birthDate: '2005-01-15',
-            address: '123 ถนนสุขุมวิท แขวงคลองตัน เขตคลองตัน กรุงเทพฯ 10110',
-            attendanceRate: 95,
-            attendedDays: 42,
-            absentDays: 3,
-            showOnlineStatus: true,
-            emailNotifications: true,
-            browserNotifications: false
-        },
-        'teacher001': {
-            username: 'teacher001',
-            password: 'teacher123',
-            firstName: 'อาจารย์สมหญิง',
-            lastName: 'ประเสริฐ',
-            email: 'teacher@school.ac.th',
-            phone: '0887654321',
-            studentId: 'T001',
-            class: 'ครูประจำชั้น 3/1',
-            role: 'teacher',
-            roleDisplay: 'ครู',
-            birthDate: '1985-05-20',
-            address: '456 ถนนพหลโยธิน เขตจตุจักร กรุงเทพฯ 10900',
-            attendanceRate: 98,
-            attendedDays: 45,
-            absentDays: 1,
-            showOnlineStatus: true,
-            emailNotifications: true,
-            browserNotifications: true
-        },
-    };
+    <!-- Success Modal -->
+    <div class="success-modal" id="successModal">
+        <div class="modal-content">
+            <div class="success-icon">
+                <ion-icon name="checkmark-circle"></ion-icon>
+            </div>
+            <h3 id="successTitle">สำเร็จ!</h3>
+            <p id="successMessage">ดำเนินการเรียบร้อยแล้ว</p>
+            <div class="modal-actions">
+                <button class="modal-btn primary" id="successBtn" onclick="closeSuccessModal()">
+                    <ion-icon name="checkmark-outline"></ion-icon>
+                    ตรงไป
+                </button>
+            </div>
+        </div>
+    </div>
 
-    // Load existing users
-    const storedUsers = JSON.parse(localStorage.getItem('userDatabase') || '{}');
-    userDatabase = { ...userDatabase, ...storedUsers };
+    <!-- Error Modal -->
+    <div class="error-modal" id="errorModal">
+        <div class="modal-content">
+            <div class="error-icon">
+                <ion-icon name="alert-circle"></ion-icon>
+            </div>
+            <h3>เกิดข้อผิดพลาด</h3>
+            <p id="errorMessage">กรุณาลองใหม่อีกครั้ง</p>
+            <div class="modal-actions">
+                <button class="modal-btn primary" onclick="closeErrorModal()">
+                    <ion-icon name="close-outline"></ion-icon>
+                    ปิด
+                </button>
+            </div>
+        </div>
+    </div>
 
-    // Global variable to store user data for password reset
-    let resetUserData = null;
-
-    // Auto-fill login form if remembered
-    document.addEventListener('DOMContentLoaded', function() {
-        loadRememberedLogin();
-        checkAutoLogin();
-    });
-
-    function loadRememberedLogin() {
-        const rememberedLogin = JSON.parse(localStorage.getItem('rememberedLogin') || '{}');
-        if (rememberedLogin.username) {
-            document.getElementById('username').value = rememberedLogin.username;
-            document.getElementById('remember').checked = true;
-        }
-    }
-
-    function checkAutoLogin() {
-        const isLoggedIn = localStorage.getItem('isLoggedIn');
-        const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-        
-        if (isLoggedIn === 'true' && userData.rememberMe) {
-            window.location.href = 'index.html';
-        }
-    }
-
-    // Form toggle function
-    function toggleForm(formType) {
-        const containers = {
-            login: document.getElementById('loginContainer'),
-            register: document.getElementById('registerContainer'),
-            forgot: document.getElementById('forgotContainer'),
-            reset: document.getElementById('resetContainer')
-        };
-        
-        // Hide all containers
-        Object.values(containers).forEach(container => {
-            container.style.display = 'none';
+    <script type="module">
+        // Wait for Firebase to load
+        await new Promise(resolve => {
+            const checkFirebase = setInterval(() => {
+                if (window.firebaseAuth && window.firebaseDB) {
+                    clearInterval(checkFirebase);
+                    resolve();
+                }
+            }, 100);
         });
-        
-        // Show selected container
-        if (containers[formType]) {
-            containers[formType].style.display = 'block';
-        }
-        
-        resetForms();
-    }
 
-    // Password toggle functionality - Fixed to prevent duplicate icons
-    function setupPasswordToggle(toggleId, inputId) {
-        const toggleButton = document.getElementById(toggleId);
-        const input = document.getElementById(inputId);
-        
-        if (toggleButton && input) {
-            toggleButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const icon = this.querySelector('ion-icon');
-                
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.name = 'eye-off-outline';
-                } else {
-                    input.type = 'password';
-                    icon.name = 'eye-outline';
+        const auth = window.firebaseAuth;
+        const db = window.firebaseDB;
+        const dbRef = window.firebaseRef;
+        const dbSet = window.firebaseSet;
+        const dbGet = window.firebaseGet;
+        const dbUpdate = window.firebaseUpdate;
+
+        // Check for remembered login
+        window.addEventListener('DOMContentLoaded', () => {
+            const rememberedEmail = localStorage.getItem('rememberedEmail');
+            if (rememberedEmail) {
+                document.getElementById('loginEmail').value = rememberedEmail;
+                document.getElementById('remember').checked = true;
+            }
+
+            // Check if user is already logged in
+            window.authStateChanged(auth, (user) => {
+                if (user && localStorage.getItem('autoLogin') === 'true') {
+                    window.location.href = 'index.html';
                 }
             });
-        }
-    }
-
-    // Setup all password toggles
-    setupPasswordToggle('passwordToggle', 'password');
-    setupPasswordToggle('regPasswordToggle', 'regPassword');
-    setupPasswordToggle('confirmPasswordToggle', 'confirmPassword');
-    setupPasswordToggle('newPasswordToggle', 'newPassword');
-    setupPasswordToggle('confirmNewPasswordToggle', 'confirmNewPassword');
-
-    // Username validation
-    const regUsernameField = document.getElementById('regUsername');
-    if (regUsernameField) {
-        regUsernameField.addEventListener('input', function() {
-            const username = this.value;
-            const hint = document.getElementById('usernameHint');
-            
-            if (username.length === 0) {
-                hint.textContent = '';
-                hint.style.color = '';
-                return;
-            }
-            
-            if (username.length < 4) {
-                hint.textContent = 'ชื่อผู้ใช้ต้องมีอย่างน้อย 4 ตัวอักษร';
-                hint.style.color = '#ff6b6b';
-            } else if (userDatabase[username]) {
-                hint.textContent = 'ชื่อผู้ใช้นี้ถูกใช้แล้ว';
-                hint.style.color = '#ff6b6b';
-            } else {
-                hint.textContent = 'ชื่อผู้ใช้พร้อมใช้งาน';
-                hint.style.color = '#4ecdc4';
-            }
         });
-    }
 
-    // Password validation
-    const regPasswordField = document.getElementById('regPassword');
-    if (regPasswordField) {
-        regPasswordField.addEventListener('input', function() {
+        // Password validation
+        document.getElementById('regPassword')?.addEventListener('input', function() {
             const password = this.value;
             const hint = document.getElementById('passwordHint');
             
             if (password.length === 0) {
                 hint.textContent = '';
+                hint.className = 'form-hint';
                 return;
             }
             
             if (password.length < 6) {
                 hint.textContent = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
-                hint.style.color = '#ff6b6b';
+                hint.className = 'form-hint error';
             } else {
                 hint.textContent = 'รหัสผ่านแข็งแรง';
-                hint.style.color = '#4ecdc4';
+                hint.className = 'form-hint success';
             }
             
-            // Check confirm password if filled
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            if (confirmPassword) {
-                checkConfirmPassword();
-            }
+            validateConfirmPassword();
         });
-    }
 
-    // Confirm password validation
-    function checkConfirmPassword() {
-        const password = document.getElementById('regPassword').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        const hint = document.getElementById('confirmPasswordHint');
-        
-        if (confirmPassword.length === 0) {
-            hint.textContent = '';
-            return;
-        }
-        
-        if (password === confirmPassword) {
-            hint.textContent = 'รหัสผ่านตรงกัน';
-            hint.style.color = '#4ecdc4';
-        } else {
-            hint.textContent = 'รหัสผ่านไม่ตรงกัน';
-            hint.style.color = '#ff6b6b';
-        }
-    }
+        document.getElementById('confirmPassword')?.addEventListener('input', validateConfirmPassword);
 
-    const confirmPasswordField = document.getElementById('confirmPassword');
-    if (confirmPasswordField) {
-        confirmPasswordField.addEventListener('input', checkConfirmPassword);
-    }
-
-    // New password validation for reset form
-    const newPasswordField = document.getElementById('newPassword');
-    if (newPasswordField) {
-        newPasswordField.addEventListener('input', function() {
-            const password = this.value;
-            const hint = document.getElementById('newPasswordHint');
+        function validateConfirmPassword() {
+            const password = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            const hint = document.getElementById('confirmHint');
             
-            if (password.length === 0) {
+            if (confirm.length === 0) {
                 hint.textContent = '';
+                hint.className = 'form-hint';
+                return;
+            }
+            
+            if (password === confirm) {
+                hint.textContent = 'รหัสผ่านตรงกัน';
+                hint.className = 'form-hint success';
+            } else {
+                hint.textContent = 'รหัสผ่านไม่ตรงกัน';
+                hint.className = 'form-hint error';
+            }
+        }
+
+        // Login Form
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const remember = document.getElementById('remember').checked;
+            
+            showLoading('กำลังเข้าสู่ระบบ');
+            
+            try {
+                const userCredential = await window.signInUser(auth, email, password);
+                const user = userCredential.user;
+                
+                // Get user data from database
+                const userRef = dbRef(db, 'users/' + user.uid);
+                const snapshot = await dbGet(userRef);
+                
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    
+                    // Save to localStorage
+                    localStorage.setItem('userData', JSON.stringify({
+                        uid: user.uid,
+                        email: user.email,
+                        ...userData,
+                        loginTime: new Date().toISOString()
+                    }));
+                    localStorage.setItem('isLoggedIn', 'true');
+                    
+                    if (remember) {
+                        localStorage.setItem('rememberedEmail', email);
+                        localStorage.setItem('autoLogin', 'true');
+                    } else {
+                        localStorage.removeItem('rememberedEmail');
+                        localStorage.removeItem('autoLogin');
+                    }
+                    
+                    hideLoading();
+                    showSuccess(
+                        'เข้าสู่ระบบสำเร็จ!',
+                        `ยินดีต้อนรับ ${userData.firstName} ${userData.lastName}`,
+                        () => window.location.href = 'index.html'
+                    );
+                } else {
+                    throw new Error('ไม่พบข้อมูลผู้ใช้');
+                }
+            } catch (error) {
+                hideLoading();
+                let errorMsg = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
+                
+                if (error.code === 'auth/invalid-email') {
+                    errorMsg = 'รูปแบบอีเมลไม่ถูกต้อง';
+                } else if (error.code === 'auth/user-not-found') {
+                    errorMsg = 'ไม่พบบัญชีผู้ใช้นี้';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMsg = 'รหัสผ่านไม่ถูกต้อง';
+                } else if (error.code === 'auth/invalid-credential') {
+                    errorMsg = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+                }
+                
+                showError(errorMsg);
+            }
+        });
+
+        // Register Form
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const password = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirm) {
+                showError('รหัสผ่านไม่ตรงกัน');
                 return;
             }
             
             if (password.length < 6) {
-                hint.textContent = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
-                hint.style.color = '#ff6b6b';
-            } else {
-                hint.textContent = 'รหัสผ่านแข็งแรง';
-                hint.style.color = '#4ecdc4';
+                showError('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+                return;
             }
             
-            // Check confirm password if filled
-            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-            if (confirmNewPassword) {
-                checkConfirmNewPassword();
-            }
-        });
-    }
-
-    // Confirm new password validation
-    function checkConfirmNewPassword() {
-        const newPassword = document.getElementById('newPassword').value;
-        const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-        const hint = document.getElementById('confirmNewPasswordHint');
-        
-        if (confirmNewPassword.length === 0) {
-            hint.textContent = '';
-            return;
-        }
-        
-        if (newPassword === confirmNewPassword) {
-            hint.textContent = 'รหัสผ่านตรงกัน';
-            hint.style.color = '#4ecdc4';
-        } else {
-            hint.textContent = 'รหัสผ่านไม่ตรงกัน';
-            hint.style.color = '#ff6b6b';
-        }
-    }
-
-    const confirmNewPasswordField = document.getElementById('confirmNewPassword');
-    if (confirmNewPasswordField) {
-        confirmNewPasswordField.addEventListener('input', checkConfirmNewPassword);
-    }
-
-    // Remember login functionality
-    function saveRememberedLogin(username, remember) {
-        if (remember) {
-            localStorage.setItem('rememberedLogin', JSON.stringify({
-                username: username,
-                savedAt: new Date().getTime()
-            }));
-        } else {
-            localStorage.removeItem('rememberedLogin');
-        }
-    }
-
-    // Login form submission
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const rememberMe = document.getElementById('remember').checked;
-            
-            if (username && password) {
-                showLoading('กำลังเข้าสู่ระบบ');
-                
-                setTimeout(() => {
-                    hideLoading();
-                    
-                    const user = userDatabase[username];
-                    if (user && user.password === password) {
-                        const userData = { ...user };
-                        delete userData.password;
-                        userData.loginTime = new Date().toISOString();
-                        userData.rememberMe = rememberMe;
-                        
-                        // Save user data
-                        localStorage.setItem('userData', JSON.stringify(userData));
-                        localStorage.setItem('isLoggedIn', 'true');
-                        localStorage.setItem('userRole', user.role);
-                        localStorage.setItem('username', username);
-                        
-                        // Save remembered login
-                        saveRememberedLogin(username, rememberMe);
-                        
-                        showSuccessModal(
-                            'เข้าสู่ระบบสำเร็จ!',
-                            `ยินดีต้อนรับ ${user.firstName} ${user.lastName}`,
-                            'login'
-                        );
-                    } else {
-                        showErrorModal('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
-                    }
-                }, 2000);
-            }
-        });
-    }
-
-    // Register form submission
-    const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
-        registerForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Get form data
-            const formData = {
-                username: document.getElementById('regUsername').value,
-                password: document.getElementById('regPassword').value,
-                confirmPassword: document.getElementById('confirmPassword').value,
+            const userData = {
+                role: document.getElementById('role').value,
                 firstName: document.getElementById('firstName').value,
                 lastName: document.getElementById('lastName').value,
-                email: document.getElementById('email').value,
+                email: document.getElementById('regEmail').value,
                 phone: document.getElementById('phone').value,
                 studentId: document.getElementById('studentId').value,
-                class: document.getElementById('class').value,
-                role: document.getElementById('role').value,
-                birthDate: document.getElementById('birthDate').value,
-                acceptTerms: document.getElementById('acceptTerms').checked
+                classField: document.getElementById('classField').value,
+                createdAt: new Date().toISOString(),
+                attendanceRate: 0,
+                attendedDays: 0,
+                absentDays: 0
             };
-            
-            // Validation
-            if (!validateRegistrationForm(formData)) {
-                return;
-            }
             
             showLoading('กำลังสมัครสมาชิก');
             
-            setTimeout(() => {
+            try {
+                const userCredential = await window.createUser(auth, userData.email, password);
+                const user = userCredential.user;
+                
+                // Save user data to database
+                await dbSet(dbRef(db, 'users/' + user.uid), userData);
+                
                 hideLoading();
-                
-                // Create new user
-                const newUser = {
-                    username: formData.username,
-                    password: formData.password,
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
-                    email: formData.email,
-                    phone: formData.phone,
-                    studentId: formData.studentId,
-                    class: formData.class,
-                    role: formData.role,
-                    birthDate: formData.birthDate,
-                    roleDisplay: formData.role === 'student' ? 'นักเรียน' : 'ครู',
-                    address: '',
-                    attendanceRate: 0,
-                    attendedDays: 0,
-                    absentDays: 0,
-                    showOnlineStatus: true,
-                    emailNotifications: true,
-                    browserNotifications: false,
-                    registrationDate: new Date().toISOString()
-                };
-                
-                // Add to database
-                userDatabase[formData.username] = newUser;
-                
-                // Save to localStorage (only new users, not default ones)
-                const usersToSave = {};
-                Object.keys(userDatabase).forEach(key => {
-                    if (!['student001', 'teacher001', 'admin'].includes(key)) {
-                        usersToSave[key] = userDatabase[key];
-                    }
-                });
-                localStorage.setItem('userDatabase', JSON.stringify(usersToSave));
-                
-                showSuccessModal(
+                showSuccess(
                     'สมัครสมาชิกสำเร็จ!',
-                    `ยินดีต้อนรับ ${formData.firstName} ${formData.lastName} เข้าสู่ระบบ Scan Check-in`,
-                    'register'
+                    `ยินดีต้อนรับ ${userData.firstName} ${userData.lastName}`,
+                    () => {
+                        document.getElementById('loginEmail').value = userData.email;
+                        showLoginForm();
+                    }
                 );
-            }, 2500);
+            } catch (error) {
+                hideLoading();
+                let errorMsg = 'เกิดข้อผิดพลาดในการสมัครสมาชิก';
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMsg = 'อีเมลนี้ถูกใช้งานแล้ว';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg = 'รูปแบบอีเมลไม่ถูกต้อง';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMsg = 'รหัสผ่านไม่แข็งแรงพอ';
+                }
+                
+                showError(errorMsg);
+            }
         });
-    }
 
-    // Forgot password form submission
-    const forgotForm = document.getElementById('forgotForm');
-    if (forgotForm) {
-        forgotForm.addEventListener('submit', function(e) {
+        // Forgot Password Form - ตรวจสอบข้อมูลก่อนส่งอีเมล
+        document.getElementById('forgotForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const username = document.getElementById('forgotUsername').value;
+            const email = document.getElementById('forgotEmail').value;
             const studentId = document.getElementById('forgotStudentId').value;
-            const birthDate = document.getElementById('forgotBirthDate').value;
+            const phone = document.getElementById('forgotPhone').value;
             
             showLoading('กำลังตรวจสอบข้อมูล');
             
-            setTimeout(() => {
-                hideLoading();
+            try {
+                // ค้นหาผู้ใช้ที่ตรงกับข้อมูล
+                const usersRef = dbRef(db, 'users');
+                const snapshot = await dbGet(usersRef);
                 
-                const user = userDatabase[username];
-                if (user && user.studentId === studentId && user.birthDate === birthDate) {
-                    resetUserData = user;
-                    showSuccessModal(
-                        'ยืนยันตัวตนสำเร็จ!',
-                        'กรุณาตั้งรหัสผ่านใหม่ของคุณ',
-                        'forgot'
-                    );
-                } else {
-                    showErrorModal('ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบชื่อผู้ใช้ รหัสประจำตัว และวันเดือนปีเกิดอีกครั้ง');
-                }
-            }, 2000);
-        });
-    }
-
-    // Reset password form submission
-    const resetForm = document.getElementById('resetForm');
-    if (resetForm) {
-        resetForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-            
-            // Validation
-            if (newPassword.length < 6) {
-                showErrorModal('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
-                return;
-            }
-            
-            if (newPassword !== confirmNewPassword) {
-                showErrorModal('รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน');
-                return;
-            }
-            
-            if (!resetUserData) {
-                showErrorModal('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
-                return;
-            }
-            
-            showLoading('กำลังเปลี่ยนรหัสผ่าน');
-            
-            setTimeout(() => {
-                hideLoading();
+                let userFound = false;
+                let userEmail = '';
                 
-                // Update password in database
-                userDatabase[resetUserData.username].password = newPassword;
-                
-                // Save to localStorage
-                const usersToSave = {};
-                Object.keys(userDatabase).forEach(key => {
-                    if (!['student001', 'teacher001', 'admin'].includes(key)) {
-                        usersToSave[key] = userDatabase[key];
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    
+                    // ตรวจสอบทีละคน
+                    for (let uid in users) {
+                        const user = users[uid];
+                        if (user.email === email && 
+                            user.studentId === studentId && 
+                            user.phone === phone) {
+                            userFound = true;
+                            userEmail = user.email;
+                            break;
+                        }
                     }
-                });
-                localStorage.setItem('userDatabase', JSON.stringify(usersToSave));
+                }
                 
-                // Clear reset data
-                resetUserData = null;
+                if (!userFound) {
+                    hideLoading();
+                    showError('ข้อมูลไม่ถูกต้อง\nกรุณาตรวจสอบอีเมล รหัสประจำตัว และเบอร์โทรศัพท์อีกครั้ง');
+                    return;
+                }
                 
-                showSuccessModal(
-                    'เปลี่ยนรหัสผ่านสำเร็จ!',
-                    'คุณสามารถเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้แล้ว',
-                    'reset'
-                );
-            }, 2000);
-        });
-    }
-
-    // Validation function
-    function validateRegistrationForm(data) {
-        const requiredFields = ['username', 'password', 'firstName', 'lastName', 'email', 'phone', 'studentId', 'class', 'role', 'birthDate'];
-        for (let field of requiredFields) {
-            if (!data[field]) {
-                showErrorModal('กรุณากรอกข้อมูลให้ครบถ้วน');
-                return false;
-            }
-        }
-        
-        if (userDatabase[data.username]) {
-            showErrorModal('ชื่อผู้ใช้นี้ถูกใช้แล้ว กรุณาเลือกชื่อใหม่');
-            return false;
-        }
-        
-        if (data.username.length < 4) {
-            showErrorModal('ชื่อผู้ใช้ต้องมีอย่างน้อย 4 ตัวอักษร');
-            return false;
-        }
-        
-        if (data.password.length < 6) {
-            showErrorModal('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
-            return false;
-        }
-        
-        if (data.password !== data.confirmPassword) {
-            showErrorModal('รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน');
-            return false;
-        }
-        
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(data.email)) {
-            showErrorModal('รูปแบบอีเมลไม่ถูกต้อง');
-            return false;
-        }
-        
-        const phoneRegex = /^[0-9]{10}$/;
-        if (!phoneRegex.test(data.phone.replace(/[-\s]/g, ''))) {
-            showErrorModal('รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง (10 หลัก)');
-            return false;
-        }
-        
-        const birthDate = new Date(data.birthDate);
-        const today = new Date();
-        if (birthDate >= today) {
-            showErrorModal('วันเดือนปีเกิดไม่ถูกต้อง');
-            return false;
-        }
-        
-        if (!data.acceptTerms) {
-            showErrorModal('กรุณายอมรับเงื่อนไขการใช้งาน');
-            return false;
-        }
-        
-        return true;
-    }
-
-    // Modal functions
-    function showLoading(text = 'กำลังประมวลผล') {
-        document.getElementById('loadingText').textContent = text;
-        document.getElementById('loadingOverlay').classList.add('active');
-    }
-
-    function hideLoading() {
-        document.getElementById('loadingOverlay').classList.remove('active');
-    }
-
-    function showSuccessModal(title, message, type) {
-        document.getElementById('successTitle').textContent = title;
-        document.getElementById('successMessage').textContent = message;
-        
-        const primaryBtn = document.getElementById('successPrimaryBtn');
-        const secondaryBtn = document.getElementById('successSecondaryBtn');
-        
-        switch(type) {
-            case 'register':
-                primaryBtn.innerHTML = '<ion-icon name="log-in-outline"></ion-icon> เข้าสู่ระบบ';
-                primaryBtn.onclick = () => {
-                    document.getElementById('successModal').classList.remove('active');
-                    toggleForm('login');
-                };
-                secondaryBtn.style.display = 'none';
-                break;
-            case 'forgot':
-                primaryBtn.innerHTML = '<ion-icon name="key-outline"></ion-icon> ตั้งรหัสผ่านใหม่';
-                primaryBtn.onclick = () => {
-                    document.getElementById('successModal').classList.remove('active');
-                    toggleForm('reset');
-                };
-                secondaryBtn.style.display = 'none';
-                break;
-            case 'reset':
-                primaryBtn.innerHTML = '<ion-icon name="log-in-outline"></ion-icon> เข้าสู่ระบบ';
-                primaryBtn.onclick = () => {
-                    document.getElementById('successModal').classList.remove('active');
-                    toggleForm('login');
-                };
-                secondaryBtn.style.display = 'none';
-                break;
-            default: // login
-                primaryBtn.innerHTML = '<ion-icon name="home-outline"></ion-icon> หน้าหลัก';
-                primaryBtn.onclick = () => window.location.href = 'index.html';
+                // ถ้าข้อมูลถูกต้อง ส่งอีเมลรีเซ็ตรหัสผ่าน
+                await window.resetPassword(auth, userEmail);
                 
-                secondaryBtn.innerHTML = '<ion-icon name="person-outline"></ion-icon> แก้ไขโปรไฟล์';
-                secondaryBtn.style.display = 'block';
-                secondaryBtn.onclick = () => window.location.href = 'Nav.html';
-        }
-        
-        document.getElementById('successModal').classList.add('active');
-    }
-
-    function showErrorModal(message) {
-        document.getElementById('errorMessage').textContent = message;
-        document.getElementById('errorModal').classList.add('active');
-    }
-
-    // Helper functions for GitHub Pages compatibility
-    function showHelp() {
-        alert('การช่วยเหลือ:\n\n- ใช้ชื่อผู้ใช้: student001, รหัสผ่าน: password123 สำหรับนักเรียน\n- ใช้ชื่อผู้ใช้: teacher001, รหัสผ่าน: teacher123 สำหรับครู\n- ติดต่อเราหากมีปัญหา');
-    }
-
-    function showTerms() {
-        alert('เงื่อนไขการใช้งาน:\n\n1. ใช้ระบบตามวัตถุประสงค์ที่กำหนด\n2. ไม่นำข้อมูลไปใช้ในทางที่ผิด\n3. รักษาความปลอดภัยของบัญชี\n4. ปฏิบัติตามกฎระเบียบของสถาบัน');
-    }
-
-    function showPrivacy() {
-        alert('นโยบายความเป็นส่วนตัว:\n\n1. เก็บข้อมูลอย่างปลอดภัย\n2. ไม่เปิดเผยข้อมูลแก่บุคคลที่สาม\n3. ใช้ข้อมูลเพื่อการศึกษาเท่านั้น\n4. สามารถขอดูข้อมูลส่วนตัวได้');
-    }
-
-    // Modal action buttons
-    const tryAgainBtn = document.getElementById('tryAgain');
-    if (tryAgainBtn) {
-        tryAgainBtn.addEventListener('click', function() {
-            document.getElementById('errorModal').classList.remove('active');
-        });
-    }
-
-    // Quick login buttons
-    document.querySelectorAll('.quick-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const type = this.classList.contains('qr-btn') ? 'QR Code' : 
-                        this.classList.contains('face-btn') ? 'Face ID' : 'Fingerprint';
-            
-            showLoading(`กำลังเข้าสู่ระบบด้วย ${type}`);
-            setTimeout(() => {
                 hideLoading();
-                showErrorModal(`การเข้าสู่ระบบด้วย ${type} ยังไม่พร้อมใช้งาน`);
-            }, 1500);
-        });
-    });
-
-    // Input focus animations
-    document.querySelectorAll('.form-input').forEach(input => {
-        input.addEventListener('focus', function() {
-            this.parentElement.classList.add('focused');
-        });
-        
-        input.addEventListener('blur', function() {
-            if (!this.value) {
-                this.parentElement.classList.remove('focused');
+                showSuccess(
+                    'ยืนยันตัวตนสำเร็จ!',
+                    'เราได้ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลของคุณแล้ว\nกรุณาตรวจสอบอีเมล (รวมถึง Spam)',
+                    () => showLoginForm()
+                );
+            } catch (error) {
+                hideLoading();
+                let errorMsg = 'เกิดข้อผิดพลาดในการส่งอีเมล';
+                
+                if (error.code === 'auth/user-not-found') {
+                    errorMsg = 'ไม่พบบัญชีผู้ใช้นี้';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg = 'รูปแบบอีเมลไม่ถูกต้อง';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMsg = 'มีการร้องขอมากเกินไป\nกรุณารอสักครู่แล้วลองใหม่';
+                }
+                
+                showError(errorMsg);
             }
         });
-    });
 
-    // Close modals when clicking outside
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('success-modal') || e.target.classList.contains('error-modal')) {
-            e.target.classList.remove('active');
-        }
-    });
-
-    // Auto-generate student ID based on role
-    const roleField = document.getElementById('role');
-    if (roleField) {
-        roleField.addEventListener('change', function() {
-            const role = this.value;
-            const studentIdField = document.getElementById('studentId');
-            const studentIdLabel = studentIdField.parentElement.previousElementSibling;
+        // UI Functions
+        window.togglePassword = function(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling.querySelector('ion-icon');
             
-            if (role === 'student') {
-                studentIdLabel.textContent = 'รหัสนักเรียน';
-                studentIdField.placeholder = 'เช่น 67010001';
-            } else if (role === 'teacher') {
-                studentIdLabel.textContent = 'รหัสครู';
-                studentIdField.placeholder = 'เช่น T001';
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.name = 'eye-off-outline';
             } else {
-                studentIdLabel.textContent = 'รหัสประจำตัว';
-                studentIdField.placeholder = 'กรอกรหัสประจำตัว';
+                input.type = 'password';
+                icon.name = 'eye-outline';
             }
-        });
-    }
+        };
 
-    // Form reset when switching
-    function resetForms() {
-        const forms = ['loginForm', 'registerForm', 'forgotForm', 'resetForm'];
-        forms.forEach(formId => {
-            const form = document.getElementById(formId);
-            if (form) {
-                form.reset();
-            }
-        });
-        
-        // Clear hints
-        document.querySelectorAll('.form-hint').forEach(hint => {
-            hint.textContent = '';
-        });
-        
-        // Clear reset user data
-        resetUserData = null;
-        
-        // Reload remembered login if switching back to login
-        setTimeout(() => {
-            if (document.getElementById('loginContainer').style.display !== 'none') {
-                loadRememberedLogin();
-            }
-        }, 100);
-    }
-        </script>
-    </body>
-    </html>
+        window.showLoginForm = function(e) {
+            if (e) e.preventDefault();
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('registerContainer').style.display = 'none';
+            document.getElementById('forgotContainer').style.display = 'none';
+        };
 
+        window.showRegisterForm = function(e) {
+            if (e) e.preventDefault();
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('registerContainer').style.display = 'block';
+            document.getElementById('forgotContainer').style.display = 'none';
+        };
+
+        window.showForgotForm = function(e) {
+            if (e) e.preventDefault();
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('registerContainer').style.display = 'none';
+            document.getElementById('forgotContainer').style.display = 'block';
+        };
+
+        function showLoading(text) {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        function showSuccess(title, message, callback) {
+            document.getElementById('successTitle').textContent = title;
+            document.getElementById('successMessage').textContent = message;
+            document.getElementById('successModal').classList.add('active');
+            
+            window.successCallback = callback;
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorModal').classList.add('active');
+        }
+
+        window.closeSuccessModal = function() {
+            document.getElementById('successModal').classList.remove('active');
+            if (window.successCallback) {
+                window.successCallback();
+                window.successCallback = null;
+            }
+        };
+
+        window.closeErrorModal = function() {
+            document.getElementById('errorModal').classList.remove('active');
+        };
+    </script>
+</body>
+</html>
