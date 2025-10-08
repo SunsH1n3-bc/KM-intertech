@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบเช็คชื่อนักเรียน (Multi-User)</title>
     
-    <!-- Firebase SDK - ต้องมี 2 บรรทัดนี้ -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     
@@ -13,7 +13,6 @@
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     
-    <!-- วาง CSS เดิมของคุณตรงนี้ -->
     <style>
         /* Enhanced Student Attendance System CSS */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -1391,6 +1390,18 @@
                 </div>
             </div>
 
+            <!-- ส่วนจัดการข้อมูล (เพิ่มใหม่) -->
+            <div class="data-management">
+                <h2 class="form-title">💾 จัดการข้อมูล</h2>
+                <div class="data-controls">
+                    <button type="button" class="btn btn-export" onclick="exportAllData()">☁️ ส่งออกข้อมูลทั้งหมด</button>
+                    <button type="button" class="btn btn-export" onclick="exportAttendance()">📄 ส่งออกการเช็คชื่อ</button>
+                    <button type="button" class="btn btn-import" onclick="document.getElementById('importFile').click()">📥 นำเข้าข้อมูล</button>
+                    <button type="button" class="btn btn-danger" onclick="clearAllData()">🗑️ ลบข้อมูลทั้งหมด</button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+                </div>
+            </div>
+
             <!-- แสดงข้อมูลรายวิชาปัจจุบัน -->
             <div class="current-info" id="currentInfo" style="display: none;">
                 <div class="info-item">
@@ -1484,592 +1495,1000 @@
     </div>
 
     <script>
-        // ============================================
-        // Firebase Configuration - ใช้ Firebase ของคุณ
-        // ============================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyCOu2MSd4fXzJppzoRn_3ZrCRiKoBVK11M",
-            authDomain: "km-intertech.firebaseapp.com",
-            databaseURL: "https://km-intertech-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "km-intertech",
-            storageBucket: "km-intertech.firebasestorage.app",
-            messagingSenderId: "378139509245",
-            appId: "1:378139509245:web:c9a7d7bf3b92945be09994",
-            measurementId: "G-23PJCBSTNF"
-        };
+// ============================================
+// Firebase Configuration
+// ============================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCOu2MSd4fXzJppzoRn_3ZrCRiKoBVK11M",
+    authDomain: "km-intertech.firebaseapp.com",
+    databaseURL: "https://km-intertech-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "km-intertech",
+    storageBucket: "km-intertech.firebasestorage.app",
+    messagingSenderId: "378139509245",
+    appId: "1:378139509245:web:c9a7d7bf3b92945be09994",
+    measurementId: "G-23PJCBSTNF"
+};
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
-        // ============================================
-        // ตัวแปรสำหรับเก็บข้อมูล
-        // ============================================
-        let subjects = [];
-        let currentSubjectId = null;
-        let gradeData = {};
-        let currentGrade = null;
-        let editingStudentId = null;
+// ============================================
+// ตัวแปรสำหรับเก็บข้อมูล
+// ============================================
+let subjects = [];
+let currentSubjectId = null;
+let gradeData = {};
+let currentGrade = null;
+let editingStudentId = null;
+let lastResetDate = null;
 
-        // ============================================
-        // ฟังก์ชันโหลดข้อมูลจาก Firebase (Real-time Sync)
-        // ============================================
-        function loadDataFromFirebase() {
-            // โหลดรายวิชา - ทุกคนเห็นเหมือนกัน
-            database.ref('subjects').on('value', (snapshot) => {
-                subjects = [];
-                snapshot.forEach((child) => {
-                    subjects.push({
-                        id: child.key,
-                        ...child.val()
-                    });
+// ============================================
+// ฟังก์ชันตรวจสอบและรีเซ็ตข้อมูลรายวัน
+// ============================================
+function checkAndResetStudentData() {
+    const today = new Date();
+    const todayDateString = today.toISOString().split('T')[0];
+    
+    database.ref('system/lastResetDate').once('value').then((snapshot) => {
+        const savedResetDate = snapshot.val();
+        
+        if (savedResetDate !== todayDateString) {
+            database.ref('students').once('value').then((studentsSnapshot) => {
+                const updates = {};
+                studentsSnapshot.forEach((child) => {
+                    updates[`students/${child.key}/status`] = null;
+                    updates[`students/${child.key}/statusTime`] = null;
                 });
-                updateSubjectSelector();
-            });
-
-            // โหลดข้อมูลนักเรียน - ซิงค์แบบเรียลไทม์
-            database.ref('students').on('value', (snapshot) => {
-                gradeData = {};
-                snapshot.forEach((child) => {
-                    const student = {
-                        id: child.key,
-                        ...child.val()
-                    };
-                    if (!gradeData[student.grade]) {
-                        gradeData[student.grade] = [];
-                    }
-                    gradeData[student.grade].push(student);
-                });
-                updateGradeTabs();
-                displayStudents();
-                updateSummary();
-            });
-        }
-
-        // ============================================
-        // ฟังก์ชันจัดการรายวิชา
-        // ============================================
-        function addSubject() {
-            const code = document.getElementById('subjectCode').value.trim();
-            const name = document.getElementById('subjectName').value.trim();
-            
-            if (!code || !name) {
-                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-                return;
-            }
-            
-            const newSubjectRef = database.ref('subjects').push();
-            newSubjectRef.set({
-                code: code,
-                name: name,
-                createdAt: Date.now()
-            }).then(() => {
-                document.getElementById('subjectCode').value = '';
-                document.getElementById('subjectName').value = '';
-                showSuccessMessage('เพิ่มรายวิชาสำเร็จ!');
-            }).catch((error) => {
-                console.error('Error:', error);
-                alert('เกิดข้อผิดพลาด: ' + error.message);
-            });
-        }
-
-        function updateSubjectSelector() {
-            const selector = document.getElementById('currentSubject');
-            selector.innerHTML = '<option value="">เลือกรายวิชา</option>';
-            
-            subjects.forEach(subject => {
-                const option = document.createElement('option');
-                option.value = subject.id;
-                option.textContent = `${subject.code} - ${subject.name}`;
-                if (subject.id === currentSubjectId) {
-                    option.selected = true;
-                }
-                selector.appendChild(option);
-            });
-        }
-
-        function changeSubject() {
-            currentSubjectId = document.getElementById('currentSubject').value || null;
-            showCurrentInfo();
-            updateGradeTabs();
-            displayStudents();
-            updateSummary();
-        }
-
-        function showCurrentInfo() {
-            const infoDiv = document.getElementById('currentInfo');
-            
-            if (currentSubjectId) {
-                const subject = subjects.find(s => s.id === currentSubjectId);
-                if (subject) {
-                    document.getElementById('currentSubjectInfo').textContent = `${subject.code} - ${subject.name}`;
-                    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('th-TH');
-                    infoDiv.style.display = 'grid';
-                    showCurrentGradeInfo();
-                }
-            } else {
-                infoDiv.style.display = 'none';
-            }
-        }
-
-        function openEditSubjectModal() {
-            if (!currentSubjectId) {
-                alert('กรุณาเลือกรายวิชาก่อน');
-                return;
-            }
-            
-            const subject = subjects.find(s => s.id === currentSubjectId);
-            if (subject) {
-                document.getElementById('editSubjectCode').value = subject.code;
-                document.getElementById('editSubjectNameModal').value = subject.name;
-                document.getElementById('editSubjectModal').style.display = 'block';
-            }
-        }
-
-        function closeEditSubjectModal() {
-            document.getElementById('editSubjectModal').style.display = 'none';
-        }
-
-        function deleteCurrentSubject() {
-            if (confirm('ลบรายวิชานี้? ข้อมูลนักเรียนทั้งหมดจะถูกลบด้วย')) {
-                const promises = [];
-                Object.values(gradeData).flat()
-                    .filter(s => s.subjectId === currentSubjectId)
-                    .forEach(student => {
-                        promises.push(database.ref(`students/${student.id}`).remove());
-                    });
                 
-                Promise.all(promises).then(() => {
-                    return database.ref(`subjects/${currentSubjectId}`).remove();
-                }).then(() => {
-                    currentSubjectId = null;
-                    currentGrade = null;
-                    closeEditSubjectModal();
-                    showSuccessMessage('ลบรายวิชาสำเร็จ!');
-                }).catch((error) => {
-                    console.error('Error:', error);
-                    alert('เกิดข้อผิดพลาด: ' + error.message);
-                });
-            }
+                updates['system/lastResetDate'] = todayDateString;
+                
+                return database.ref().update(updates);
+            }).then(() => {
+                showResetMessage();
+                console.log('✅ รีเซ็ตข้อมูลการเช็คชื่อรายวันสำเร็จ');
+            });
         }
+    });
+}
 
-        // ============================================
-        // ฟังก์ชันจัดการแท็บชั้นปี
-        // ============================================
-        function showCurrentGradeInfo() {
-            const nameSpan = document.getElementById('currentGradeName');
-            
-            if (currentGrade && currentSubjectId) {
-                const studentsInGrade = (gradeData[currentGrade] || []).filter(s => s.subjectId === currentSubjectId);
-                const checkedCount = studentsInGrade.filter(s => s.status).length;
-                nameSpan.textContent = `${currentGrade} • ${studentsInGrade.length} คน • เช็คแล้ว ${checkedCount} คน`;
-            }
-        }
+function showResetMessage() {
+    const resetDiv = document.createElement('div');
+    resetDiv.innerHTML = `
+        <div style="position: fixed; top: 20px; right: 20px; z-index: 1001; 
+                background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
+                color: white; padding: 20px 25px; border-radius: 12px; 
+                box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+                font-weight: 600; animation: slideIn 0.3s ease; max-width: 300px;">
+            <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                🔄 ข้อมูลการเช็คชื่อถูกรีเซ็ตแล้ว
+            </div>
+            <div style="font-size: 0.9em; opacity: 0.9;">
+                เริ่มต้นวันใหม่ (รายชื่อนักเรียนยังคงอยู่)
+            </div>
+        </div>
+    `;
+    document.body.appendChild(resetDiv);
+    
+    setTimeout(() => {
+        resetDiv.remove();
+    }, 5000);
+}
 
-        function updateGradeTabs() {
-            const tabsContainer = document.getElementById('gradeTabs');
-            tabsContainer.innerHTML = '';
-            
-            if (!currentSubjectId) return;
-            
-            const gradesWithStudents = {};
-            Object.keys(gradeData).forEach(grade => {
-                const studentsInGrade = gradeData[grade].filter(s => s.subjectId === currentSubjectId);
-                if (studentsInGrade.length > 0) {
-                    gradesWithStudents[grade] = studentsInGrade.length;
+// ============================================
+// ฟังก์ชันรับข้อมูลจาก URL parameters (Auto-fill)
+// ============================================
+function handleAutoFillFromCode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (urlParams.get('auto') === 'true') {
+        const code = urlParams.get('code');
+        const name = urlParams.get('name');
+        const grade = urlParams.get('grade');
+        const subjectCode = urlParams.get('subjectCode');
+        const subjectName = urlParams.get('subjectName');
+        
+        console.log('🔗 รับข้อมูลจากหน้าสร้างรหัส:', { code, name, grade, subjectCode, subjectName });
+        
+        if (subjectCode && subjectName) {
+            database.ref('subjects').orderByChild('code').equalTo(subjectCode).once('value').then((snapshot) => {
+                if (!snapshot.exists()) {
+                    const newSubjectRef = database.ref('subjects').push();
+                    return newSubjectRef.set({
+                        code: subjectCode,
+                        name: subjectName,
+                        createdAt: Date.now()
+                    }).then(() => {
+                        showSuccessMessage('เพิ่มรายวิชาอัตโนมัติ: ' + subjectCode);
+                        return newSubjectRef.key;
+                    });
+                } else {
+                    let subjectId = null;
+                    snapshot.forEach((child) => {
+                        subjectId = child.key;
+                    });
+                    return subjectId;
+                }
+            }).then((subjectId) => {
+                if (subjectId) {
+                    currentSubjectId = subjectId;
+                    document.getElementById('currentSubject').value = subjectId;
+                    showCurrentInfo();
+                    updateGradeTabs();
+                    
+                    if (name && grade) {
+                        addStudentAndCheckIn(name, grade, subjectId, code);
+                    }
                 }
             });
+        }
+        
+        setTimeout(() => {
+            const url = new URL(window.location);
+            url.search = '';
+            window.history.replaceState({}, document.title, url);
+        }, 2000);
+    }
+}
+
+function addStudentAndCheckIn(name, grade, subjectId, code) {
+    database.ref('students').orderByChild('name').equalTo(name).once('value').then((snapshot) => {
+        let studentId = null;
+        let studentExists = false;
+        
+        snapshot.forEach((child) => {
+            const student = child.val();
+            if (student.grade === grade && student.subjectId === subjectId) {
+                studentId = child.key;
+                studentExists = true;
+            }
+        });
+        
+        if (studentExists) {
+            const time = new Date();
+            const timeString = `${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}น.`;
             
-            Object.keys(gradesWithStudents).forEach(grade => {
-                const button = document.createElement('button');
-                button.className = 'tab-button';
-                button.innerHTML = `
-                    <div style="font-weight: 700; margin-bottom: 5px;">${grade}</div>
-                    <div style="font-size: 0.9em; opacity: 0.8;">${gradesWithStudents[grade]} คน</div>
-                `;
-                button.onclick = () => {
-                    currentGrade = grade;
+            return database.ref(`students/${studentId}`).update({
+                status: 'present',
+                statusTime: timeString
+            }).then(() => {
+                currentGrade = grade;
+                setTimeout(() => {
+                    updateGradeTabs();
                     updateActiveTab();
                     displayStudents();
                     updateSummary();
                     showCurrentGradeInfo();
-                };
-                tabsContainer.appendChild(button);
+                    showCodeMessage(code, name, false);
+                }, 500);
             });
-            
-            if (!currentGrade || !gradesWithStudents[currentGrade]) {
-                currentGrade = Object.keys(gradesWithStudents)[0] || null;
-            }
-            
-            updateActiveTab();
-        }
-
-        function updateActiveTab() {
-            document.querySelectorAll('.tab-button').forEach((btn) => {
-                btn.classList.remove('active');
-                if (currentGrade && btn.textContent.includes(currentGrade)) {
-                    btn.classList.add('active');
-                }
-            });
-        }
-
-        // ============================================
-        // ฟังก์ชันแสดงนักเรียน - ทุกคนเห็นข้อมูลเดียวกัน
-        // ============================================
-        function displayStudents() {
-            const container = document.getElementById('studentsContainer');
-            
-            if (!currentGrade || !currentSubjectId) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <h3>เลือกรายวิชาและระดับชั้น</h3>
-                        <p>เพื่อเริ่มเช็คชื่อนักเรียน</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const studentsInGrade = (gradeData[currentGrade] || []).filter(s => s.subjectId === currentSubjectId);
-            
-            if (studentsInGrade.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <h3>ไม่มีนักเรียนในระดับชั้นนี้</h3>
-                        <p>เพิ่มนักเรียนเพื่อเริ่มต้น</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = '<div class="students-grid"></div>';
-            const grid = container.querySelector('.students-grid');
-            
-            studentsInGrade.forEach(student => {
-                const studentCard = document.createElement('div');
-                studentCard.className = 'student-card';
-                
-                let statusTimeHTML = '';
-                if (student.status && student.statusTime) {
-                    const statusTexts = {
-                        'present': 'เข้าเรียน',
-                        'absent': 'ขาดเรียน',
-                        'late': 'มาสาย',
-                        'leave': 'ลา'
-                    };
-                    statusTimeHTML = `
-                        <div class="status-time ${student.status}">
-                            ⏰ ${statusTexts[student.status]} เวลา ${student.statusTime}
-                        </div>
-                    `;
-                }
-                
-                studentCard.innerHTML = `
-                    <div class="student-header">
-                        <div class="student-name">${student.name}</div>
-                        <div class="student-actions">
-                            <button class="btn btn-secondary btn-small" onclick="editStudent('${student.id}')">
-                                ✏️ แก้ไข
-                            </button>
-                            <button class="btn btn-danger btn-small" onclick="deleteStudent('${student.id}')">
-                                🗑️ ลบ
-                            </button>
-                        </div>
-                    </div>
-                    <div class="status-buttons">
-                        <button class="status-btn present ${student.status === 'present' ? 'active' : ''}" 
-                                onclick="setStatus('${student.id}', 'present')">
-                            ✅ เข้าเรียน
-                        </button>
-                        <button class="status-btn absent ${student.status === 'absent' ? 'active' : ''}" 
-                                onclick="setStatus('${student.id}', 'absent')">
-                            ❌ ขาดเรียน
-                        </button>
-                        <button class="status-btn late ${student.status === 'late' ? 'active' : ''}" 
-                                onclick="setStatus('${student.id}', 'late')">
-                            ⏰ มาสาย
-                        </button>
-                        <button class="status-btn leave ${student.status === 'leave' ? 'active' : ''}" 
-                                onclick="setStatus('${student.id}', 'leave')">
-                            📄 ลา
-                        </button>
-                    </div>
-                    ${statusTimeHTML}
-                `;
-                grid.appendChild(studentCard);
-            });
-        }
-
-        // ============================================
-        // ฟังก์ชันจัดการสถานะนักเรียน
-        // ============================================
-        function setStatus(studentId, status) {
+        } else {
+            const newStudentRef = database.ref('students').push();
             const time = new Date();
             const timeString = `${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}น.`;
             
-            database.ref(`students/${studentId}`).update({
-                status: status,
-                statusTime: timeString
+            return newStudentRef.set({
+                name: name,
+                grade: grade,
+                subjectId: subjectId,
+                status: 'present',
+                statusTime: timeString,
+                createdAt: Date.now()
             }).then(() => {
-                showSuccessMessage('บันทึกสถานะสำเร็จ!');
+                currentGrade = grade;
+                setTimeout(() => {
+                    updateGradeTabs();
+                    updateActiveTab();
+                    displayStudents();
+                    updateSummary();
+                    showCurrentGradeInfo();
+                    showCodeMessage(code, name, true);
+                }, 500);
+            });
+        }
+    }).catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+function showCodeMessage(code, studentName, isNew) {
+    const message = isNew ? 'เพิ่มนักเรียนและเช็คชื่อเรียบร้อย' : 'เช็คชื่อเรียบร้อย';
+    const codeDiv = document.createElement('div');
+    codeDiv.innerHTML = `
+        <div style="position: fixed; top: 20px; right: 20px; z-index: 1001; 
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+                color: white; padding: 25px; border-radius: 15px; 
+                box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
+                font-weight: 600; animation: slideIn 0.5s ease; max-width: 350px;">
+            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                ✅ ยินดีต้อนรับ ${studentName}
+            </div>
+            <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <div style="font-size: 0.9em; opacity: 0.9; margin-bottom: 5px;">รหัสเข้าเรียนของคุณ:</div>
+                <div style="font-size: 2em; font-weight: bold; letter-spacing: 3px; text-align: center;">${code}</div>
+            </div>
+            <div style="font-size: 0.9em; opacity: 0.9; text-align: center;">
+                ${message} - สถานะ: เข้าเรียน
+            </div>
+        </div>
+    `;
+    document.body.appendChild(codeDiv);
+    
+    setTimeout(() => {
+        codeDiv.remove();
+    }, 8000);
+}
+
+// ============================================
+// ฟังก์ชัน Export/Import ข้อมูล
+// ============================================
+function exportAllData() {
+    Promise.all([
+        database.ref('subjects').once('value'),
+        database.ref('students').once('value')
+    ]).then(([subjectsSnapshot, studentsSnapshot]) => {
+        const allData = {
+            subjects: {},
+            students: {},
+            exportDate: new Date().toISOString(),
+            version: '2.0'
+        };
+        
+        subjectsSnapshot.forEach((child) => {
+            allData.subjects[child.key] = child.val();
+        });
+        
+        studentsSnapshot.forEach((child) => {
+            allData.students[child.key] = child.val();
+        });
+        
+        const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `attendance_backup_${new Date().toISOString().split('T')[0]}.json`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showSuccessMessage('ส่งออกข้อมูลสำเร็จ!');
+    }).catch((error) => {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาด: ' + error.message);
+    });
+}
+
+function exportAttendance() {
+    if (!currentGrade || !currentSubjectId) {
+        alert('กรุณาเลือกรายวิชาและระดับชั้น');
+        return;
+    }
+    
+    const subject = subjects.find(s => s.id === currentSubjectId);
+    const studentsInGrade = (gradeData[currentGrade] || []).filter(s => s.subjectId === currentSubjectId);
+    
+    if (studentsInGrade.length === 0) {
+        alert('ไม่มีข้อมูลนักเรียนให้ส่งออก');
+        return;
+    }
+    
+    const currentDate = new Date().toLocaleDateString('th-TH');
+    let csvContent = `รายงานการเข้าเรียน\n`;
+    csvContent += `รายวิชา: ${subject.code} - ${subject.name}\n`;
+    csvContent += `ระดับชั้น: ${currentGrade}\n`;
+    csvContent += `วันที่: ${currentDate}\n\n`;
+    csvContent += `ลำดับ,ชื่อ-นามสกุล,สถานะ,เวลา\n`;
+    
+    studentsInGrade.forEach((student, index) => {
+        const statusTexts = {
+            'present': 'เข้าเรียน',
+            'absent': 'ขาดเรียน',
+            'late': 'มาสาย',
+            'leave': 'ลา'
+        };
+        const status = student.status ? `${statusTexts[student.status]} ${student.statusTime || ''}` : 'ยังไม่เช็คชื่อ';
+        csvContent += `${index + 1},${student.name},${status}\n`;
+    });
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `attendance_${subject.code}_${currentGrade}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showSuccessMessage('ส่งออกข้อมูลสำเร็จ!');
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            
+            if (!importedData.subjects || !importedData.students) {
+                alert('ไฟล์ข้อมูลไม่ถูกต้อง');
+                return;
+            }
+            
+            if (confirm('การนำเข้าข้อมูลจะเขียนทับข้อมูลปัจจุบัน คุณต้องการดำเนินการต่อหรือไม่?')) {
+                const updates = {};
+                
+                Object.keys(importedData.subjects).forEach(key => {
+                    updates[`subjects/${key}`] = importedData.subjects[key];
+                });
+                
+                Object.keys(importedData.students).forEach(key => {
+                    updates[`students/${key}`] = importedData.students[key];
+                });
+                
+                database.ref().update(updates).then(() => {
+                    currentSubjectId = null;
+                    currentGrade = null;
+                    document.getElementById('currentSubject').value = '';
+                    showSuccessMessage('นำเข้าข้อมูลสำเร็จ!');
+                }).catch((error) => {
+                    console.error('Error:', error);
+                    alert('เกิดข้อผิดพลาด: ' + error.message);
+                });
+            }
+        } catch (error) {
+            alert('เกิดข้อผิดพลาดในการอ่านไฟล์: ' + error.message);
+        }
+    };
+    reader.readAsText(file);
+    
+    event.target.value = '';
+}
+
+function clearAllData() {
+    if (confirm('คุณต้องการลบข้อมูลทั้งหมดใช่หรือไม่? การกระทำนี้ไม่สามารถยกเลิกได้')) {
+        if (confirm('กรุณายืนยันอีกครั้ง: ลบข้อมูลทั้งหมด?')) {
+            Promise.all([
+                database.ref('subjects').remove(),
+                database.ref('students').remove(),
+                database.ref('system').remove()
+            ]).then(() => {
+                subjects = [];
+                currentSubjectId = null;
+                gradeData = {};
+                currentGrade = null;
+                
+                updateSubjectSelector();
+                updateGradeTabs();
+                displayStudents();
+                updateSummary();
+                showCurrentInfo();
+                
+                showSuccessMessage('ลบข้อมูลทั้งหมดเรียบร้อย!');
             }).catch((error) => {
                 console.error('Error:', error);
                 alert('เกิดข้อผิดพลาด: ' + error.message);
             });
         }
+    }
+}
 
-        function deleteStudent(studentId) {
-            const student = Object.values(gradeData).flat().find(s => s.id === studentId);
-            
-            if (student && confirm(`ลบ "${student.name}" ใช่หรือไม่?`)) {
-                database.ref(`students/${studentId}`).remove().then(() => {
-                    showSuccessMessage('ลบนักเรียนสำเร็จ!');
-                }).catch((error) => {
-                    console.error('Error:', error);
-                    alert('เกิดข้อผิดพลาด: ' + error.message);
-                });
-            }
-        }
-
-        function editStudent(studentId) {
-            const student = Object.values(gradeData).flat().find(s => s.id === studentId);
-            
-            if (student) {
-                editingStudentId = studentId;
-                document.getElementById('editStudentName').value = student.name;
-                document.getElementById('editModal').style.display = 'block';
-            }
-        }
-
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
-            editingStudentId = null;
-        }
-
-        // ============================================
-        // ฟังก์ชันอัพเดทสรุป
-        // ============================================
-        function updateSummary() {
-            const summary = document.getElementById('summary');
-            
-            if (!currentGrade || !currentSubjectId) {
-                summary.style.display = 'none';
-                return;
-            }
-
-            const studentsInGrade = (gradeData[currentGrade] || []).filter(s => s.subjectId === currentSubjectId);
-            
-            if (studentsInGrade.length === 0) {
-                summary.style.display = 'none';
-                return;
-            }
-
-            summary.style.display = 'block';
-            
-            document.getElementById('presentCount').textContent = studentsInGrade.filter(s => s.status === 'present').length;
-            document.getElementById('absentCount').textContent = studentsInGrade.filter(s => s.status === 'absent').length;
-            document.getElementById('lateCount').textContent = studentsInGrade.filter(s => s.status === 'late').length;
-            document.getElementById('leaveCount').textContent = studentsInGrade.filter(s => s.status === 'leave').length;
-        }
-
-        // ============================================
-        // ฟังก์ชันแสดงข้อความสำเร็จ
-        // ============================================
-        function showSuccessMessage(message) {
-            const div = document.createElement('div');
-            div.style.cssText = `
-                position: fixed; top: 20px; right: 20px; z-index: 1001;
-                background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-                color: white; padding: 15px 25px; border-radius: 12px;
-                box-shadow: 0 8px 32px rgba(5, 150, 105, 0.3);
-                font-weight: 600;
-            `;
-            div.textContent = `✅ ${message}`;
-            document.body.appendChild(div);
-            
-            setTimeout(() => div.remove(), 3000);
-        }
-
-        // ============================================
-        // Event Listeners - เริ่มต้นระบบ
-        // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 กำลังเริ่มต้นระบบเช็คชื่อ Multi-User...');
-            
-            // โหลดข้อมูลจาก Firebase
-            loadDataFromFirebase();
-            
-            // Toggle Forms (เพิ่มรายบุคคล / เพิ่มหลายคน)
-            const singleToggle = document.getElementById('singleToggle');
-            const bulkToggle = document.getElementById('bulkToggle');
-            
-            if (singleToggle && bulkToggle) {
-                singleToggle.addEventListener('click', function() {
-                    singleToggle.classList.add('active');
-                    bulkToggle.classList.remove('active');
-                    document.getElementById('addStudentForm').classList.add('active');
-                    document.getElementById('bulkAddForm').classList.remove('active');
-                });
-
-                bulkToggle.addEventListener('click', function() {
-                    bulkToggle.classList.add('active');
-                    singleToggle.classList.remove('active');
-                    document.getElementById('bulkAddForm').classList.add('active');
-                    document.getElementById('addStudentForm').classList.remove('active');
-                });
-            }
-            
-            // ฟอร์มเพิ่มนักเรียนรายบุคคล
-            document.getElementById('addStudentForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                if (!currentSubjectId) {
-                    alert('กรุณาเลือกรายวิชาก่อน');
-                    return;
-                }
-                
-                const name = document.getElementById('studentName').value.trim();
-                const grade = document.getElementById('gradeLevel').value;
-                
-                if (!name || !grade) {
-                    alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-                    return;
-                }
-                
-                const newStudentRef = database.ref('students').push();
-                newStudentRef.set({
-                    name: name,
-                    grade: grade,
-                    subjectId: currentSubjectId,
-                    status: null,
-                    statusTime: null,
-                    createdAt: Date.now()
-                }).then(() => {
-                    document.getElementById('studentName').value = '';
-                    document.getElementById('gradeLevel').value = '';
-                    showSuccessMessage('เพิ่มนักเรียนสำเร็จ!');
-                }).catch((error) => {
-                    console.error('Error:', error);
-                    alert('เกิดข้อผิดพลาด: ' + error.message);
-                });
+// ============================================
+// ฟังก์ชันโหลดข้อมูลจาก Firebase (Real-time Sync)
+// ============================================
+function loadDataFromFirebase() {
+    database.ref('subjects').on('value', (snapshot) => {
+        subjects = [];
+        snapshot.forEach((child) => {
+            subjects.push({
+                id: child.key,
+                ...child.val()
             });
-            
-            // ฟอร์มเพิ่มนักเรียนหลายคน
-            document.getElementById('bulkAddForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                if (!currentSubjectId) {
-                    alert('กรุณาเลือกรายวิชาก่อน');
-                    return;
-                }
-                
-                const names = document.getElementById('bulkStudentNames').value.trim();
-                const grade = document.getElementById('bulkGradeLevel').value;
-                
-                if (!names || !grade) {
-                    alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-                    return;
-                }
-                
-                const nameList = names.split('\n').filter(name => name.trim() !== '');
-                let addedCount = 0;
-                const promises = [];
-                
-                nameList.forEach(name => {
-                    const trimmedName = name.trim();
-                    if (trimmedName) {
-                        const newStudentRef = database.ref('students').push();
-                        promises.push(
-                            newStudentRef.set({
-                                name: trimmedName,
-                                grade: grade,
-                                subjectId: currentSubjectId,
-                                status: null,
-                                statusTime: null,
-                                createdAt: Date.now()
-                            })
-                        );
-                        addedCount++;
-                    }
-                });
-                
-                Promise.all(promises).then(() => {
-                    document.getElementById('bulkStudentNames').value = '';
-                    document.getElementById('bulkGradeLevel').value = '';
-                    showSuccessMessage(`เพิ่มนักเรียนสำเร็จ ${addedCount} คน!`);
-                }).catch((error) => {
-                    console.error('Error:', error);
-                    alert('เกิดข้อผิดพลาด: ' + error.message);
-                });
-            });
-            
-            // ฟอร์มแก้ไขนักเรียน
-            document.getElementById('editStudentForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const newName = document.getElementById('editStudentName').value.trim();
-                
-                if (!newName) {
-                    alert('กรุณากรอกชื่อ');
-                    return;
-                }
-                
-                if (editingStudentId) {
-                    database.ref(`students/${editingStudentId}`).update({
-                        name: newName
-                    }).then(() => {
-                        closeEditModal();
-                        showSuccessMessage('แก้ไขข้อมูลสำเร็จ!');
-                    }).catch((error) => {
-                        console.error('Error:', error);
-                        alert('เกิดข้อผิดพลาด: ' + error.message);
-                    });
-                }
-            });
-            
-            // ฟอร์มแก้ไขรายวิชา
-            document.getElementById('editSubjectForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const newCode = document.getElementById('editSubjectCode').value.trim();
-                const newName = document.getElementById('editSubjectNameModal').value.trim();
-                
-                if (!newCode || !newName) {
-                    alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-                    return;
-                }
-                
-                if (currentSubjectId) {
-                    database.ref(`subjects/${currentSubjectId}`).update({
-                        code: newCode,
-                        name: newName
-                    }).then(() => {
-                        closeEditSubjectModal();
-                        showSuccessMessage('แก้ไขรายวิชาสำเร็จ!');
-                    }).catch((error) => {
-                        console.error('Error:', error);
-                        alert('เกิดข้อผิดพลาด: ' + error.message);
-                    });
-                }
-            });
-            
-            // ปิด Modal เมื่อคลิกนอก
-            window.onclick = function(event) {
-                if (event.target.classList.contains('modal')) {
-                    event.target.style.display = 'none';
-                }
+        });
+        updateSubjectSelector();
+    });
+
+    database.ref('students').on('value', (snapshot) => {
+        gradeData = {};
+        snapshot.forEach((child) => {
+            const student = {
+                id: child.key,
+                ...child.val()
             };
+            if (!gradeData[student.grade]) {
+                gradeData[student.grade] = [];
+            }
+            gradeData[student.grade].push(student);
+        });
+        updateGradeTabs();
+        displayStudents();
+        updateSummary();
+    });
+}
+
+// ============================================
+// ฟังก์ชันจัดการรายวิชา
+// ============================================
+function addSubject() {
+    const code = document.getElementById('subjectCode').value.trim();
+    const name = document.getElementById('subjectName').value.trim();
+    
+    if (!code || !name) {
+        alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+        return;
+    }
+    
+    const newSubjectRef = database.ref('subjects').push();
+    newSubjectRef.set({
+        code: code,
+        name: name,
+        createdAt: Date.now()
+    }).then(() => {
+        document.getElementById('subjectCode').value = '';
+        document.getElementById('subjectName').value = '';
+        showSuccessMessage('เพิ่มรายวิชาสำเร็จ!');
+    }).catch((error) => {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาด: ' + error.message);
+    });
+}
+
+function updateSubjectSelector() {
+    const selector = document.getElementById('currentSubject');
+    selector.innerHTML = '<option value="">เลือกรายวิชา</option>';
+    
+    subjects.forEach(subject => {
+        const option = document.createElement('option');
+        option.value = subject.id;
+        option.textContent = `${subject.code} - ${subject.name}`;
+        if (subject.id === currentSubjectId) {
+            option.selected = true;
+        }
+        selector.appendChild(option);
+    });
+}
+
+function changeSubject() {
+    currentSubjectId = document.getElementById('currentSubject').value || null;
+    showCurrentInfo();
+    updateGradeTabs();
+    displayStudents();
+    updateSummary();
+}
+
+function showCurrentInfo() {
+    const infoDiv = document.getElementById('currentInfo');
+    
+    if (currentSubjectId) {
+        const subject = subjects.find(s => s.id === currentSubjectId);
+        if (subject) {
+            document.getElementById('currentSubjectInfo').textContent = `${subject.code} - ${subject.name}`;
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('th-TH');
+            infoDiv.style.display = 'grid';
+            showCurrentGradeInfo();
+        }
+    } else {
+        infoDiv.style.display = 'none';
+    }
+}
+
+function openEditSubjectModal() {
+    if (!currentSubjectId) {
+        alert('กรุณาเลือกรายวิชาก่อน');
+        return;
+    }
+    
+    const subject = subjects.find(s => s.id === currentSubjectId);
+    if (subject) {
+        document.getElementById('editSubjectCode').value = subject.code;
+        document.getElementById('editSubjectNameModal').value = subject.name;
+        document.getElementById('editSubjectModal').style.display = 'block';
+    }
+}
+
+function closeEditSubjectModal() {
+    document.getElementById('editSubjectModal').style.display = 'none';
+}
+
+function deleteCurrentSubject() {
+    if (confirm('ลบรายวิชานี้? ข้อมูลนักเรียนทั้งหมดจะถูกลบด้วย')) {
+        const promises = [];
+        Object.values(gradeData).flat()
+            .filter(s => s.subjectId === currentSubjectId)
+            .forEach(student => {
+                promises.push(database.ref(`students/${student.id}`).remove());
+            });
+        
+        Promise.all(promises).then(() => {
+            return database.ref(`subjects/${currentSubjectId}`).remove();
+        }).then(() => {
+            currentSubjectId = null;
+            currentGrade = null;
+            closeEditSubjectModal();
+            showSuccessMessage('ลบรายวิชาสำเร็จ!');
+        }).catch((error) => {
+            console.error('Error:', error);
+            alert('เกิดข้อผิดพลาด: ' + error.message);
+        });
+    }
+}
+
+// ============================================
+// ฟังก์ชันจัดการแท็บชั้นปี
+// ============================================
+function showCurrentGradeInfo() {
+    const nameSpan = document.getElementById('currentGradeName');
+    
+    if (currentGrade && currentSubjectId) {
+        const studentsInGrade = (gradeData[currentGrade] || []).filter(s => s.subjectId === currentSubjectId);
+        const checkedCount = studentsInGrade.filter(s => s.status).length;
+        nameSpan.textContent = `${currentGrade} • ${studentsInGrade.length} คน • เช็คแล้ว ${checkedCount} คน`;
+    }
+}
+
+function updateGradeTabs() {
+    const tabsContainer = document.getElementById('gradeTabs');
+    tabsContainer.innerHTML = '';
+    
+    if (!currentSubjectId) return;
+    
+    const gradesWithStudents = {};
+    Object.keys(gradeData).forEach(grade => {
+        const studentsInGrade = gradeData[grade].filter(s => s.subjectId === currentSubjectId);
+        if (studentsInGrade.length > 0) {
+            gradesWithStudents[grade] = studentsInGrade.length;
+        }
+    });
+    
+    Object.keys(gradesWithStudents).forEach(grade => {
+        const button = document.createElement('button');
+        button.className = 'tab-button';
+        button.innerHTML = `
+            <div style="font-weight: 700; margin-bottom: 5px;">${grade}</div>
+            <div style="font-size: 0.9em; opacity: 0.8;">${gradesWithStudents[grade]} คน</div>
+        `;
+        button.onclick = () => {
+            currentGrade = grade;
+            updateActiveTab();
+            displayStudents();
+            updateSummary();
+            showCurrentGradeInfo();
+        };
+        tabsContainer.appendChild(button);
+    });
+    
+    if (!currentGrade || !gradesWithStudents[currentGrade]) {
+        currentGrade = Object.keys(gradesWithStudents)[0] || null;
+    }
+    
+    updateActiveTab();
+}
+
+function updateActiveTab() {
+    document.querySelectorAll('.tab-button').forEach((btn) => {
+        btn.classList.remove('active');
+        if (currentGrade && btn.textContent.includes(currentGrade)) {
+            btn.classList.add('active');
+        }
+    });
+}
+
+// ============================================
+// ฟังก์ชันแสดงนักเรียน
+// ============================================
+function displayStudents() {
+    const container = document.getElementById('studentsContainer');
+    
+    if (!currentGrade || !currentSubjectId) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>เลือกรายวิชาและระดับชั้น</h3>
+                <p>เพื่อเริ่มเช็คชื่อนักเรียน</p>
+            </div>
+        `;
+        return;
+    }
+
+    const studentsInGrade = (gradeData[currentGrade] || []).filter(s => s.subjectId === currentSubjectId);
+    
+    if (studentsInGrade.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3>ไม่มีนักเรียนในระดับชั้นนี้</h3>
+                <p>เพิ่มนักเรียนเพื่อเริ่มต้น</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = '<div class="students-grid"></div>';
+    const grid = container.querySelector('.students-grid');
+    
+    studentsInGrade.forEach(student => {
+        const studentCard = document.createElement('div');
+        studentCard.className = 'student-card';
+        
+        let statusTimeHTML = '';
+        if (student.status && student.statusTime) {
+            const statusTexts = {
+                'present': 'เข้าเรียน',
+                'absent': 'ขาดเรียน',
+                'late': 'มาสาย',
+                'leave': 'ลา'
+            };
+            statusTimeHTML = `
+                <div class="status-time ${student.status}">
+                    ⏰ ${statusTexts[student.status]} เวลา ${student.statusTime}
+                </div>
+            `;
+        }
+        
+        studentCard.innerHTML = `
+            <div class="student-header">
+                <div class="student-name">${student.name}</div>
+                <div class="student-actions">
+                    <button class="btn btn-secondary btn-small" onclick="editStudent('${student.id}')">
+                        ✏️ แก้ไข
+                    </button>
+                    <button class="btn btn-danger btn-small" onclick="deleteStudent('${student.id}')">
+                        🗑️ ลบ
+                    </button>
+                </div>
+            </div>
+            <div class="status-buttons">
+                <button class="status-btn present ${student.status === 'present' ? 'active' : ''}" 
+                        onclick="setStatus('${student.id}', 'present')">
+                    ✅ เข้าเรียน
+                </button>
+                <button class="status-btn absent ${student.status === 'absent' ? 'active' : ''}" 
+                        onclick="setStatus('${student.id}', 'absent')">
+                    ❌ ขาดเรียน
+                </button>
+                <button class="status-btn late ${student.status === 'late' ? 'active' : ''}" 
+                        onclick="setStatus('${student.id}', 'late')">
+                    ⏰ มาสาย
+                </button>
+                <button class="status-btn leave ${student.status === 'leave' ? 'active' : ''}" 
+                        onclick="setStatus('${student.id}', 'leave')">
+                    📄 ลา
+                </button>
+            </div>
+            ${statusTimeHTML}
+        `;
+        grid.appendChild(studentCard);
+    });
+}
+
+// ============================================
+// ฟังก์ชันจัดการสถานะนักเรียน
+// ============================================
+function setStatus(studentId, status) {
+    const time = new Date();
+    const timeString = `${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}น.`;
+    
+    database.ref(`students/${studentId}`).update({
+        status: status,
+        statusTime: timeString
+    }).then(() => {
+        showSuccessMessage('บันทึกสถานะสำเร็จ!');
+    }).catch((error) => {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาด: ' + error.message);
+    });
+}
+
+function deleteStudent(studentId) {
+    const student = Object.values(gradeData).flat().find(s => s.id === studentId);
+    
+    if (student && confirm(`ลบ "${student.name}" ใช่หรือไม่?`)) {
+        database.ref(`students/${studentId}`).remove().then(() => {
+            showSuccessMessage('ลบนักเรียนสำเร็จ!');
+        }).catch((error) => {
+            console.error('Error:', error);
+            alert('เกิดข้อผิดพลาด: ' + error.message);
+        });
+    }
+}
+
+function editStudent(studentId) {
+    const student = Object.values(gradeData).flat().find(s => s.id === studentId);
+    
+    if (student) {
+        editingStudentId = studentId;
+        document.getElementById('editStudentName').value = student.name;
+        document.getElementById('editModal').style.display = 'block';
+    }
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+    editingStudentId = null;
+}
+
+// ============================================
+// ฟังก์ชันอัพเดทสรุป
+// ============================================
+function updateSummary() {
+    const summary = document.getElementById('summary');
+    
+    if (!currentGrade || !currentSubjectId) {
+        summary.style.display = 'none';
+        return;
+    }
+
+    const studentsInGrade = (gradeData[currentGrade] || []).filter(s => s.subjectId === currentSubjectId);
+    
+    if (studentsInGrade.length === 0) {
+        summary.style.display = 'none';
+        return;
+    }
+
+    summary.style.display = 'block';
+    
+    document.getElementById('presentCount').textContent = studentsInGrade.filter(s => s.status === 'present').length;
+    document.getElementById('absentCount').textContent = studentsInGrade.filter(s => s.status === 'absent').length;
+    document.getElementById('lateCount').textContent = studentsInGrade.filter(s => s.status === 'late').length;
+    document.getElementById('leaveCount').textContent = studentsInGrade.filter(s => s.status === 'leave').length;
+}
+
+// ============================================
+// ฟังก์ชันแสดงข้อความสำเร็จ
+// ============================================
+function showSuccessMessage(message) {
+    const div = document.createElement('div');
+    div.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 1001;
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        color: white; padding: 15px 25px; border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(5, 150, 105, 0.3);
+        font-weight: 600; animation: slideIn 0.3s ease;
+    `;
+    div.textContent = `✅ ${message}`;
+    document.body.appendChild(div);
+    
+    setTimeout(() => div.remove(), 3000);
+}
+
+// ============================================
+// Event Listeners - เริ่มต้นระบบ
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 กำลังเริ่มต้นระบบเช็คชื่อ Multi-User + ฟีเจอร์เต็มรูปแบบ...');
+    
+    loadDataFromFirebase();
+    checkAndResetStudentData();
+    
+    setTimeout(() => {
+        handleAutoFillFromCode();
+    }, 1000);
+    
+    const singleToggle = document.getElementById('singleToggle');
+    const bulkToggle = document.getElementById('bulkToggle');
+    
+    if (singleToggle && bulkToggle) {
+        singleToggle.addEventListener('click', function() {
+            singleToggle.classList.add('active');
+            bulkToggle.classList.remove('active');
+            document.getElementById('addStudentForm').classList.add('active');
+            document.getElementById('bulkAddForm').classList.remove('active');
         });
 
-        // ============================================
-        // ตรวจสอบการเชื่อมต่อ Firebase
-        // ============================================
-        database.ref('.info/connected').on('value', (snapshot) => {
-            if (snapshot.val() === true) {
-                console.log('✅ เชื่อมต่อ Firebase สำเร็จ - พร้อมใช้งานแบบ Multi-User');
-            } else {
-                console.log('⚠️ กำลังพยายามเชื่อมต่อ Firebase...');
+        bulkToggle.addEventListener('click', function() {
+            bulkToggle.classList.add('active');
+            singleToggle.classList.remove('active');
+            document.getElementById('bulkAddForm').classList.add('active');
+            document.getElementById('addStudentForm').classList.remove('active');
+        });
+    }
+    
+    document.getElementById('addStudentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!currentSubjectId) {
+            alert('กรุณาเลือกรายวิชาก่อน');
+            return;
+        }
+        
+        const name = document.getElementById('studentName').value.trim();
+        const grade = document.getElementById('gradeLevel').value;
+        
+        if (!name || !grade) {
+            alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+            return;
+        }
+        
+        const newStudentRef = database.ref('students').push();
+        newStudentRef.set({
+            name: name,
+            grade: grade,
+            subjectId: currentSubjectId,
+            status: null,
+            statusTime: null,
+            createdAt: Date.now()
+        }).then(() => {
+            document.getElementById('studentName').value = '';
+            document.getElementById('gradeLevel').value = '';
+            showSuccessMessage('เพิ่มนักเรียนสำเร็จ!');
+        }).catch((error) => {
+            console.error('Error:', error);
+            alert('เกิดข้อผิดพลาด: ' + error.message);
+        });
+    });
+    
+    document.getElementById('bulkAddForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!currentSubjectId) {
+            alert('กรุณาเลือกรายวิชาก่อน');
+            return;
+        }
+        
+        const names = document.getElementById('bulkStudentNames').value.trim();
+        const grade = document.getElementById('bulkGradeLevel').value;
+        
+        if (!names || !grade) {
+            alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+            return;
+        }
+        
+        const nameList = names.split('\n').filter(name => name.trim() !== '');
+        let addedCount = 0;
+        const promises = [];
+        
+        nameList.forEach(name => {
+            const trimmedName = name.trim();
+            if (trimmedName) {
+                const newStudentRef = database.ref('students').push();
+                promises.push(
+                    newStudentRef.set({
+                        name: trimmedName,
+                        grade: grade,
+                        subjectId: currentSubjectId,
+                        status: null,
+                        statusTime: null,
+                        createdAt: Date.now()
+                    })
+                );
+                addedCount++;
             }
         });
+        
+        Promise.all(promises).then(() => {
+            document.getElementById('bulkStudentNames').value = '';
+            document.getElementById('bulkGradeLevel').value = '';
+            showSuccessMessage(`เพิ่มนักเรียนสำเร็จ ${addedCount} คน!`);
+        }).catch((error) => {
+            console.error('Error:', error);
+            alert('เกิดข้อผิดพลาด: ' + error.message);
+        });
+    });
+    
+    document.getElementById('editStudentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const newName = document.getElementById('editStudentName').value.trim();
+        
+        if (!newName) {
+            alert('กรุณากรอกชื่อ');
+            return;
+        }
+        
+        if (editingStudentId) {
+            database.ref(`students/${editingStudentId}`).update({
+                name: newName
+            }).then(() => {
+                closeEditModal();
+                showSuccessMessage('แก้ไขข้อมูลสำเร็จ!');
+            }).catch((error) => {
+                console.error('Error:', error);
+                alert('เกิดข้อผิดพลาด: ' + error.message);
+            });
+        }
+    });
+    
+    document.getElementById('editSubjectForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const newCode = document.getElementById('editSubjectCode').value.trim();
+        const newName = document.getElementById('editSubjectNameModal').value.trim();
+        
+        if (!newCode || !newName) {
+            alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+            return;
+        }
+        
+        if (currentSubjectId) {
+            database.ref(`subjects/${currentSubjectId}`).update({
+                code: newCode,
+                name: newName
+            }).then(() => {
+                closeEditSubjectModal();
+                showSuccessMessage('แก้ไขรายวิชาสำเร็จ!');
+            }).catch((error) => {
+                console.error('Error:', error);
+                alert('เกิดข้อผิดพลาด: ' + error.message);
+            });
+        }
+    });
+    
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    };
+});
+
+// ============================================
+// ตรวจสอบการเชื่อมต่อ Firebase
+// ============================================
+database.ref('.info/connected').on('value', (snapshot) => {
+    if (snapshot.val() === true) {
+        console.log('✅ เชื่อมต่อ Firebase สำเร็จ - พร้อมใช้งานแบบ Multi-User');
+    } else {
+        console.log('⚠️ กำลังพยายามเชื่อมต่อ Firebase...');
+    }
+});
+
+// ============================================
+// เพิ่ม CSS Animation
+// ============================================
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    .online-status {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        color: #059669;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.5;
+            transform: scale(1.2);
+        }
+    }
+`;
+document.head.appendChild(style);
+
+setInterval(checkAndResetStudentData, 3600000);
+
+console.log('✨ ระบบพร้อมใช้งาน - ฟีเจอร์ครบทุกอย่าง!');
     </script>
 </body>
 </html>
