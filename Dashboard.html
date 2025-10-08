@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แดชบอร์ดอาจารย์ - ระบบเช็คชื่อนักเรียน</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+    <style>
+       /* Reset และ Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #334155;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+/* Container */
+#container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    padding-top: 6rem;
+}
+
+/* Header - แก้ไขให้สวยงามขึ้น */
+#header {
+    background: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#teacherInfo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+#teacherName {
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.9375rem;
+}
+
+#header button {
+    background: white;
+    color: #ef4444;
+    border: 1px solid #fee2e2;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+#header button:hover {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+/* Sections - โทนสีเรียบง่าย */
+section {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+section:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+section h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+section h2 ion-icon {
+    font-size: 1.75rem;
+    color: #2563eb;
+}
+
+/* Filters Section - ปรับปรุงขนาดให้สมดุล */
+#filters {
+    background: white;
+}
+
+#filterControls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.875rem;
+    margin-top: 1rem;
+}
+
+#filterControls > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+#filterControls label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+#filterControls select,
+#filterControls input {
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    background: white;
+    color: #334155;
+}
+
+#filterControls select:focus,
+#filterControls input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* ปรับปรุงปุ่มกรองให้เท่ากัน */
+#filterControls button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 0.625rem 0.875rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    margin-top: 1.5rem;
+}
+
+#filterControls button:hover {
+    background: #1d4ed8;
+}
+
+#filterControls button:active {
+    transform: scale(0.98);
+}
+
+#filterControls button ion-icon {
+    font-size: 1.125rem;
+}
+
+/* Stats Cards - โทนสีเรียบง่าย */
+#statsCards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    text-align: center;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+}
+
+.stat-card h3 {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.stat-card p {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #2563eb;
+    margin: 0;
+}
+
+/* Student List */
+#studentListHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+#studentListHeader h2 {
+    margin: 0;
+}
+
+#studentListHeader div {
+    display: flex;
+    gap: 0.625rem;
+}
+
+#studentListHeader button {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 0.625rem 1.125rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+#studentListHeader button:hover {
+    background: #059669;
+}
+
+#studentListHeader button:active {
+    transform: scale(0.98);
+}
+
+#filteredCount {
+    color: #2563eb;
+    font-weight: 700;
+}
+
+/* Tables - โทนสีเรียบง่าย */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 1rem;
+    border-radius: 0.625rem;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+thead {
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+thead th {
+    padding: 0.875rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: #64748b;
+}
+
+tbody tr {
+    background: white;
+    border-bottom: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+}
+
+tbody tr:hover {
+    background: #f8fafc;
+}
+
+tbody tr:last-child {
+    border-bottom: none;
+}
+
+tbody td {
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+    color: #334155;
+}
+
+tbody td:first-child {
+    font-weight: 600;
+    color: #64748b;
+}
+
+tbody td strong {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+tbody td ion-icon {
+    font-size: 1.125rem;
+    vertical-align: middle;
+    margin-right: 0.25rem;
+}
+
+tbody td button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+    margin-right: 0.5rem;
+}
+
+tbody td button:hover {
+    background: #1d4ed8;
+}
+
+tbody td button:active {
+    transform: scale(0.96);
+}
+
+tbody td button:last-child {
+    background: #10b981;
+    margin-right: 0;
+}
+
+tbody td button:last-child:hover {
+    background: #059669;
+}
+
+/* Frequent Absent */
+#frequentAbsentList p {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #10b981;
+    font-weight: 600;
+    padding: 1rem;
+    background: #f0fdf4;
+    border-radius: 0.5rem;
+    border: 1px solid #bbf7d0;
+}
+
+#frequentAbsentList p ion-icon {
+    font-size: 1.5rem;
+}
+
+#frequentAbsentList ul {
+    list-style: none;
+    display: grid;
+    gap: 0.625rem;
+}
+
+#frequentAbsentList li {
+    background: #fef2f2;
+    border-left: 3px solid #ef4444;
+    padding: 0.875rem 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+    border: 1px solid #fee2e2;
+}
+
+#frequentAbsentList li:hover {
+    background: #fee2e2;
+}
+
+#frequentAbsentList li strong {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+#frequentAbsentList li button {
+    background: #f59e0b;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+}
+
+#frequentAbsentList li button:hover {
+    background: #d97706;
+}
+
+/* Modals */
+#editModal,
+#studentDetailModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+#modalContent,
+#studentDetailContent {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    animation: slideUp 0.25s ease;
+    position: relative;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+#studentDetailContent {
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+#modalContent h3,
+#studentDetailContent h3 {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#modalContent p {
+    margin-bottom: 0.875rem;
+    color: #334155;
+}
+
+#modalContent strong {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+#modalContent > div {
+    margin-bottom: 1.25rem;
+}
+
+#modalContent label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.5rem;
+}
+
+#modalContent select {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    background: white;
+    color: #334155;
+}
+
+#modalContent select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+#modalButtons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+#modalButtons button {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+#modalButtons button:first-child {
+    background: #10b981;
+    color: white;
+}
+
+#modalButtons button:first-child:hover {
+    background: #059669;
+}
+
+#modalButtons button:last-child {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+#modalButtons button:last-child:hover {
+    background: #e2e8f0;
+}
+
+/* Student Detail Modal */
+.close-btn {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 1.5rem;
+}
+
+.close-btn:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.student-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.75rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.student-avatar {
+    width: 4.5rem;
+    height: 4.5rem;
+    background: #eff6ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.student-avatar ion-icon {
+    font-size: 2.25rem;
+    color: #2563eb;
+}
+
+.student-info-detail h2 {
+    font-size: 1.625rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.student-info-detail p {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.student-info-detail ion-icon {
+    font-size: 1rem;
+    color: #2563eb;
+}
+
+/* Detail Stats Cards */
+.detail-stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.875rem;
+    margin-bottom: 1.75rem;
+}
+
+.detail-stat-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.125rem;
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.detail-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.detail-stat-card.present {
+    border-left: 3px solid #22c55e;
+}
+
+.detail-stat-card.absent {
+    border-left: 3px solid #ef4444;
+}
+
+.detail-stat-card.late {
+    border-left: 3px solid #f59e0b;
+}
+
+.detail-stat-card.leave {
+    border-left: 3px solid #2563eb;
+}
+
+.detail-stat-card.rate {
+    border-left: 3px solid #8b5cf6;
+}
+
+.stat-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.detail-stat-card.present .stat-icon {
+    background: #f0fdf4;
+    color: #22c55e;
+}
+
+.detail-stat-card.absent .stat-icon {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+.detail-stat-card.late .stat-icon {
+    background: #fffbeb;
+    color: #f59e0b;
+}
+
+.detail-stat-card.leave .stat-icon {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.detail-stat-card.rate .stat-icon {
+    background: #faf5ff;
+    color: #8b5cf6;
+}
+
+.stat-icon ion-icon {
+    font-size: 1.375rem;
+}
+
+.stat-info h4 {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.125rem;
+}
+
+.stat-info p {
+    font-size: 0.6875rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+/* Chart Section */
+.chart-section {
+    margin-bottom: 1.75rem;
+    padding: 1.25rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+}
+
+.chart-section h3 {
+    margin-bottom: 1.25rem;
+}
+
+#studentTrendChart {
+    max-height: 280px;
+}
+
+/* History Section */
+.history-section {
+    padding: 1.25rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+}
+
+.history-section h3 {
+    margin-bottom: 1rem;
+}
+
+.history-filters {
+    display: flex;
+    gap: 0.625rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.5rem 0.875rem;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.8125rem;
+}
+
+.filter-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.filter-btn.active {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+
+.history-table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 0.625rem;
+}
+
+.history-table-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.history-table-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.history-table-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.history-table-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-badge.present {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.status-badge.absent {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.status-badge.late {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.status-badge.leave {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    #container {
+        padding: 1.5rem;
+        padding-top: 5.5rem;
+    }
+
+    #statsCards {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    #container {
+        padding: 1rem;
+        padding-top: 5rem;
+    }
+
+    #header {
+        padding: 0.75rem 1rem;
+    }
+
+    #header h1 {
+        font-size: 1.25rem;
+    }
+
+    #teacherInfo {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-end;
+    }
+
+    section {
+        padding: 1.25rem;
+    }
+
+    section h2 {
+        font-size: 1.25rem;
+    }
+
+    #filterControls {
+        grid-template-columns: 1fr;
+    }
+
+    #statsCards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    #studentListHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    table {
+        font-size: 0.8125rem;
+    }
+
+    thead th,
+    tbody td {
+        padding: 0.625rem 0.5rem;
+    }
+
+    .detail-stats-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .student-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .history-filters {
+        flex-direction: column;
+    }
+
+    .filter-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    #statsCards {
+        grid-template-columns: 1fr;
+    }
+
+    tbody td button {
+        padding: 0.375rem 0.625rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Smooth Transitions */
+* {
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Print Styles */
+@media print {
+    #header,
+    #filters,
+    #modalButtons,
+    .close-btn {
+        display: none;
+    }
+
+    #container {
+        padding-top: 1rem;
+    }
+
+    section {
+        break-inside: avoid;
+        box-shadow: none;
+    }
+}
+    </style>
+</head>
+<body>
+    <div id="container">
+        <header id="header">
+            <h1>แดชบอร์ดอาจารย์</h1>
+            <div id="teacherInfo">
+                <span id="teacherName">อาจารย์</span>
+                <button onclick="logout()">ออกจากระบบ</button>
+            </div>
+        </header>
+
+        <section id="filters">
+            <h2>ตัวกรองข้อมูล</h2>
+            <div id="filterControls">
+                <div>
+                    <label>รายวิชา:</label>
+                    <select id="filterSubject" onchange="applyFilters()">
+                        <option value="">ทุกรายวิชา</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label>ระดับชั้น:</label>
+                    <select id="filterGrade" onchange="applyFilters()">
+                        <option value="">ทุกระดับชั้น</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label>สถานะ:</label>
+                    <select id="filterStatus" onchange="applyFilters()">
+                        <option value="">ทุกสถานะ</option>
+                        <option value="present">เข้าเรียน</option>
+                        <option value="absent">ขาดเรียน</option>
+                        <option value="late">มาสาย</option>
+                        <option value="leave">ลา</option>
+                        <option value="no-status">ยังไม่เช็ค</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label>ค้นหา:</label>
+                    <input type="text" id="searchBox" placeholder="ชื่อนักเรียน..." oninput="applyFilters()">
+                </div>
+                
+                <button onclick="resetFilters()"><ion-icon name="refresh-circle"></ion-icon> รีเซ็ตตัวกรอง</button>
+                <button onclick="refreshData()"><ion-icon name="reload"></ion-icon> รีเฟรช</button>
+            </div>
+        </section>
+
+        <section id="overviewStats">
+            <h2><ion-icon name="trending-up"></ion-icon> สถิติภาพรวม</h2>
+            <div id="statsCards">
+                <div class="stat-card">
+                    <h3>นักเรียนทั้งหมด</h3>
+                    <p id="totalStudents">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>เข้าเรียนวันนี้</h3>
+                    <p id="presentToday">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>ขาดเรียนวันนี้</h3>
+                    <p id="absentToday">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>มาสายวันนี้</h3>
+                    <p id="lateToday">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>ลาวันนี้</h3>
+                    <p id="leaveToday">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>เปอร์เซ็นต์เข้าเรียน</h3>
+                    <p id="attendanceRate">0%</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="studentList">
+            <div id="studentListHeader">
+                <h2><ion-icon name="people"></ion-icon> รายชื่อนักเรียน (<span id="filteredCount">0</span> คน)</h2>
+                <div>
+                    <button onclick="exportToCSV()"><ion-icon name="document-text"></ion-icon> ส่งออก CSV</button>
+                    <button onclick="exportToJSON()"><ion-icon name="save"></ion-icon> ส่งออก JSON</button>
+                </div>
+            </div>
+            
+            <table id="studentsTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>ชื่อ-นามสกุล</th>
+                        <th>ระดับชั้น</th>
+                        <th>รายวิชา</th>
+                        <th>สถานะ</th>
+                        <th>เวลา</th>
+                        <th>การเข้าเรียน</th>
+                        <th>การจัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                    <tr>
+                        <td colspan="8">กำลังโหลดข้อมูล...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="frequentAbsent">
+            <h2><ion-icon name="warning"></ion-icon> นักเรียนที่ขาดเรียนบ่อย</h2>
+            <div id="frequentAbsentList"></div>
+        </section>
+
+        <section id="subjectStats">
+            <h2><ion-icon name="book"></ion-icon> สถิติรายวิชา</h2>
+            <table id="subjectStatsTable">
+                <thead>
+                    <tr>
+                        <th>รหัสวิชา</th>
+                        <th>ชื่อรายวิชา</th>
+                        <th>นักเรียน</th>
+                        <th>เข้าเรียน</th>
+                        <th>ขาดเรียน</th>
+                        <th>มาสาย</th>
+                        <th>ลา</th>
+                        <th>%</th>
+                    </tr>
+                </thead>
+                <tbody id="subjectStatsBody"></tbody>
+            </table>
+        </section>
+
+        <section id="gradeStats">
+            <h2><ion-icon name="school"></ion-icon> สถิติรายชั้น</h2>
+            <table id="gradeStatsTable">
+                <thead>
+                    <tr>
+                        <th>ระดับชั้น</th>
+                        <th>นักเรียน</th>
+                        <th>เข้าเรียน</th>
+                        <th>ขาดเรียน</th>
+                        <th>มาสาย</th>
+                        <th>ลา</th>
+                        <th>%</th>
+                    </tr>
+                </thead>
+                <tbody id="gradeStatsBody"></tbody>
+            </table>
+        </section>
+    </div>
+
+    <div id="editModal" style="display: none;">
+        <div id="modalContent">
+            <h3><ion-icon name="create"></ion-icon> แก้ไขสถานะนักเรียน</h3>
+            <p><strong>นักเรียน:</strong> <span id="modalStudentName"></span></p>
+            <p><strong>รายวิชา:</strong> <span id="modalSubject"></span></p>
+            <p><strong>ระดับชั้น:</strong> <span id="modalGrade"></span></p>
+            
+            <div>
+                <label>เปลี่ยนสถานะ:</label>
+                <select id="modalStatus">
+                    <option value="present">เข้าเรียน</option>
+                    <option value="absent">ขาดเรียน</option>
+                    <option value="late">มาสาย</option>
+                    <option value="leave">ลา</option>
+                </select>
+            </div>
+            
+            <div id="modalButtons">
+                <button onclick="saveStatusChange()"><ion-icon name="save"></ion-icon> บันทึก</button>
+                <button onclick="closeModal()"><ion-icon name="close"></ion-icon> ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="studentDetailModal" style="display: none;">
+        <div id="studentDetailContent">
+            <button class="close-btn" onclick="closeStudentDetailModal()">
+                <ion-icon name="close"></ion-icon>
+            </button>
+            
+            <div class="student-header">
+                <div class="student-avatar">
+                    <ion-icon name="person"></ion-icon>
+                </div>
+                <div class="student-info-detail">
+                    <h2 id="detailStudentName">ชื่อนักเรียน</h2>
+                    <p><ion-icon name="school"></ion-icon> <span id="detailStudentGrade">ระดับชั้น</span></p>
+                    <p><ion-icon name="book"></ion-icon> <span id="detailStudentSubject">รายวิชา</span></p>
+                    <p><ion-icon name="calendar"></ion-icon> รหัสนักเรียน: <span id="detailStudentId">-</span></p>
+                </div>
+            </div>
+
+            <div class="detail-stats-cards">
+                <div class="detail-stat-card present">
+                    <div class="stat-icon"><ion-icon name="checkmark-circle"></ion-icon></div>
+                    <div class="stat-info">
+                        <h4 id="detailPresentCount">0</h4>
+                        <p>เข้าเรียน</p>
+                    </div>
+                </div>
+                <div class="detail-stat-card absent">
+                    <div class="stat-icon"><ion-icon name="close-circle"></ion-icon></div>
+                    <div class="stat-info">
+                        <h4 id="detailAbsentCount">0</h4>
+                        <p>ขาดเรียน</p>
+                    </div>
+                </div>
+                <div class="detail-stat-card late">
+                    <div class="stat-icon"><ion-icon name="time"></ion-icon></div>
+                    <div class="stat-info">
+                        <h4 id="detailLateCount">0</h4>
+                        <p>มาสาย</p>
+                    </div>
+                </div>
+                <div class="detail-stat-card leave">
+                    <div class="stat-icon"><ion-icon name="document"></ion-icon></div>
+                    <div class="stat-info">
+                        <h4 id="detailLeaveCount">0</h4>
+                        <p>ลา</p>
+                    </div>
+                </div>
+                <div class="detail-stat-card rate">
+                    <div class="stat-icon"><ion-icon name="trending-up"></ion-icon></div>
+                    <div class="stat-info">
+                        <h4 id="detailAttendanceRate">0%</h4>
+                        <p>อัตราการเข้าเรียน</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h3><ion-icon name="bar-chart"></ion-icon> กราฟแนวโน้มการเข้าเรียน (7 วันล่าสุด)</h3>
+                <canvas id="studentTrendChart"></canvas>
+            </div>
+
+            <div class="history-section">
+                <h3><ion-icon name="time"></ion-icon> ประวัติการเข้าเรียน</h3>
+                <div class="history-filters">
+                    <button class="filter-btn active" onclick="filterHistory('all')">ทั้งหมด</button>
+                    <button class="filter-btn" onclick="filterHistory('present')">เข้าเรียน</button>
+                    <button class="filter-btn" onclick="filterHistory('absent')">ขาดเรียน</button>
+                    <button class="filter-btn" onclick="filterHistory('late')">มาสาย</button>
+                    <button class="filter-btn" onclick="filterHistory('leave')">ลา</button>
+                </div>
+                <div class="history-table-container">
+                    <table id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>วันที่</th>
+                                <th>รายวิชา</th>
+                                <th>สถานะ</th>
+                                <th>เวลา</th>
+                                <th>หมายเหตุ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td colspan="5">กำลังโหลดประวัติ...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOu2MSd4fXzJppzoRn_3ZrCRiKoBVK11M",
+            authDomain: "km-intertech.firebaseapp.com",
+            databaseURL: "https://km-intertech-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "km-intertech",
+            storageBucket: "km-intertech.firebasestorage.app",
+            messagingSenderId: "378139509245",
+            appId: "1:378139509245:web:c9a7d7bf3b92945be09994",
+            measurementId: "G-23PJCBSTNF"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Global Variables
+        let allStudents = [];
+        let allSubjects = [];
+        let filteredStudents = [];
+        let currentEditingStudent = null;
+        let currentViewingStudent = null;
+        let studentTrendChart = null;
+        let currentHistoryFilter = 'all';
+
+        // Load Data from Firebase
+        function loadAllData() {
+            console.log('กำลังโหลดข้อมูลจาก Firebase...');
+            
+            database.ref('subjects').on('value', (snapshot) => {
+                allSubjects = [];
+                snapshot.forEach((child) => {
+                    allSubjects.push({
+                        id: child.key,
+                        ...child.val()
+                    });
+                });
+                updateSubjectFilter();
+                updateSubjectStats();
+            });
+
+            database.ref('students').on('value', (snapshot) => {
+                allStudents = [];
+                snapshot.forEach((child) => {
+                    const studentData = child.val();
+                    allStudents.push({
+                        id: child.key,
+                        ...studentData,
+                        history: studentData.history || []
+                    });
+                });
+                
+                updateGradeFilter();
+                applyFilters();
+                updateOverviewStats();
+                updateGradeStats();
+                updateFrequentAbsent();
+            });
+        }
+
+        function generateMockHistory(studentId) {
+            const history = [];
+            const statuses = ['present', 'present', 'present', 'late', 'absent', 'leave', 'present'];
+            const subjects = allSubjects.length > 0 ? allSubjects : [
+                { id: '1', code: 'TH101', name: 'ภาษาไทย' }
+            ];
+            
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                
+                if (Math.random() > 0.2) {
+                    const status = statuses[Math.floor(Math.random() * statuses.length)];
+                    const subject = subjects[Math.floor(Math.random() * subjects.length)];
+                    const hour = 8 + Math.floor(Math.random() * 4);
+                    const minute = Math.floor(Math.random() * 60);
+                    
+                    history.push({
+                        date: date.toISOString().split('T')[0],
+                        subjectId: subject.id,
+                        subjectCode: subject.code,
+                        subjectName: subject.name,
+                        status: status,
+                        time: `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+                        note: status === 'leave' ? 'ลาป่วย' : status === 'absent' ? 'ไม่มาโดยไม่แจ้ง' : ''
+                    });
+                }
+            }
+            
+            return history;
+        }
+
+        function viewStudentDetail(studentId) {
+            const student = allStudents.find(s => s.id === studentId);
+            if (!student) {
+                alert('ไม่พบข้อมูลนักเรียน');
+                return;
+            }
+
+            currentViewingStudent = student;
+            const subject = allSubjects.find(s => s.id === student.subjectId);
+            const subjectName = subject ? `${subject.code} - ${subject.name}` : '-';
+
+            document.getElementById('detailStudentName').textContent = student.name;
+            document.getElementById('detailStudentGrade').textContent = student.grade;
+            document.getElementById('detailStudentSubject').textContent = subjectName;
+            document.getElementById('detailStudentId').textContent = student.id;
+
+            if (!student.history || student.history.length === 0) {
+                student.history = generateMockHistory(studentId);
+            }
+
+            const stats = calculateStudentStats(student.history);
+            document.getElementById('detailPresentCount').textContent = stats.present;
+            document.getElementById('detailAbsentCount').textContent = stats.absent;
+            document.getElementById('detailLateCount').textContent = stats.late;
+            document.getElementById('detailLeaveCount').textContent = stats.leave;
+            document.getElementById('detailAttendanceRate').textContent = stats.rate + '%';
+
+            createStudentTrendChart(student.history);
+            displayStudentHistory(student.history, 'all');
+            document.getElementById('studentDetailModal').style.display = 'flex';
+        }
+
+        function calculateStudentStats(history) {
+            const stats = {
+                present: 0,
+                absent: 0,
+                late: 0,
+                leave: 0,
+                total: history.length
+            };
+
+            history.forEach(record => {
+                if (record.status === 'present') stats.present++;
+                else if (record.status === 'absent') stats.absent++;
+                else if (record.status === 'late') stats.late++;
+                else if (record.status === 'leave') stats.leave++;
+            });
+
+            stats.rate = stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0;
+            return stats;
+        }
+
+        function createStudentTrendChart(history) {
+            const ctx = document.getElementById('studentTrendChart');
+            if (!ctx) return;
+            
+            if (studentTrendChart) {
+                studentTrendChart.destroy();
+            }
+
+            const last7Days = [];
+            const presentData = [];
+            const absentData = [];
+            const lateData = [];
+
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                last7Days.push(date.toLocaleDateString('th-TH', { month: 'short', day: 'numeric' }));
+                
+                const dayRecords = history.filter(r => r.date === dateStr);
+                presentData.push(dayRecords.filter(r => r.status === 'present').length);
+                absentData.push(dayRecords.filter(r => r.status === 'absent').length);
+                lateData.push(dayRecords.filter(r => r.status === 'late').length);
+            }
+
+            studentTrendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: last7Days,
+                    datasets: [
+                        {
+                            label: 'เข้าเรียน',
+                            data: presentData,
+                            borderColor: '#22c55e',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'ขาดเรียน',
+                            data: absentData,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'มาสาย',
+                            data: lateData,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function displayStudentHistory(history, filter) {
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
+
+            let filteredHistory = history;
+            if (filter !== 'all') {
+                filteredHistory = history.filter(r => r.status === filter);
+            }
+
+            filteredHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (filteredHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">ไม่พบข้อมูล</td></tr>';
+                return;
+            }
+
+            const statusText = {
+                'present': 'เข้าเรียน',
+                'absent': 'ขาดเรียน',
+                'late': 'มาสาย',
+                'leave': 'ลา'
+            };
+
+            const statusClass = {
+                'present': 'status-badge present',
+                'absent': 'status-badge absent',
+                'late': 'status-badge late',
+                'leave': 'status-badge leave'
+            };
+
+            filteredHistory.forEach(record => {
+                const row = tbody.insertRow();
+                const dateObj = new Date(record.date);
+                const formattedDate = dateObj.toLocaleDateString('th-TH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${record.subjectCode || '-'}</td>
+                    <td><span class="${statusClass[record.status]}">${statusText[record.status]}</span></td>
+                    <td>${record.time}</td>
+                    <td>${record.note || '-'}</td>
+                `;
+            });
+        }
+
+        function filterHistory(filter) {
+            currentHistoryFilter = filter;
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            if (currentViewingStudent && currentViewingStudent.history) {
+                displayStudentHistory(currentViewingStudent.history, filter);
+            }
+        }
+
+        function closeStudentDetailModal() {
+            document.getElementById('studentDetailModal').style.display = 'none';
+            currentViewingStudent = null;
+            if (studentTrendChart) {
+                studentTrendChart.destroy();
+                studentTrendChart = null;
+            }
+        }
+
+        function updateSubjectFilter() {
+            const select = document.getElementById('filterSubject');
+            select.innerHTML = '<option value="">ทุกรายวิชา</option>';
+            
+            allSubjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject.id;
+                option.textContent = `${subject.code} - ${subject.name}`;
+                select.appendChild(option);
+            });
+        }
+
+        function updateGradeFilter() {
+            const select = document.getElementById('filterGrade');
+            select.innerHTML = '<option value="">ทุกระดับชั้น</option>';
+            
+            const grades = [...new Set(allStudents.map(s => s.grade))].sort();
+            grades.forEach(grade => {
+                const option = document.createElement('option');
+                option.value = grade;
+                option.textContent = grade;
+                select.appendChild(option);
+            });
+        }
+
+        function applyFilters() {
+            const subjectFilter = document.getElementById('filterSubject').value;
+            const gradeFilter = document.getElementById('filterGrade').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+            const searchText = document.getElementById('searchBox').value.toLowerCase();
+
+            filteredStudents = allStudents.filter(student => {
+                if (subjectFilter && student.subjectId !== subjectFilter) return false;
+                if (gradeFilter && student.grade !== gradeFilter) return false;
+                if (statusFilter) {
+                    if (statusFilter === 'no-status' && student.status) return false;
+                    if (statusFilter !== 'no-status' && student.status !== statusFilter) return false;
+                }
+                if (searchText && !student.name.toLowerCase().includes(searchText)) return false;
+                return true;
+            });
+
+            displayStudents();
+        }
+
+        function resetFilters() {
+            document.getElementById('filterSubject').value = '';
+            document.getElementById('filterGrade').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('searchBox').value = '';
+            applyFilters();
+        }
+
+        function displayStudents() {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+
+            document.getElementById('filteredCount').textContent = filteredStudents.length;
+
+            if (filteredStudents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8">ไม่พบข้อมูลนักเรียน</td></tr>';
+                return;
+            }
+
+            filteredStudents.forEach((student, index) => {
+                const subject = allSubjects.find(s => s.id === student.subjectId);
+                const subjectName = subject ? `${subject.code} - ${subject.name}` : '-';
+                
+                const statusText = {
+                    'present': '<ion-icon name="checkmark-circle"></ion-icon> เข้าเรียน',
+                    'absent': '<ion-icon name="close-circle"></ion-icon> ขาดเรียน',
+                    'late': '<ion-icon name="time"></ion-icon> มาสาย',
+                    'leave': '<ion-icon name="document"></ion-icon> ลา'
+                };
+
+                let attendancePercent = '85%';
+                if (student.history && student.history.length > 0) {
+                    const stats = calculateStudentStats(student.history);
+                    attendancePercent = stats.rate + '%';
+                }
+
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${student.name}</strong></td>
+                    <td>${student.grade}</td>
+                    <td>${subjectName}</td>
+                    <td>${statusText[student.status] || '<ion-icon name="ellipse-outline"></ion-icon> ยังไม่เช็ค'}</td>
+                    <td>${student.statusTime || '-'}</td>
+                    <td>${attendancePercent}</td>
+                    <td>
+                        <button onclick="openEditModal('${student.id}')"><ion-icon name="create"></ion-icon> แก้ไข</button>
+                        <button onclick="viewStudentDetail('${student.id}')"><ion-icon name="eye"></ion-icon> ดูรายละเอียด</button>
+                    </td>
+                `;
+            });
+        }
+
+        function updateOverviewStats() {
+            const total = allStudents.length;
+            const present = allStudents.filter(s => s.status === 'present').length;
+            const absent = allStudents.filter(s => s.status === 'absent').length;
+            const late = allStudents.filter(s => s.status === 'late').length;
+            const leave = allStudents.filter(s => s.status === 'leave').length;
+            
+            const rate = total > 0 ? Math.round((present / total) * 100) : 0;
+
+            document.getElementById('totalStudents').textContent = total;
+            document.getElementById('presentToday').textContent = present;
+            document.getElementById('absentToday').textContent = absent;
+            document.getElementById('lateToday').textContent = late;
+            document.getElementById('leaveToday').textContent = leave;
+            document.getElementById('attendanceRate').textContent = rate + '%';
+        }
+
+        function updateSubjectStats() {
+            const tbody = document.getElementById('subjectStatsBody');
+            tbody.innerHTML = '';
+
+            allSubjects.forEach(subject => {
+                const studentsInSubject = allStudents.filter(s => s.subjectId === subject.id);
+                const total = studentsInSubject.length;
+                const present = studentsInSubject.filter(s => s.status === 'present').length;
+                const absent = studentsInSubject.filter(s => s.status === 'absent').length;
+                const late = studentsInSubject.filter(s => s.status === 'late').length;
+                const leave = studentsInSubject.filter(s => s.status === 'leave').length;
+                const rate = total > 0 ? Math.round((present / total) * 100) : 0;
+
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${subject.code}</td>
+                    <td>${subject.name}</td>
+                    <td>${total}</td>
+                    <td>${present}</td>
+                    <td>${absent}</td>
+                    <td>${late}</td>
+                    <td>${leave}</td>
+                    <td><strong>${rate}%</strong></td>
+                `;
+            });
+        }
+
+        function updateGradeStats() {
+            const tbody = document.getElementById('gradeStatsBody');
+            tbody.innerHTML = '';
+
+            const grades = [...new Set(allStudents.map(s => s.grade))].sort();
+
+            grades.forEach(grade => {
+                const studentsInGrade = allStudents.filter(s => s.grade === grade);
+                const total = studentsInGrade.length;
+                const present = studentsInGrade.filter(s => s.status === 'present').length;
+                const absent = studentsInGrade.filter(s => s.status === 'absent').length;
+                const late = studentsInGrade.filter(s => s.status === 'late').length;
+                const leave = studentsInGrade.filter(s => s.status === 'leave').length;
+                const rate = total > 0 ? Math.round((present / total) * 100) : 0;
+
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${grade}</strong></td>
+                    <td>${total}</td>
+                    <td>${present}</td>
+                    <td>${absent}</td>
+                    <td>${late}</td>
+                    <td>${leave}</td>
+                    <td><strong>${rate}%</strong></td>
+                `;
+            });
+        }
+
+        function updateFrequentAbsent() {
+            const container = document.getElementById('frequentAbsentList');
+            const absentStudents = allStudents.filter(s => s.status === 'absent');
+            
+            if (absentStudents.length === 0) {
+                container.innerHTML = '<p><ion-icon name="checkmark-circle"></ion-icon> ไม่มีนักเรียนขาดเรียนในวันนี้</p>';
+                return;
+            }
+
+            container.innerHTML = '<ul>' + absentStudents.map(student => {
+                const subject = allSubjects.find(s => s.id === student.subjectId);
+                const subjectName = subject ? `${subject.code} - ${subject.name}` : '-';
+                
+                return `<li>
+                    <strong>${student.name}</strong> (${student.grade}) - ${subjectName}
+                    <button onclick="openEditModal('${student.id}')"><ion-icon name="create"></ion-icon> แก้ไข</button>
+                </li>`;
+            }).join('') + '</ul>';
+        }
+
+        function openEditModal(studentId) {
+            const student = allStudents.find(s => s.id === studentId);
+            if (!student) return;
+
+            currentEditingStudent = student;
+            
+            const subject = allSubjects.find(s => s.id === student.subjectId);
+            const subjectName = subject ? `${subject.code} - ${subject.name}` : '-';
+
+            document.getElementById('modalStudentName').textContent = student.name;
+            document.getElementById('modalSubject').textContent = subjectName;
+            document.getElementById('modalGrade').textContent = student.grade;
+            document.getElementById('modalStatus').value = student.status || 'present';
+            
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+            currentEditingStudent = null;
+        }
+
+        function saveStatusChange() {
+            if (!currentEditingStudent) return;
+
+            const newStatus = document.getElementById('modalStatus').value;
+            const time = new Date();
+            const timeString = `${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}น.`;
+            const dateString = time.toISOString().split('T')[0];
+
+            const historyRecord = {
+                date: dateString,
+                subjectId: currentEditingStudent.subjectId,
+                status: newStatus,
+                time: timeString,
+                note: ''
+            };
+
+            database.ref(`students/${currentEditingStudent.id}`).update({
+                status: newStatus,
+                statusTime: timeString
+            }).then(() => {
+                const historyRef = database.ref(`students/${currentEditingStudent.id}/history`);
+                historyRef.once('value', (snapshot) => {
+                    let history = snapshot.val() || [];
+                    if (!Array.isArray(history)) history = [];
+                    
+                    const existingIndex = history.findIndex(h => h.date === dateString && h.subjectId === currentEditingStudent.subjectId);
+                    
+                    if (existingIndex >= 0) {
+                        history[existingIndex] = historyRecord;
+                    } else {
+                        history.push(historyRecord);
+                    }
+                    
+                    historyRef.set(history);
+                });
+
+                sendNotification('✅ บันทึกสถานะสำเร็จ!', 'success');
+                closeModal();
+            }).catch((error) => {
+                alert('❌ เกิดข้อผิดพลาด: ' + error.message);
+            });
+        }
+
+        function exportToCSV() {
+            if (filteredStudents.length === 0) {
+                alert('ไม่มีข้อมูลให้ส่งออก');
+                return;
+            }
+
+            const currentDate = new Date().toLocaleDateString('th-TH');
+            let csvContent = `รายงานการเข้าเรียน\nวันที่: ${currentDate}\n\n`;
+            csvContent += `ลำดับ,ชื่อ-นามสกุล,ระดับชั้น,รายวิชา,สถานะ,เวลา\n`;
+
+            filteredStudents.forEach((student, index) => {
+                const subject = allSubjects.find(s => s.id === student.subjectId);
+                const subjectName = subject ? `${subject.code} - ${subject.name}` : '-';
+                
+                const statusText = {
+                    'present': 'เข้าเรียน',
+                    'absent': 'ขาดเรียน',
+                    'late': 'มาสาย',
+                    'leave': 'ลา'
+                };
+
+                csvContent += `${index + 1},${student.name},${student.grade},${subjectName},${statusText[student.status] || 'ยังไม่เช็ค'},${student.statusTime || '-'}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `attendance_report_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            sendNotification('ส่งออกไฟล์ CSV สำเร็จ!', 'success');
+        }
+
+        function exportToJSON() {
+            if (filteredStudents.length === 0) {
+                alert('ไม่มีข้อมูลให้ส่งออก');
+                return;
+            }
+
+            const exportData = {
+                exportDate: new Date().toISOString(),
+                totalStudents: filteredStudents.length,
+                students: filteredStudents.map(student => {
+                    const subject = allSubjects.find(s => s.id === student.subjectId);
+                    return {
+                        ...student,
+                        subjectInfo: subject
+                    };
+                })
+            };
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `attendance_data_${new Date().toISOString().split('T')[0]}.json`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            sendNotification('ส่งออกไฟล์ JSON สำเร็จ!', 'success');
+        }
+
+        function refreshData() {
+            console.log('🔄 กำลังรีเฟรชข้อมูล...');
+            loadAllData();
+            sendNotification('รีเฟรชข้อมูลสำเร็จ!', 'success');
+        }
+
+        function logout() {
+            if (confirm('คุณต้องการออกจากระบบใช่หรือไม่?')) {
+                window.location.href = './index.html';
+            }
+        }
+
+        function loadTeacherInfo() {
+            try {
+                const userData = localStorage.getItem('userData');
+                if (userData) {
+                    const user = JSON.parse(userData);
+                    document.getElementById('teacherName').textContent = 
+                        `${user.firstName} ${user.lastName} (${user.roleDisplay || 'อาจารย์'})`;
+                } else {
+                    document.getElementById('teacherName').textContent = 'อาจารย์';
+                }
+            } catch (error) {
+                console.error('Error loading teacher info:', error);
+                document.getElementById('teacherName').textContent = 'อาจารย์';
+            }
+        }
+
+        function checkAccess() {
+            const userRole = localStorage.getItem('userRole');
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            
+            if (isLoggedIn !== 'true' || (userRole !== 'teacher' && userRole !== 'admin')) {
+                alert('คุณไม่มีสิทธิ์เข้าถึงหน้านี้\nกรุณาเข้าสู่ระบบด้วยบัญชีอาจารย์');
+                window.location.href = './index.html';
+                return false;
+            }
+            
+            return true;
+        }
+
+        function sendNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('เริ่มต้นระบบแดชบอร์ดอาจารย์...');
+            
+            if (!checkAccess()) return;
+            
+            loadTeacherInfo();
+            loadAllData();
+            
+            setTimeout(() => {
+                sendNotification('ระบบพร้อมใช้งานแล้ว', 'success');
+            }, 1000);
+        });
+
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'studentAttendanceData') {
+                console.log('ตรวจพบการเปลี่ยนแปลงข้อมูล - รีเฟรชอัตโนมัติ');
+                loadAllData();
+                sendNotification('ข้อมูลได้รับการอัพเดท', 'info');
+            }
+        });
+
+        database.ref('.info/connected').on('value', (snapshot) => {
+            if (snapshot.val() === true) {
+                console.log('เชื่อมต่อ Firebase สำเร็จ');
+            } else {
+                console.log('กำลังพยายามเชื่อมต่อ Firebase...');
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                e.preventDefault();
+                refreshData();
+            }
+            
+            if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                e.preventDefault();
+                exportToCSV();
+            }
+            
+            if (e.key === 'Escape') {
+                closeModal();
+                closeStudentDetailModal();
+            }
+        });
+
+        console.log('ระบบแดชบอร์ดอาจารย์พร้อมใช้งานครบทุกฟังก์ชัน!');
+    </script>
+</body>
+</html>
