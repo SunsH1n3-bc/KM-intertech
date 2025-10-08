@@ -15,6 +15,7 @@
 
     <style>
 /* ===== RESET & BASE STYLES ===== */
+/* ===== RESET & BASE STYLES ===== */
 * {
     margin: 0;
     padding: 0;
@@ -1071,7 +1072,7 @@ body {
     height: 150px;
     border-radius: 50%;
     opacity: 0.03;
-    }
+}
 
 .stat-card.attendance::before {
     background: var(--success-color);
@@ -1307,7 +1308,7 @@ body {
     font-weight: 500;
 }
 
-/* ===== FOOTER - แก้ไขให้อยู่ตรงกลาง ===== */
+/* ===== FOOTER ===== */
 .main-footer {
     background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
     color: var(--text-white);
@@ -1663,9 +1664,18 @@ body {
                 </a>
             </li>
             
-            <li class="nav-item" data-tooltip="สถิติการเข้าเรียน">
+            <!-- สถิติการเข้าเรียน - แสดงเฉพาะนักเรียน -->
+            <li class="nav-item student-only" data-tooltip="สถิติการเข้าเรียน">
                 <a href="./User.html" class="nav-link" role="button" tabindex="0" aria-label="รายงาน">
                     <ion-icon name="bar-chart" class="nav-icon"></ion-icon>
+                    <span class="nav-ripple"></span>
+                </a>
+            </li>
+
+            <!-- แดชบอร์ดอาจารย์ - แสดงเฉพาะครู -->
+            <li class="nav-item teacher-only" data-tooltip="แดชบอร์ดอาจารย์">
+                <a href="./Dashboard.html" class="nav-link" role="button" tabindex="0" aria-label="รายงาน">
+                    <ion-icon name="podium" class="nav-icon"></ion-icon>
                     <span class="nav-ripple"></span>
                 </a>
             </li>
@@ -2474,7 +2484,7 @@ function loadUserAvatar() {
     }
 }
 
-// ===== 11. ฟังก์ชันจัดการบทบาทผู้ใช้ =====
+// ===== 11. ฟังก์ชันจัดการบทบาทผู้ใช้ - แก้ไขแล้ว =====
 function setUserRole(role) {
     currentUserRole = role;
     console.log('User role set to:', role);
@@ -2516,17 +2526,42 @@ function getUserRole() {
     return 'student';
 }
 
+// ===== ฟังก์ชันอัพเดท UI ตามบทบาท - ปรับปรุงใหม่ =====
 function updateUIByRole(role) {
     const checkinElements = document.querySelectorAll('.checkin-feature');
+    const studentOnlyElements = document.querySelectorAll('.student-only');
+    const teacherOnlyElements = document.querySelectorAll('.teacher-only');
     
     if (role === 'student' || role === 'นักเรียน') {
+        // ซ่อนฟีเจอร์ของครู
         checkinElements.forEach(element => {
             element.style.display = 'none';
         });
-    } else {
+        teacherOnlyElements.forEach(element => {
+            element.style.display = 'none';
+        });
+        
+        // แสดงฟีเจอร์ของนักเรียน
+        studentOnlyElements.forEach(element => {
+            element.style.display = '';
+        });
+        
+        console.log('UI updated for student role - Statistics visible, Dashboard hidden');
+    } else if (role === 'teacher' || role === 'ครู') {
+        // แสดงฟีเจอร์ของครู
         checkinElements.forEach(element => {
             element.style.display = '';
         });
+        teacherOnlyElements.forEach(element => {
+            element.style.display = '';
+        });
+        
+        // ซ่อนฟีเจอร์ของนักเรียน
+        studentOnlyElements.forEach(element => {
+            element.style.display = 'none';
+        });
+        
+        console.log('UI updated for teacher role - Dashboard visible, Statistics hidden');
     }
 }
 
@@ -2670,6 +2705,17 @@ function setupEventListeners() {
         if (e.key === 'isLoggedIn' && e.newValue !== 'true') {
             NotificationManager.show('เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่', 'error', 6000);
         }
+        
+        // เพิ่ม: ตรวจจับการเปลี่ยน role
+        if (e.key === 'userRole') {
+            console.log('ตรวจพบการเปลี่ยนแปลงบทบาทผู้ใช้');
+            const newRole = e.newValue;
+            if (newRole) {
+                currentUserRole = newRole;
+                updateUIByRole(newRole);
+                NotificationManager.show(`เปลี่ยนบทบาทเป็น ${newRole === 'teacher' ? 'ครู' : 'นักเรียน'} แล้ว`, 'info');
+            }
+        }
     });
     
     document.addEventListener('visibilitychange', function() {
@@ -2678,6 +2724,10 @@ function setupEventListeners() {
             updateTodaySchedule();
             updateIndexStatistics();
             updateDateTime();
+            
+            // รีเฟรช UI ตาม role
+            const role = getUserRole();
+            updateUIByRole(role);
         }
     });
     
@@ -2714,6 +2764,7 @@ window.getUserRole = getUserRole;
 window.NotificationManager = NotificationManager;
 window.updateTodaySchedule = updateTodaySchedule;
 window.updateIndexStatistics = updateIndexStatistics;
+window.updateUIByRole = updateUIByRole;
 
 // ===== 21. DOM Ready Initialization =====
 if (document.readyState === 'loading') {
@@ -2730,6 +2781,6 @@ if (document.readyState === 'loading') {
     }, 100);
 }
 
-console.log('Real-time Schedule System loaded successfully!');
+console.log('Real-time Schedule System with Role Management loaded successfully!');
     </script>
 </html>
