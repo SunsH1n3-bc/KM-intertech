@@ -1345,11 +1345,46 @@ select.form-input {
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            // ตรวจสอบข้อมูลทั้งหมด
+            const role = document.getElementById('role').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('regEmail').value;
+            const phone = document.getElementById('phone').value;
+            const studentId = document.getElementById('studentId').value;
+            const classField = document.getElementById('classField').value;
             const password = document.getElementById('regPassword').value;
             const confirm = document.getElementById('confirmPassword').value;
+            const acceptTerms = document.getElementById('acceptTerms').checked;
             
-            if (password !== confirm) {
-                showError('รหัสผ่านไม่ตรงกัน');
+            // Validation
+            if (!role) {
+                showError('กรุณาเลือกประเภทผู้ใช้งาน');
+                return;
+            }
+            
+            if (!firstName || !lastName) {
+                showError('กรุณากรอกชื่อและนามสกุล');
+                return;
+            }
+            
+            if (!email) {
+                showError('กรุณากรอกอีเมล');
+                return;
+            }
+            
+            if (!phone) {
+                showError('กรุณากรอกเบอร์โทรศัพท์');
+                return;
+            }
+            
+            if (!studentId) {
+                showError('กรุณากรอกรหัสประจำตัว');
+                return;
+            }
+            
+            if (!classField) {
+                showError('กรุณากรอกชั้นเรียน/แผนก');
                 return;
             }
             
@@ -1358,14 +1393,24 @@ select.form-input {
                 return;
             }
             
+            if (password !== confirm) {
+                showError('รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน');
+                return;
+            }
+            
+            if (!acceptTerms) {
+                showError('กรุณายอมรับเงื่อนไขการใช้งาน');
+                return;
+            }
+            
             const userData = {
-                role: document.getElementById('role').value,
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                email: document.getElementById('regEmail').value,
-                phone: document.getElementById('phone').value,
-                studentId: document.getElementById('studentId').value,
-                classField: document.getElementById('classField').value,
+                role: role,
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                phone: phone,
+                studentId: studentId,
+                classField: classField,
                 createdAt: new Date().toISOString(),
                 attendanceRate: 0,
                 attendedDays: 0,
@@ -1375,11 +1420,14 @@ select.form-input {
             showLoading('กำลังสมัครสมาชิก');
             
             try {
+                console.log('🔄 กำลังสร้างบัญชี Firebase Authentication...');
                 const userCredential = await window.createUser(auth, userData.email, password);
                 const user = userCredential.user;
+                console.log('✅ สร้างบัญชีสำเร็จ! UID:', user.uid);
                 
-                // Save user data to database
+                console.log('🔄 กำลังบันทึกข้อมูลลง Database...');
                 await dbSet(dbRef(db, 'users/' + user.uid), userData);
+                console.log('✅ บันทึกข้อมูลสำเร็จ!');
                 
                 hideLoading();
                 showSuccess(
@@ -1391,15 +1439,25 @@ select.form-input {
                     }
                 );
             } catch (error) {
+                console.error('❌ Error:', error);
+                console.error('Error Code:', error.code);
+                console.error('Error Message:', error.message);
+                
                 hideLoading();
                 let errorMsg = 'เกิดข้อผิดพลาดในการสมัครสมาชิก';
                 
                 if (error.code === 'auth/email-already-in-use') {
-                    errorMsg = 'อีเมลนี้ถูกใช้งานแล้ว';
+                    errorMsg = 'อีเมลนี้ถูกใช้งานแล้ว\nกรุณาใช้อีเมลอื่น';
                 } else if (error.code === 'auth/invalid-email') {
-                    errorMsg = 'รูปแบบอีเมลไม่ถูกต้อง';
+                    errorMsg = 'รูปแบบอีเมลไม่ถูกต้อง\nเช่น example@school.ac.th';
                 } else if (error.code === 'auth/weak-password') {
-                    errorMsg = 'รหัสผ่านไม่แข็งแรงพอ';
+                    errorMsg = 'รหัสผ่านไม่แข็งแรงพอ\nควรมีอย่างน้อย 6 ตัวอักษร';
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    errorMsg = 'ยังไม่ได้เปิดใช้งานระบบสมัครสมาชิก\nกรุณาติดต่อผู้ดูแลระบบ';
+                } else if (error.code === 'auth/network-request-failed') {
+                    errorMsg = 'ไม่สามารถเชื่อมต่ออินเทอร์เน็ตได้\nกรุณาตรวจสอบการเชื่อมต่อ';
+                } else {
+                    errorMsg = `เกิดข้อผิดพลาด: ${error.message}\n\nError Code: ${error.code}`;
                 }
                 
                 showError(errorMsg);
