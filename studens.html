@@ -1495,7 +1495,6 @@
     </div>
 
     <script>
-<script>
 // ============================================
 // Firebase Configuration
 // ============================================
@@ -1533,7 +1532,6 @@ function checkAndResetStudentData() {
     const today = new Date();
     const todayDateString = today.toISOString().split('T')[0];
     
-    // รอให้โหลดข้อมูลเสร็จก่อน
     if (!isDataLoaded) {
         console.log('⏳ กำลังรอโหลดข้อมูลก่อนตรวจสอบการรีเซ็ต...');
         setTimeout(checkAndResetStudentData, 1000);
@@ -1543,13 +1541,11 @@ function checkAndResetStudentData() {
     database.ref('system/lastResetDate').once('value').then((snapshot) => {
         const savedResetDate = snapshot.val();
         
-        // ถ้าไม่เคยตั้งค่าวันรีเซ็ต ให้ตั้งค่าวันนี้โดยไม่ลบข้อมูล
         if (!savedResetDate) {
             console.log('🆕 ตั้งค่าวันรีเซ็ตครั้งแรก');
             return database.ref('system/lastResetDate').set(todayDateString);
         }
         
-        // ถ้าเป็นวันใหม่ ให้รีเซ็ตข้อมูล
         if (savedResetDate !== todayDateString) {
             console.log('📅 ตรวจพบวันใหม่ - กำลังรีเซ็ตข้อมูลการเช็คชื่อ...');
             database.ref('students').once('value').then((studentsSnapshot) => {
@@ -1596,10 +1592,7 @@ function showResetMessage() {
         </div>
     `;
     document.body.appendChild(resetDiv);
-    
-    setTimeout(() => {
-        resetDiv.remove();
-    }, 5000);
+    setTimeout(() => resetDiv.remove(), 5000);
 }
 
 // ============================================
@@ -1671,10 +1664,10 @@ function addStudentAndCheckIn(name, grade, subjectId, code) {
             }
         });
         
+        const time = new Date();
+        const timeString = `${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}น.`;
+        
         if (studentExists) {
-            const time = new Date();
-            const timeString = `${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}น.`;
-            
             return database.ref(`students/${studentId}`).update({
                 status: 'present',
                 statusTime: timeString
@@ -1691,9 +1684,6 @@ function addStudentAndCheckIn(name, grade, subjectId, code) {
             });
         } else {
             const newStudentRef = database.ref('students').push();
-            const time = new Date();
-            const timeString = `${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}น.`;
-            
             return newStudentRef.set({
                 name: name,
                 grade: grade,
@@ -1740,10 +1730,7 @@ function showCodeMessage(code, studentName, isNew) {
         </div>
     `;
     document.body.appendChild(codeDiv);
-    
-    setTimeout(() => {
-        codeDiv.remove();
-    }, 8000);
+    setTimeout(() => codeDiv.remove(), 8000);
 }
 
 // ============================================
@@ -1871,7 +1858,6 @@ function importData(event) {
         }
     };
     reader.readAsText(file);
-    
     event.target.value = '';
 }
 
@@ -1909,7 +1895,6 @@ function clearAllData() {
 function loadDataFromFirebase() {
     console.log('🔄 กำลังโหลดข้อมูลจาก Firebase...');
     
-    // สร้าง Promise สำหรับรอให้โหลดข้อมูลเสร็จ
     dataLoadPromise = new Promise((resolve) => {
         let subjectsLoaded = false;
         let studentsLoaded = false;
@@ -1922,7 +1907,6 @@ function loadDataFromFirebase() {
             }
         };
         
-        // โหลดรายวิชา
         database.ref('subjects').once('value').then((snapshot) => {
             subjects = [];
             snapshot.forEach((child) => {
@@ -1936,9 +1920,8 @@ function loadDataFromFirebase() {
             subjectsLoaded = true;
             checkAllLoaded();
             
-            // ตั้งค่า listener สำหรับ real-time sync
             database.ref('subjects').on('value', (snapshot) => {
-                if (isDataLoaded) { // อัพเดทแบบ real-time หลังจากโหลดครั้งแรกเสร็จแล้ว
+                if (isDataLoaded) {
                     subjects = [];
                     snapshot.forEach((child) => {
                         subjects.push({
@@ -1952,7 +1935,6 @@ function loadDataFromFirebase() {
             });
         });
 
-        // โหลดนักเรียน
         database.ref('students').once('value').then((snapshot) => {
             gradeData = {};
             snapshot.forEach((child) => {
@@ -1975,9 +1957,8 @@ function loadDataFromFirebase() {
             studentsLoaded = true;
             checkAllLoaded();
             
-            // ตั้งค่า listener สำหรับ real-time sync
             database.ref('students').on('value', (snapshot) => {
-                if (isDataLoaded) { // อัพเดทแบบ real-time หลังจากโหลดครั้งแรกเสร็จแล้ว
+                if (isDataLoaded) {
                     gradeData = {};
                     snapshot.forEach((child) => {
                         const student = {
@@ -1998,7 +1979,6 @@ function loadDataFromFirebase() {
         });
     });
 }
-
 // ============================================
 // ฟังก์ชันจัดการรายวิชา
 // ============================================
@@ -2348,14 +2328,11 @@ function showSuccessMessage(message) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 กำลังเริ่มต้นระบบเช็คชื่อ Multi-User + Real-time Sync...');
     
-    // โหลดข้อมูลจาก Firebase ก่อน
     loadDataFromFirebase();
     
-    // รอให้โหลดข้อมูลเสร็จแล้วค่อยตรวจสอบการรีเซ็ต
     dataLoadPromise.then(() => {
         checkAndResetStudentData();
         
-        // ตรวจสอบ Auto-fill จาก URL
         setTimeout(() => {
             handleAutoFillFromCode();
         }, 500);
@@ -2597,74 +2574,12 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-setInterval(checkAndResetStudentData, 3600000); // ตรวจสอบทุก 1 ชั่วโมง
+setInterval(checkAndResetStudentData, 3600000);
 
 console.log('✨ ระบบพร้อมใช้งาน - Real-time Multi-User Sync เปิดใช้งานแล้ว!');
-console.log('📱 ข้อมูลจะซิงค์อัตโนมัติระหว่างทุกอุปกรณ์ที่เชื่อมต่อ');// ============================================
-// ตัวแปรสำหรับเก็บข้อมูล
-// ============================================
-let subjects = [];
-let currentSubjectId = null;
-let gradeData = {};
-let currentGrade = null;
-let editingStudentId = null;
-let lastResetDate = null;
-let isDataLoaded = false;
-let dataLoadPromise = null;
-
-// ============================================
-// ฟังก์ชันตรวจสอบและรีเซ็ตข้อมูลรายวัน
-// ============================================
-function checkAndResetStudentData() {
-    const today = new Date();
-    const todayDateString = today.toISOString().split('T')[0];
-    
-    // รอให้โหลดข้อมูลเสร็จก่อน
-    if (!isDataLoaded) {
-        console.log('⏳ กำลังรอโหลดข้อมูลก่อนตรวจสอบการรีเซ็ต...');
-        setTimeout(checkAndResetStudentData, 1000);
-        return;
-    }
-    
-    database.ref('system/lastResetDate').once('value').then((snapshot) => {
-        const savedResetDate = snapshot.val();
-        
-        // ถ้าไม่เคยตั้งค่าวันรีเซ็ต ให้ตั้งค่าวันนี้โดยไม่ลบข้อมูล
-        if (!savedResetDate) {
-            console.log('🆕 ตั้งค่าวันรีเซ็ตครั้งแรก');
-            return database.ref('system/lastResetDate').set(todayDateString);
-        }
-        
-        // ถ้าเป็นวันใหม่ ให้รีเซ็ตข้อมูล
-        if (savedResetDate !== todayDateString) {
-            console.log('📅 ตรวจพบวันใหม่ - กำลังรีเซ็ตข้อมูลการเช็คชื่อ...');
-            database.ref('students').once('value').then((studentsSnapshot) => {
-                const updates = {};
-                let studentCount = 0;
-                
-                studentsSnapshot.forEach((child) => {
-                    updates[`students/${child.key}/status`] = null;
-                    updates[`students/${child.key}/statusTime`] = null;
-                    studentCount++;
-                });
-                
-                updates['system/lastResetDate'] = todayDateString;
-                
-                if (studentCount > 0) {
-                    return database.ref().update(updates);
-                }
-            }).then(() => {
-                showResetMessage();
-                console.log('✅ รีเซ็ตข้อมูลการเช็คชื่อรายวันสำเร็จ');
-            }).catch((error) => {
-                console.error('❌ เกิดข้อผิดพลาดในการรีเซ็ตข้อมูล:', error);
-            });
-        }
-    }).catch((error) => {
-        console.error('❌ เกิดข้อผิดพลาดในการตรวจสอบวันรีเซ็ต:', error);
-    });
-}
-    </script>
+console.log('📱 ข้อมูลจะซิงค์อัตโนมัติระหว่างทุกอุปกรณ์ที่เชื่อมต่อ');
+</script>
 </body>
 </html>
+
 
